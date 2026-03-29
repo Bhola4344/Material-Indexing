@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin - User Rights</title>
+    <!-- Browser Tab Icon -->
+    <link rel="icon" type="image/png" href="logo.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="style-admin.css">
+</head>
+
+<body class="p-3">
+
+    <div class="container-fluid bg-white p-4 rounded shadow">
+
+        <!-- HEADER -->
+        <div class="header d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center gap-3">
+                <img src="logo.jpg" style="height:60px">
+                <div>
+                    <div class="company-name">Balaji Action Buildwell Pvt. Ltd.</div>
+                    <div class="page-title">Admin – User Rights Management</div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
+                <span class="fw-bold text-primary" id="welcomeUser"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="card search-card mb-3">
+            <div class="search-row">
+                <input type="text" id="searchId" class="form-control search-input" placeholder="🆔 User ID">
+                <input type="text" id="searchName" class="form-control search-input" placeholder="🔍 User Name">
+                <input type="text" id="searchRole" class="form-control search-input" placeholder="🏢 Department">
+                <button id="refreshBtn" class="refresh-btn" onclick="refreshUsers()">Refresh</button>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="saved-table-wrapper">
+            <table class="table table-bordered mb-0" id="userTable">
+                <thead>
+                    <tr>
+                        <th>S.N</th>
+                        <th>User ID</th>
+                        <th>User Name</th>
+                        <th>Department</th>
+                        <th class="text-center">Approve Authorized</th>
+                        <th class="text-center">Save</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- TOAST -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+        <div id="refreshToast" class="toast toast-success" data-bs-delay="2500">
+            <div class="toast-body">✅ Data refreshed successfully</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzp_nr9X12liqKDI52fh1e3rh8H_Na9FWEHXnvDYzzv8E6ofzLLZCSp0jKMgu8qdeQURw/exec";
+        if (!sessionStorage.getItem("userName")) {
+            location.href = "index.html";
+        }
+        const userName = sessionStorage.getItem("userName") || "Admin";
+        document.getElementById("welcomeUser").innerText = "Welcome: " + userName;
+
+        function logout() {
+            sessionStorage.clear();
+            location.href = "index.html";
+        }
+
+        function loadUsers(cb) {
+            fetch(API_URL + "?action=getUsers")
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.querySelector("#userTable tbody");
+                    tbody.innerHTML = "";
+                    data.forEach((u, index) => {
+                        tbody.innerHTML += `
+                        <tr data-username="${u.Username}">
+                            <td>${index + 1}</td>
+                            <td>${u.Username}</td>
+                            <td>${u.Name}</td>
+                            <td>${u.Role}</td>
+                            <td class="text-center">
+                                <input type="checkbox" ${u.Approval === "YES" ? "checked" : ""}>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-success btn-sm btn-save">Save</button>
+                            </td>
+                        </tr>`;
+                    });
+                    attachSaveEvents();
+                    if (cb) cb();
+                });
+        }
+
+        loadUsers();
+
+        function refreshUsers() {
+            const btn = document.getElementById("refreshBtn");
+            btn.innerText = "Refreshing...";
+            btn.disabled = true;
+
+            searchName.value = "";
+            searchId.value = "";
+            searchRole.value = "";
+
+            loadUsers(() => {
+                btn.innerText = "Refresh";
+                btn.disabled = false;
+                new bootstrap.Toast(document.getElementById("refreshToast")).show();
+            });
+        }
+
+        const searchId = document.getElementById("searchId");
+        const searchName = document.getElementById("searchName");
+        const searchRole = document.getElementById("searchRole");
+
+        [searchId, searchName, searchRole].forEach(input => {
+            input.addEventListener("input", () => {
+                const tbody = document.querySelector("#userTable tbody");
+                const rows = tbody.querySelectorAll("tr");
+                rows.forEach(row => {
+                    const username = row.children[1].innerText.toLowerCase();
+                    const name = row.children[2].innerText.toLowerCase();
+                    const role = row.children[3].innerText.toLowerCase();
+                    const match =
+                        username.includes(searchId.value.toLowerCase()) &&
+                        name.includes(searchName.value.toLowerCase()) &&
+                        role.includes(searchRole.value.toLowerCase());
+                    row.style.display = match ? "" : "none";
+                });
+            });
+        });
+
+        function attachSaveEvents() {
+            document.querySelectorAll(".btn-save").forEach(btn => {
+                btn.onclick = () => {
+                    const row = btn.closest("tr");
+                    const username = row.getAttribute("data-username");
+                    const checkbox = row.querySelector("input[type='checkbox']");
+                    const approvalValue = checkbox.checked ? "YES" : "NO";
+
+                    btn.innerText = "Saving...";
+                    btn.disabled = true;
+
+                    fetch(API_URL + `?action=updateApproval&Username=${encodeURIComponent(username)}&Approval=${approvalValue}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            btn.innerText = "Save";
+                            btn.disabled = false;
+                        })
+                        .catch(err => {
+                            btn.innerText = "Save";
+                            btn.disabled = false;
+                            alert("Error saving approval");
+                        });
+                };
+            });
+        }
+    </script>
+
+</body>
+
+</html>

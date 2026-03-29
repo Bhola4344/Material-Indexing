@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Live Store Index Search - Native</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* ===== Background ===== */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f766e, #2563eb);
+            background-size: 400% 400%;
+            animation: gradientMove 12s ease infinite;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        /* ===== Glass Card ===== */
+        .card-custom {
+            border-radius: 22px;
+            backdrop-filter: blur(14px);
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+            transition: all .35s ease;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+        }
+
+        /* ===== Header ===== */
+        .header {
+            backdrop-filter: blur(12px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, .6), rgba(255, 255, 255, .3));
+            border-radius: 14px;
+        }
+
+        /* ===== Inputs ===== */
+        input.form-control {
+            border-radius: 14px;
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #2563eb, #10b981) border-box;
+            padding: 11px 14px;
+            font-size: 15px;
+            transition: all .35s ease;
+        }
+
+        input.form-control:focus {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, .25);
+        }
+
+        /* ===== Buttons ===== */
+        .btn-custom {
+            border-radius: 12px !important;
+            font-weight: 600;
+            letter-spacing: .4px;
+            transition: all .3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+            border: none;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, .35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            border: none;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, .35);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+            border: none;
+            box-shadow: 0 6px 18px rgba(239, 68, 68, .35);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .25);
+        }
+
+        /* ===== Location Chips ===== */
+        .location-chip {
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 6px;
+            transition: all .3s ease;
+            animation: pulseChip 2.5s infinite;
+        }
+
+        @keyframes pulseChip {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        .loc-green {
+            background: linear-gradient(135deg, #bbf7d0, #86efac);
+            color: #065f46;
+        }
+
+        .loc-red {
+            background: linear-gradient(135deg, #fecaca, #fca5a5);
+            color: #7f1d1d;
+        }
+
+        /* ===== Logout Button ===== */
+        #logoutBtn {
+            border-radius: 12px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            transition: all .3s ease;
+        }
+
+        #logoutBtn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 10px 28px rgba(239, 68, 68, .45);
+        }
+
+        /* ===== Download Button ===== */
+        .btn-download {
+            margin-top: 10px;
+            padding: 7px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #2563eb, #0f766e);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 22px rgba(37, 99, 235, .35);
+            transition: all .3s ease;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 14px 40px rgba(37, 99, 235, .45);
+        }
+
+        /* ===== Toast ===== */
+        #liveToast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            border-radius: 14px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== Spinner overlay smoother ===== */
+        #spinnerOverlay {
+            backdrop-filter: blur(6px);
+        }
+
+        /* Update button ko control */
+        .btn-success {
+            transform: none !important;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px) scale(1.01) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .25) !important;
+        }
+
+        .btn-view-photo {
+            margin-left: 10px;
+            padding: 6px 14px;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+            font-weight: 600;
+            font-size: 13px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Add inside <body>, before container -->
+    <div id="spinnerOverlay" style="
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(255,255,255,0.8);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2000;
+">
+        <div class="spinner-border text-primary" role="status" style="width:3rem; height:3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="container py-3">
+        <div class="card card-custom p-4">
+            <header class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="logo.jpg" style="height:75px;">
+                    <div><b>Balaji Action Buildwell Pvt. Ltd.</b><br><small>Material Indexing</small></div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span id="welcomeUser" class="fw-bold" style="color:#0F3C73;"></span>
+                    <button id="logoutBtn" onclick="logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="position-relative mt-2">
+                <input id="searchBox" class="form-control" placeholder="SAP Code / Description Search" list="itemList"
+                    autocomplete="off">
+                <datalist id="itemList"></datalist>
+            </div>
+
+            <div id="output" class="mt-3"></div>
+            <footer class="text-center mt-2 mb-0">
+                <div style="margin-top:8px;">
+                    <label>
+                        <input type="radio" name="downloadType" value="with" checked>
+                        Material with location
+                    </label>
+
+                    <label style="margin-left:10px;">
+                        <input type="radio" name="downloadType" value="without">
+                        Material without location
+                    </label>
+                </div>
+
+                <button class="btn-download" onclick="handleDownload()">
+                    Download
+                </button>
+            </footer>
+        </div>
+    </div>
+
+    <div class="toast text-white bg-primary border-0" id="liveToast">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API = "https://script.google.com/macros/s/AKfycbza_aWWX9UzfhIgEe5pg0TE29-JtAKn_FoUUtbBtCUCAHHUj-FJzO4twhsawDNCaKJq/exec";
+        const ITEM_API = "https://script.google.com/macros/s/AKfycbza_aWWX9UzfhIgEe5pg0TE29-JtAKn_FoUUtbBtCUCAHHUj-FJzO4twhsawDNCaKJq/exec";
+
+        let currentItem = null;
+        let itemMaster = [];
+        let userName = "Guest";
+
+        const searchBox = document.getElementById('searchBox');
+        const datalist = document.getElementById('itemList');
+        const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+        const toastMsg = document.getElementById('toastMsg');
+
+        function showToast(msg, t = "primary") {
+            const el = document.getElementById('liveToast');
+            el.className = `toast text-white bg-${t} border-0`;
+            toastMsg.textContent = msg;
+            toast.show();
+        }
+        // Load all items
+        fetch(ITEM_API + "?action=getItems")
+            .then(res => res.json())
+            .then(data => {
+                itemMaster = data;
+                updateDatalist("");
+
+                // Hide spinner after loading items
+                const spinner = document.getElementById('spinnerOverlay');
+                if (spinner) spinner.style.display = 'none';
+            });
+
+        function updateDatalist(query) {
+            datalist.innerHTML = "";
+
+            const filtered = itemMaster
+                .filter(item =>
+                    item.name.toLowerCase().includes(query.toLowerCase()) ||
+                    String(item.sap).toLowerCase().includes(query.toLowerCase())
+                )
+                .slice(0, 20);
+
+            filtered.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.name;
+                option.label = String(item.sap);
+                datalist.appendChild(option);
+            });
+
+            const exact = filtered.find(i =>
+                i.name.toLowerCase() === query.toLowerCase() ||
+                String(i.sap).toLowerCase() === query.toLowerCase()
+            );
+
+            if (exact) currentItem = exact;
+        }
+
+        searchBox.addEventListener('input', () => {
+            const val = searchBox.value.trim();
+            updateDatalist(val);
+
+            currentItem = itemMaster.find(i =>
+                i.name === val || String(i.sap) === val
+            );
+
+            renderDetails();
+        });
+
+        function renderDetails() {
+            if (!currentItem) {
+                document.getElementById("output").innerHTML = "";
+                return;
+            }
+
+            const hasLoc = currentItem?.location && currentItem.location.trim() !== "";
+
+            const chip = `
+        <div class="location-chip ${hasLoc ? 'loc-green' : 'loc-red'}">
+          ${hasLoc ? 'Location: ' + currentItem.location : 'Location: — Not Assigned —'}
+        </div>
+        <button type="button" class="btn-view-photo" onclick="viewPhotos()">
+                    View Photos
+                </button>
+      `;
+
+            document.getElementById("output").innerHTML = `
+        <div class="alert alert-primary mb-2">
+          <b>Description:</b> ${currentItem.name}<br>
+          <b>SAP:</b> ${currentItem.sap}<br>
+          ${chip}
+        </div>
+
+        <button class="btn btn-success btn-custom" onclick="showUpdateForm()">Update Location</button>
+
+        <div id="updateForm" class="mt-3"></div>
+      `;
+        }
+
+        function normalizeWord(word) {
+            return word.replace(/[0-9.]+/g, '').toLowerCase(); // numbers/decimals ignore
+        }
+
+        function showUpdateForm() {
+            const updateForm = document.getElementById("updateForm");
+            const currentWords = currentItem.name.split(/\s+/).map(normalizeWord);
+
+            let bestMatch = null;
+            let maxOverlap = 0;
+
+            itemMaster.forEach(item => {
+                if (!item.location) return;
+
+                const itemWords = item.name.split(/\s+/).map(normalizeWord);
+                const overlap = currentWords.filter(word => itemWords.includes(word)).length;
+
+                if (overlap > maxOverlap) {
+                    maxOverlap = overlap;
+                    bestMatch = item;
+                }
+            });
+
+            const suggestedLocation = bestMatch ? bestMatch.location.toUpperCase() : '';
+
+            // Label logic only
+            let labelText = '';
+            if (currentItem.location) {
+                labelText = 'Update Location';
+            } else if (suggestedLocation) {
+                labelText = 'Add Location, Suggest By AI';
+            } else {
+                labelText = 'Add Location';
+            }
+
+            updateForm.innerHTML = `
+        <div class="card p-3">
+          <label class="small text-muted">Current Location</label>
+          <input class="form-control mb-2" value="${currentItem.location || ''}" disabled>
+
+          <label class="small text-muted">${labelText}</label>
+          <input class="form-control mb-3" id="updateLocation"
+                 value="${suggestedLocation}"
+                 style="text-transform:uppercase;">
+
+          <button class="btn btn-success w-100" id="updateBtn" onclick="updateLocation()">Update</button>
+        </div>
+    `;
+        }
+
+
+        function updateLocation() {
+            const btn = document.getElementById('updateBtn');
+            const locInput = document.getElementById('updateLocation');
+            const loc = locInput.value.trim().toUpperCase();
+
+            if (!loc) {
+                showToast("Enter new location", "danger");
+                return;
+            }
+
+            // 1️⃣ UI FIRST (NO WAIT)
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Saving...`;
+
+            currentItem.location = loc;
+
+            // chip update only
+            const chip = document.querySelector(".location-chip");
+            if (chip) {
+                chip.textContent = "Location: " + loc;
+                chip.classList.remove("loc-red");
+                chip.classList.add("loc-green");
+            }
+
+            showToast("Saving in background...", "primary");
+
+            // 2️⃣ SERVER UPDATE (BACKGROUND)
+            fetch(
+                `${API}?action=update&sn=${currentItem.sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`
+            ).catch(() => {
+                showToast("Server update failed!", "danger");
+            });
+
+            // 3️⃣ Button final state
+            btn.innerHTML = "Updated ✓";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            userName = sessionStorage.getItem("userName") || "Guest";
+            document.getElementById("welcomeUser").innerText = userName;
+        });
+        if (!sessionStorage.getItem('loggedIn')) {
+            window.location.href = 'index.html';
+        }
+
+        // Logout function
+        function logout() {
+            sessionStorage.removeItem('loggedIn');
+            window.location.href = 'index.html';
+        }
+
+
+        function handleDownload() {
+            const type = document.querySelector('input[name="downloadType"]:checked').value;
+
+            let rows;
+
+            // WITH LOCATION
+            if (type === "with") {
+                rows = [["SAP", "Description", "Store", "Location", "Updated Date", "Update By"]];
+
+                itemMaster.forEach(item => {
+                    if (item.location && item.location.trim() !== "") {
+                        rows.push([
+                            item.sap ?? "",
+                            item.name ?? "",
+                            item.store ?? "",
+                            item.location ?? "",
+                            item.updation_date ?? "",
+                            item.update_by ?? ""
+                        ]);
+                    }
+                });
+            }
+
+            // WITHOUT LOCATION
+            else {
+                rows = [["SAP", "Description", "Store", "Location"]];
+
+                itemMaster.forEach(item => {
+                    if (!item.location || item.location.trim() === "") {
+                        rows.push([
+                            item.sap ?? "",
+                            item.name ?? "",
+                            item.store ?? "",
+                            ""
+                        ]);
+                    }
+                });
+            }
+
+            let csv = rows
+                .map(r => r.map(v => `"${(v ?? "").toString().replace(/"/g, '""')}"`).join(","))
+                .join("\n");
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download =
+                type === "with"
+                    ? "material_with_location.csv"
+                    : "material_without_location.csv";
+
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        function viewPhotos() {
+            if (!currentItem) return;
+
+            const query = encodeURIComponent(currentItem.name);
+            const url = `https://www.google.com/search?tbm=isch&q=${query}`;
+            window.open(url, '_blank');
+        }
+    </script>
+
+</body>
+
+</html>
