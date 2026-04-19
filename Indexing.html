@@ -458,6 +458,9 @@
                 return;
             }
 
+            // ⭐ NEW LINE — last location save
+    localStorage.setItem("lastLocationText", loc);
+
             // 1️⃣ UI FIRST (NO WAIT)
             btn.disabled = true;
             btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Saving...`;
@@ -614,6 +617,31 @@
         }
 
     });
+
+});
+        // Space press → last saved location fill (ONLY updateLocation box)
+
+document.addEventListener("keydown", function (e) {
+
+    if (e.code === "Space") {
+
+        const locBox = document.getElementById("updateLocation");
+
+        if (locBox && document.activeElement === locBox) {
+
+            e.preventDefault(); // extra space rokega
+
+            let savedText = localStorage.getItem("lastLocationText");
+
+            if (savedText) {
+
+                locBox.value = savedText;
+
+            }
+
+        }
+
+    }
 
 });
     </script>
