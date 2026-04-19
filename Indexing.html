@@ -619,25 +619,29 @@
     });
 
 });
-        // Space press → last saved location fill (ONLY updateLocation box)
+      // Mobile + Desktop friendly auto fill (double space only)
 
-document.addEventListener("keydown", function (e) {
+document.addEventListener("input", function (e) {
 
-    if (e.code === "Space") {
+    const locBox = document.getElementById("updateLocation");
 
-        const locBox = document.getElementById("updateLocation");
+    if (!locBox || document.activeElement !== locBox) return;
 
-        if (locBox && document.activeElement === locBox) {
+    // Sirf typing allow — delete/backspace ignore
+    if (e.inputType && e.inputType.startsWith("delete")) {
+        return;
+    }
 
-            e.preventDefault(); // extra space rokega
+    let value = locBox.value;
 
-            let savedText = localStorage.getItem("lastLocationText");
+    // Double space detect
+    if (value.endsWith("  ")) {
 
-            if (savedText) {
+        let savedText = localStorage.getItem("lastLocationText");
 
-                locBox.value = savedText;
+        if (savedText) {
 
-            }
+            locBox.value = savedText;
 
         }
 
