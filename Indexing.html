@@ -565,6 +565,57 @@
             const url = `https://www.google.com/search?tbm=isch&q=${query}`;
             window.open(url, '_blank');
         }
+        document.addEventListener("DOMContentLoaded", function () {
+
+    const box = document.getElementById("searchBox");
+
+    if (!box) return;
+
+    box.addEventListener("blur", function () {
+
+        let value = box.value.replace(/\D/g, '');
+
+        if (value.length === 0) return;
+
+        let totalLength = 10;
+
+        // Already 10 digit
+        if (value.length === totalLength) {
+            return;
+        }
+
+        // Less than 10 → add zeros in middle
+        if (value.length < totalLength) {
+
+            let start = value.substring(0, 2);
+            let end = value.substring(2);
+
+            let zerosNeeded = totalLength - (start.length + end.length);
+
+            let zeros = "0".repeat(zerosNeeded);
+
+            box.value = start + zeros + end;
+            box.dispatchEvent(new Event("input"));
+            return;
+        }
+
+        // More than 10 → remove extra zeros only from middle
+        if (value.length > totalLength) {
+
+            let start = value.substring(0, 2);
+            let end = value.substring(value.length - (totalLength - 2));
+
+            let middleLength = totalLength - (start.length + end.length);
+
+            let zeros = "0".repeat(middleLength);
+
+            box.value = start + zeros + end;
+            box.dispatchEvent(new Event("input"));
+        }
+
+    });
+
+});
     </script>
 
 </body>
