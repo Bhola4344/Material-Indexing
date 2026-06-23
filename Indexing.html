@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Store Indexing</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface2: #f1f4f8;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+      --accent2: #0891b2;
+      --green: #059669;
+      --red: #dc2626;
+      --amber: #b45309;
+      --text: #1e293b;
+      --muted: #64748b;
+      --card-shadow: 0 2px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    html {
+      scrollbar-gutter: stable;
+      overflow-y: scroll;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 10px;
+      /* Prevent zoom on input focus on iOS */
+      touch-action: manipulation;
+    }
+
+    /* ─── Spinner ─── */
+    #spinnerOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(244, 246, 249, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 16px;
+    }
+
+    .spin-ring {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #loadProgress {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ─── Layout ─── */
+    .app-shell {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ─── Header ─── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.6;
+        transform: scale(1.3);
+      }
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #welcomeUser {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #logoutBtn {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    #logoutBtn:hover,
+    #logoutBtn:active {
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* ─── Search Box ─── */
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 17px;
+      pointer-events: none;
+    }
+
+    #searchBox {
+      width: 100%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      /* 16px prevents iOS zoom */
+      padding: 14px 44px 14px 44px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    #searchBox:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    #searchBox::placeholder {
+      color: var(--muted);
+    }
+
+    /* Clear button inside search */
+    #clearSearch {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--surface2);
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    #clearSearch.visible {
+      display: flex;
+    }
+
+    /* ─── Dropdown ─── */
+    #dropdown {
+      position: fixed;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+      z-index: 1000;
+      overflow: hidden;
+      max-height: 55vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: none;
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+      transform-origin: top;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+
+    #dropdown.open {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    #dropdown::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #dropdown::-webkit-scrollbar-track {
+      background: var(--surface);
+    }
+
+    #dropdown::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    .dd-item {
+      display: flex;
+      align-items: center;
+      padding: 13px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      gap: 10px;
+      /* Larger tap target on mobile */
+      min-height: 54px;
+    }
+
+    .dd-item:last-child {
+      border-bottom: none;
+    }
+
+    .dd-item:active {
+      background: var(--surface2);
+    }
+
+    .dd-name {
+      font-size: 13px;
+      font-weight: 500;
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .dd-sap {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+
+    .dd-loc-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .dd-loc-badge.has {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--green);
+    }
+
+    .dd-loc-badge.no {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--red);
+    }
+
+    .dd-empty {
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ─── Main Content (Single-column on mobile) ─── */
+    .content-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ─── Item Card ─── */
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .item-card-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      height: 130px;
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      opacity: 0.3;
+    }
+
+    .empty-text {
+      font-size: 13px;
+    }
+
+    .item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .item-name {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .item-sap {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent2);
+      background: rgba(8, 145, 178, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      border: 1px solid rgba(8, 145, 178, 0.18);
+      flex-shrink: 0;
+    }
+
+    .loc-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .loc-pill.has {
+      background: rgba(5, 150, 105, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    .loc-pill.no {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(220, 38, 38, 0.18);
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      /* Tappable on mobile */
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:active {
+      background: #1d4ed8;
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-success {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-success:active {
+      background: #047857;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ─── Update Form ─── */
+    .form-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+
+    label.form-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      /* 16px prevents iOS auto-zoom */
+      font-weight: 600;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      -webkit-appearance: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .form-input:disabled {
+      opacity: 0.55;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(180, 83, 9, 0.1);
+      color: var(--amber);
+      border: 1px solid rgba(180, 83, 9, 0.2);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+    }
+
+    /* ─── AI Panel ─── */
+    .ai-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .ai-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ai-panel-header h3 {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ai-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 6px rgba(180, 83, 9, 0.4);
+    }
+
+    /* Collapsible AI panel on mobile */
+    #aiToggleBtn {
+      margin-left: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    #aiPanelBody {
+      display: none;
+    }
+
+    #aiPanelBody.open {
+      display: block;
+    }
+
+    .similar-item {
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+      /* Better tap area */
+      min-height: 52px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .similar-item:active {
+      border-color: var(--accent);
+    }
+
+    .similar-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .si-name {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .si-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .si-loc {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .si-score {
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1px 7px;
+      border-radius: 20px;
+    }
+
+    .si-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--accent);
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(37, 99, 235, 0.18);
+      padding: 1px 6px;
+      border-radius: 20px;
+      margin-right: 5px;
+    }
+
+    .ai-empty {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    /* ─── Download Bar ─── */
+    .download-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      cursor: pointer;
+      min-height: 36px;
+    }
+
+    .radio-label input {
+      accent-color: var(--accent);
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-dl {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-dl:active {
+      opacity: 0.88;
+    }
+
+    /* ─── Toast ─── */
+    #toastEl {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 26px rgba(15, 23, 42, 0.16);
+      z-index: 9998;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: max-content;
+      max-width: calc(100vw - 32px);
+    }
+
+    #toastEl.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* highlight */
+    mark {
+      background: rgba(37, 99, 235, 0.16);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    /* ─── Download Tabs ─── */
+    .dl-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .dl-tab {
+      flex: 1;
+      padding: 9px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+      min-height: 40px;
+    }
+
+    .dl-tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ─── Upload Zone ─── */
+    .upload-hint {
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(37, 99, 235, 0.05);
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface2);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      gap: 2px;
+    }
+
+    .upload-zone:active,
+    .upload-zone.drag {
+      border-color: var(--accent);
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    #uploadStatus {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Spinner -->
+  <div id="spinnerOverlay">
+    <div class="spin-ring"></div>
+    <div id="loadProgress">Loading items...</div>
+  </div>
+
+  <!-- Toast (bottom-center on mobile) -->
+  <div id="toastEl">
+    <div class="toast-dot" id="toastDot"></div>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- Floating dropdown -->
+  <div id="dropdown"></div>
+
+  <div class="app-shell">
+
+    <!-- Header -->
+    <header>
+      <div class="logo-area">
+        <div class="logo-dot"></div>
+        <div class="logo-text">Indexing <span>System</span></div>
+      </div>
+      <div class="user-area">
+        <div id="welcomeUser">Guest</div>
+        <button id="logoutBtn" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-wrap" id="searchWrap">
+      <span class="search-icon">🔍</span>
+      <input id="searchBox" type="search" inputmode="search" placeholder="Search SAP code or description..."
+        autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
+      <button id="clearSearch" onclick="clearSearch()" aria-label="Clear search">✕</button>
+    </div>
+
+    <!-- Single-column stack (shown after item selected) -->
+    <div class="content-stack" id="contentStack" style="display:none;">
+
+      <!-- Item Card -->
+      <div class="item-card" id="itemCard">
+        <div class="item-card-empty">
+          <div class="empty-icon">🗂️</div>
+          <div class="empty-text">Search for an item to get started</div>
+        </div>
+      </div>
+
+      <!-- AI Panel (collapsible) -->
+      <div class="ai-panel">
+        <div class="ai-panel-header">
+          <div class="ai-dot"></div>
+          <h3>AI Similar Items</h3>
+          <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
+        </div>
+        <div id="aiPanelBody">
+          <div id="aiPanel">
+            <div class="ai-empty">Select an item to see similar locations</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Download Bar -->
+    <div class="download-bar">
+      <!-- Tab switcher -->
+      <div class="dl-tabs">
+        <button class="dl-tab active" id="tabNormal" onclick="switchTab('normal')">📥 Download</button>
+        <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">📤 Upload & Enrich</button>
+      </div>
+
+      <!-- Normal download -->
+      <div id="panelNormal">
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Location</label>
+          <label class="radio-label"><input type="radio" name="dlType" value="without"> Without Location</label>
+        </div>
+        <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download CSV
+        </button>
+      </div>
+
+      <!-- Upload & Enrich panel -->
+      <div id="panelUpload" style="display:none;">
+        <div class="upload-hint">Upload kisi bhi CSV/Excel — SAP code column automatically dhundha jayega. Last column
+          mein Location add hokar download hoga.</div>
+        <label class="upload-zone" id="uploadZone">
+          <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
+            onchange="handleUpload(this)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span id="uploadLabel">CSV ya Excel file chunein</span>
+          <span style="font-size:11px;color:var(--muted);margin-top:2px;">Any format — SAP column auto-detect</span>
+        </label>
+        <div id="uploadStatus" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbza_aWWX9UzfhIgEe5pg0TE29-JtAKn_FoUUtbBtCUCAHHUj-FJzO4twhsawDNCaKJq/exec";
+
+    let itemMaster = [];
+    let currentItem = null;
+    let ddIndex = -1;
+    let ddItems = [];
+    let userName = "Guest";
+    let aiPanelOpen = false;
+
+    // ─── Toast ───
+    let toastTimer;
+    function showToast(msg, type = "blue") {
+      const el = document.getElementById('toastEl');
+      const dot = document.getElementById('toastDot');
+      const colors = { blue: '#2563eb', green: '#059669', red: '#dc2626', amber: '#b45309' };
+      dot.style.background = colors[type] || colors.blue;
+      document.getElementById('toastMsg').textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // ─── AI Panel Toggle ───
+    function toggleAI() {
+      aiPanelOpen = !aiPanelOpen;
+      const body = document.getElementById('aiPanelBody');
+      const btn = document.getElementById('aiToggleBtn');
+      body.classList.toggle('open', aiPanelOpen);
+      btn.textContent = aiPanelOpen ? 'Hide ▴' : 'Show ▾';
+    }
+
+    // ─── Highlight ───
+    function highlight(text, q) {
+      if (!q) return text;
+      const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(re, '<mark>$1</mark>');
+    }
+
+    // ─── Clear Search ───
+    function clearSearch() {
+      const box = document.getElementById('searchBox');
+      box.value = '';
+      document.getElementById('clearSearch').classList.remove('visible');
+      closeDropdown();
+      resetToEmptyState();
+      box.focus();
+    }
+
+    // ─── Dropdown ───
+    const dropdownEl = document.getElementById('dropdown');
+
+    function positionDropdown() {
+      const rect = searchBox.getBoundingClientRect();
+      dropdownEl.style.width = rect.width + 'px';
+      dropdownEl.style.left = rect.left + 'px';
+      dropdownEl.style.top = (rect.bottom + 6) + 'px';
+    }
+
+    function openDropdown(items, query) {
+      ddItems = items;
+      ddIndex = -1;
+      if (!items.length) {
+        dropdownEl.innerHTML = `<div class="dd-empty">No results for "<b>${query}</b>"</div>`;
+      } else {
+        dropdownEl.innerHTML = items.map((item, i) => {
+          const hasLoc = item.location && item.location.trim();
+          return `<div class="dd-item" data-i="${i}">
+        <div style="flex:1;min-width:0;">
+          <div class="dd-name">${highlight(item.name, query)}</div>
+          <div class="dd-sap">${highlight(String(item.sap), query)}</div>
+        </div>
+        <span class="dd-loc-badge ${hasLoc ? 'has' : 'no'}">${hasLoc ? item.location : 'No Loc'}</span>
+      </div>`;
+        }).join('');
+
+        // Use touchend + preventDefault to fire BEFORE blur closes the dropdown
+        dropdownEl.querySelectorAll('.dd-item').forEach((el, i) => {
+          el.addEventListener('touchend', (e) => { e.preventDefault(); pickItem(i); });
+          el.addEventListener('mousedown', (e) => { e.preventDefault(); pickItem(i); });
+        });
+      }
+      dropdownEl.classList.add('open');
+      positionDropdown();
+    }
+    function closeDropdown() {
+      dropdownEl.classList.remove('open');
+      ddItems = []; ddIndex = -1;
+    }
+
+    function revealContent() {
+      const stack = document.getElementById('contentStack');
+      if (stack.style.display === 'none') stack.style.display = 'flex';
+    }
+
+    function pickItem(i) {
+      currentItem = ddItems[i];
+      searchBox.value = currentItem.name;
+      closeDropdown();
+      revealContent();
+      renderItem();
+      // Auto-expand AI panel when item selected
+      if (!aiPanelOpen) toggleAI();
+      renderAI();
+      // Scroll to item card
+      setTimeout(() => {
+        document.getElementById('itemCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    // ─── SAP pad ───
+    // SAP = always 10 digits: PREFIX(2) + ZEROS(middle) + SUFFIX
+    // Rule: prefix = first 2 digits, suffix = remaining digits after stripping leading zeros
+    // Middle zeros are calculated so total = 10. NEVER cut from end.
+    // Examples:
+    //   "10123"        → "10" + "00000" + "123" = "1000000123"
+    //   "100000123"    → prefix "10", rest "0000123", suffix "123", zeros=5 → "1000000123"
+    //   "10000000123"  → prefix "10", rest "00000123", suffix "123", zeros=5 → "1000000123"
+    function padSAP(val) {
+      const digits = val.replace(/\D/g, '');
+      if (!digits || digits.length <= 2) return digits || val;
+      const prefix = digits.slice(0, 2);
+      const rest = digits.slice(2);
+      const suffix = rest.replace(/^0+/, '') || '0';
+      const zerosNeeded = 10 - 2 - suffix.length;
+      if (zerosNeeded < 0) return digits; // suffix too long, return raw
+      return prefix + '0'.repeat(zerosNeeded) + suffix;
+    }
+
+    // ─── Search ───
+    const searchBox = document.getElementById('searchBox');
+    searchBox.addEventListener('input', () => {
+      const val = searchBox.value.trim();
+      document.getElementById('clearSearch').classList.toggle('visible', val.length > 0);
+      doSearch(val);
+    });
+    searchBox.addEventListener('blur', () => {
+      const padded = padSAP(searchBox.value.trim());
+      if (/^\d{10}$/.test(padded) && padded !== searchBox.value.trim()) {
+        searchBox.value = padded;
+        doSearch(padded);
+      }
+      setTimeout(closeDropdown, 200);
+    });
+    searchBox.addEventListener('keydown', e => {
+      const rows = dropdownEl.querySelectorAll('.dd-item');
+      if (e.key === 'ArrowDown') { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, rows.length - 1); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex)); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex)); }
+      if (e.key === 'Enter') { if (ddIndex >= 0) pickItem(ddIndex); searchBox.blur(); }
+      if (e.key === 'Escape') { closeDropdown(); searchBox.blur(); }
+    });
+
+    window.addEventListener('scroll', () => { if (dropdownEl.classList.contains('open')) positionDropdown(); }, true);
+    window.addEventListener('resize', () => closeDropdown());
+
+    function resetToEmptyState() {
+      currentItem = null;
+      document.getElementById('contentStack').style.display = 'none';
+      document.getElementById('itemCard').innerHTML = `<div class="item-card-empty"><div class="empty-icon">🗂️</div><div class="empty-text">Search for an item to get started</div></div>`;
+      document.getElementById('aiPanel').innerHTML = `<div class="ai-empty">Select an item to see similar locations</div>`;
+    }
+
+    function doSearch(query) {
+      if (!query) { closeDropdown(); resetToEmptyState(); return; }
+      const q = query.toLowerCase();
+      const isNumeric = /^\d+$/.test(query);
+      const normalizedQuery = isNumeric ? padSAP(query) : null;
+      const results = itemMaster.filter(i => {
+        const sapStr = String(i.sap).toLowerCase();
+        const sapMatch = sapStr.includes(q) || (normalizedQuery && sapStr.includes(normalizedQuery.toLowerCase()));
+        return i.name.toLowerCase().includes(q) || sapMatch;
+      }).slice(0, 25);
+
+      const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
+      if (exact) {
+        currentItem = exact;
+        revealContent();
+        renderItem(); renderAI();
+        closeDropdown();
+        return;
+      }
+      openDropdown(results, query);
+    }
+
+    // ─── Render Item ───
+    function renderItem() {
+      if (!currentItem) return;
+      const hasLoc = currentItem.location && currentItem.location.trim();
+      document.getElementById('itemCard').innerHTML = `
+    <div class="item-header">
+      <div class="item-name">${currentItem.name}</div>
+      <div class="item-sap">${currentItem.sap}</div>
+    </div>
+    <div class="loc-pill ${hasLoc ? 'has' : 'no'}">
+      ${hasLoc ? '📍 ' + currentItem.location : '❌ Not Assigned'}
+    </div>
+    <div class="actions-row">
+      <button class="btn btn-primary" onclick="showUpdateForm()">✏️ Update Location</button>
+      <button class="btn btn-ghost" onclick="viewPhotos()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        Photos
+      </button>
+    </div>
+    <div id="updateForm"></div>
+  `;
+    }
+
+    // ─── AI Similarity Engine ───
+    const STOPWORDS = new Set([
+      'MM', 'CM', 'MTR', 'M', 'KG', 'GM', 'GMS', 'LTR', 'ML', 'NO', 'NOS', 'SET', 'SETS',
+      'PCS', 'PC', 'PACK', 'PKT', 'SIZE', 'TYPE', 'FOR', 'WITH', 'AND', 'OF', 'THE', 'A',
+      'IN', 'TO', 'X', 'OD', 'ID', 'STD', 'GRADE', 'GR', 'SS', 'MS', 'CI'
+    ]);
+    function tokenize(str) {
+      return String(str || '').toUpperCase().split(/[^A-Z0-9.]+/).filter(Boolean);
+    }
+    function isCode(tok) { return /\d/.test(tok); }
+    function getCategory(name) {
+      const raw = String(name || '').toUpperCase().trim();
+      const seg = raw.split('-')[0].trim();
+      return seg || raw.split(/\s+/)[0] || '';
+    }
+    function computeScore(nameA, nameB) {
+      const catA = getCategory(nameA), catB = getCategory(nameB);
+      const categoryHit = !!catA && catA === catB;
+      const tokensA = tokenize(nameA), tokensB = tokenize(nameB);
+      const setA = new Set(tokensA);
+      let score = categoryHit ? 8 : 0;
+      tokensB.forEach(tok => {
+        if (STOPWORDS.has(tok) || tok === catB) return;
+        if (setA.has(tok)) { score += isCode(tok) ? 4 : 2; }
+        else if (isCode(tok) && tok.length >= 2) {
+          for (const a of setA) {
+            if (isCode(a) && a.length >= 2 && (a.includes(tok) || tok.includes(a))) { score += 2; break; }
+          }
+        }
+      });
+      return { score, categoryHit };
+    }
+
+    function renderAI() {
+      if (!currentItem) return;
+      const panel = document.getElementById('aiPanel');
+      panel.innerHTML = `<div class="ai-empty">⚙️ Analyzing...</div>`;
+      setTimeout(() => {
+        const scored = itemMaster
+          .filter(i => i.location && i.location.trim() && i.sn !== currentItem.sn)
+          .map(i => { const { score, categoryHit } = computeScore(currentItem.name, i.name); return { item: i, score, categoryHit }; })
+          .filter(x => x.score > 0)
+          .sort((a, b) => (b.categoryHit - a.categoryHit) || (b.score - a.score))
+          .slice(0, 7);
+
+        if (!scored.length) { panel.innerHTML = `<div class="ai-empty">No similar items with locations found</div>`; return; }
+
+        const locMap = {};
+        scored.forEach(({ item, score, categoryHit }) => {
+          if (!locMap[item.location]) locMap[item.location] = { items: [], weight: 0 };
+          locMap[item.location].items.push({ item, score, categoryHit });
+          locMap[item.location].weight += score + (categoryHit ? 3 : 0);
+        });
+        const bestLoc = Object.entries(locMap).sort((a, b) => b[1].weight - a[1].weight)[0];
+        const bestHasCategory = bestLoc[1].items.some(x => x.categoryHit);
+
+        panel.innerHTML = `
+      <div style="margin-bottom:12px; padding:12px; border-radius:10px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.18);">
+        <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--amber); font-weight:700; margin-bottom:4px;">
+          AI Suggestion ${bestHasCategory ? '· same category' : ''}
+        </div>
+        <div style="font-size:20px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--amber);">${bestLoc[0]}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;">${bestLoc[1].items.length} similar item(s)</div>
+        <button class="btn btn-ghost" style="margin-top:10px; padding:8px 14px; font-size:12px; min-height:40px;" ontouchstart="" onclick="applySuggestion('${bestLoc[0]}')">Use This →</button>
+      </div>
+      ${scored.map(({ item, score, categoryHit }) => `
+        <div class="similar-item" ontouchstart="" onclick="applySuggestion('${item.location}')">
+          <div class="si-name">${categoryHit ? '<span class="si-tag">Same Category</span>' : ''}${item.name}</div>
+          <div class="si-row">
+            <span class="si-loc">📍 ${item.location}</span>
+            <span class="si-score">${score} match</span>
+          </div>
+        </div>
+      `).join('')}
+    `;
+      }, 50);
+    }
+
+    function applySuggestion(loc) {
+      showUpdateForm();
+      setTimeout(() => {
+        const inp = document.getElementById('updateLocation');
+        if (inp) { inp.value = loc.toUpperCase(); inp.focus(); }
+        document.getElementById('itemCard').scrollIntoView({ behavior: 'smooth' });
+      }, 80);
+    }
+
+    // ─── Update Form ───
+    function showUpdateForm() {
+      const form = document.getElementById('updateForm');
+      if (!form) return;
+      form.innerHTML = `
+    <div class="form-card">
+      <label class="form-label">Current Location</label>
+      <input class="form-input" value="${currentItem.location || '—'}" disabled>
+      <label class="form-label">
+        New Location
+        ${currentItem.location ? '' : '<span class="ai-badge">✨ AI Ready</span>'}
+      </label>
+      <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
+             autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+             inputmode="text">
+      <button class="btn btn-success" id="updateBtn" onclick="updateLocation()" style="width:100%; font-size:14px; justify-content:center;">Save Location</button>
+    </div>
+  `;
+      setTimeout(() => {
+        const inp = document.getElementById('updateLocation');
+        if (inp) inp.focus();
+      }, 100);
+    }
+
+    function updateLocation() {
+      const btn = document.getElementById('updateBtn');
+      const locInput = document.getElementById('updateLocation');
+      const loc = locInput.value.trim().toUpperCase();
+      if (!loc) { showToast("Enter a location first", "red"); return; }
+
+      localStorage.setItem("lastLocationText", loc);
+      btn.disabled = true;
+      btn.textContent = '⏳ Saving...';
+      currentItem.location = loc;
+
+      const pill = document.querySelector('.loc-pill');
+      if (pill) { pill.className = 'loc-pill has'; pill.textContent = '📍 ' + loc; }
+      showToast("Saved! Syncing…", "green");
+
+      fetch(`${API}?action=update&sn=${currentItem.sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
+        .then(() => showToast("Server sync done ✓", "green"))
+        .catch(() => showToast("Server sync failed", "red"));
+
+      setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Updated ✓'; } }, 600);
+    }
+
+    function viewPhotos() {
+      if (!currentItem) return;
+      window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(currentItem.name)}`, '_blank');
+    }
+
+    // ─── Tab Switch ───
+    function switchTab(tab) {
+      document.getElementById('panelNormal').style.display = tab === 'normal' ? 'block' : 'none';
+      document.getElementById('panelUpload').style.display = tab === 'upload' ? 'block' : 'none';
+      document.getElementById('tabNormal').classList.toggle('active', tab === 'normal');
+      document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
+    }
+
+    // ─── Upload & Enrich ───
+    // Logic: scan every cell of each row for a 10-digit number = SAP code.
+    // No header matching needed. Pure value-based like VLOOKUP.
+    // Encoding: ArrayBuffer + BOM detection fixes Chinese/garbled text issue.
+    function handleUpload(input) {
+
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+
+        const workbook = XLSX.read(e.target.result, {
+          type: "array"
+        });
+
+        const sheetName = workbook.SheetNames[0];
+
+        const sheet = workbook.Sheets[sheetName];
+
+        const data = XLSX.utils.sheet_to_json(
+          sheet,
+          {
+            header: 1,
+            defval: ""
+          }
+        );
+
+        const locMap = {};
+
+        itemMaster.forEach(i => {
+
+          if (!i.location) return;
+
+          locMap[String(i.sap).trim()] =
+            i.location.trim();
+
+        });
+
+        if (!data || data.length === 0) {
+          alert("File me data nahi mila");
+          return;
+        }
+
+        data[0].push("Location");
+
+        for (let r = 1; r < data.length; r++) {
+
+          let row = data[r];
+
+          let foundLocation = "";
+
+          for (let cell of row) {
+
+            let digits = String(cell)
+              .replace(/\.0$/, "")
+              .replace(/\D/g, "");
+
+            if (!digits) continue;
+
+            digits = padSAP(digits);
+
+            if (locMap[digits]) {
+
+              foundLocation =
+                locMap[digits];
+
+              break;
+            }
+          }
+
+          row.push(foundLocation);
+        }
+
+        const newSheet =
+          XLSX.utils.aoa_to_sheet(data);
+
+        const newBook =
+          XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+          newBook,
+          newSheet,
+          sheetName
+        );
+
+        XLSX.writeFile(
+          newBook,
+          file.name.replace(/\.[^.]+$/, "") +
+          "_with_location.xlsx"
+        );
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    // ─── Download ───
+    function handleDownload() {
+      const type = document.querySelector('input[name="dlType"]:checked').value;
+      let rows, filename;
+      if (type === 'with') {
+        rows = [["SAP", "Description", "Store", "Location", "Updated Date", "Update By"]];
+        itemMaster.filter(i => i.location && i.location.trim()).forEach(i =>
+          rows.push([i.sap || '', i.name || '', i.store || '', i.location || '', i.updation_date || '', i.update_by || '']));
+        filename = 'material_with_location.csv';
+      } else {
+        rows = [["SAP", "Description", "Store"]];
+        itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
+          rows.push([i.sap || '', i.name || '', i.store || '']));
+        filename = 'material_without_location.csv';
+      }
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      a.download = filename;
+      a.click();
+      showToast(`Downloaded: ${filename}`, "blue");
+    }
+
+    // ─── Double-space autofill ───
+    document.addEventListener('input', e => {
+      const locBox = document.getElementById('updateLocation');
+      if (!locBox || document.activeElement !== locBox) return;
+      if (e.inputType && e.inputType.startsWith('delete')) return;
+      if (locBox.value.endsWith('  ')) {
+        const saved = localStorage.getItem('lastLocationText');
+        if (saved) locBox.value = saved;
+      }
+    });
+
+    // ─── Auth ───
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!sessionStorage.getItem('loggedIn')) { window.location.href = 'index.html'; return; }
+      userName = sessionStorage.getItem('userName') || 'Guest';
+      document.getElementById('welcomeUser').textContent = '👤 ' + userName;
+    });
+    function logout() {
+      sessionStorage.removeItem('loggedIn');
+      window.location.href = 'index.html';
+    }
+
+    // ─── Load Data ───
+    const prog = document.getElementById('loadProgress');
+    prog.textContent = 'Connecting to server…';
+    fetch(API + '?action=getItems')
+      .then(r => { prog.textContent = 'Parsing data…'; return r.json(); })
+      .then(data => {
+        itemMaster = data;
+        document.getElementById('spinnerOverlay').style.display = 'none';
+        showToast(`${data.length.toLocaleString()} items loaded`, 'green');
+      })
+      .catch(() => {
+        prog.textContent = 'Load failed — check connection';
+        showToast('Failed to load items', 'red');
+      });
+  </script>
+</body>
+
+</html>
