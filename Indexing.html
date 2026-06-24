@@ -260,6 +260,7 @@
       transform: translateY(-6px) scale(0.98);
       transform-origin: top;
       transition: opacity 0.12s ease, transform 0.12s ease;
+touch-action: pan-y;
     }
 
     #dropdown.open {
@@ -291,6 +292,7 @@
       gap: 10px;
       /* Larger tap target on mobile */
       min-height: 54px;
+touch-action: manipulation;
     }
 
     .dd-item:last-child {
@@ -896,7 +898,7 @@
       <div class="ai-panel">
         <div class="ai-panel-header">
           <div class="ai-dot"></div>
-          <h3>AI Similar Items</h3>
+          <h3>Similar Items</h3>
           <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
         </div>
         <div id="aiPanelBody">
@@ -1032,11 +1034,19 @@
         }).join('');
 
         // Use touchend + preventDefault to fire BEFORE blur closes the dropdown
-        dropdownEl.querySelectorAll('.dd-item').forEach((el, i) => {
-          el.addEventListener('touchend', (e) => { e.preventDefault(); pickItem(i); });
-          el.addEventListener('mousedown', (e) => { e.preventDefault(); pickItem(i); });
-        });
-      }
+     dropdownEl.querySelectorAll('.dd-item').forEach((el, i) => {
+
+  el.addEventListener('click', () => {
+    pickItem(i);
+  });
+
+  el.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+  });
+
+});
+      
+ }
       dropdownEl.classList.add('open');
       positionDropdown();
     }
@@ -1224,7 +1234,7 @@
         panel.innerHTML = `
       <div style="margin-bottom:12px; padding:12px; border-radius:10px; background:rgba(180,83,9,0.06); border:1px solid rgba(180,83,9,0.18);">
         <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--amber); font-weight:700; margin-bottom:4px;">
-          AI Suggestion ${bestHasCategory ? '· same category' : ''}
+          Suggestion ${bestHasCategory ? '· same category' : ''}
         </div>
         <div style="font-size:20px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--amber);">${bestLoc[0]}</div>
         <div style="font-size:11px; color:var(--muted); margin-top:2px;">${bestLoc[1].items.length} similar item(s)</div>
