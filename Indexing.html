@@ -61,16 +61,43 @@
     }
 
     .spin-ring {
-      width: 48px;
-      height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      width: 56px;
+      height: 56px;
+      position: relative;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .spin-ring::before,
+    .spin-ring::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 4px solid transparent;
+    }
+
+    .spin-ring::before {
+      border-top-color: var(--accent);
+      border-bottom-color: var(--accent);
+      animation: spinCW 1.1s linear infinite;
+    }
+
+    .spin-ring::after {
+      inset: 8px;
+      border-left-color: var(--accent2);
+      border-right-color: var(--accent2);
+      animation: spinCCW 0.9s linear infinite;
+    }
+
+    @keyframes spinCW {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spinCCW {
+      to {
+        transform: rotate(-360deg);
+      }
     }
 
     #loadProgress {
@@ -90,34 +117,50 @@
     /* ─── Header ─── */
     header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 14px;
+      flex-direction: column;
+      gap: 10px;
+      padding: 0 0 12px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+
+    .header-stripe {
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      flex-shrink: 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 0;
     }
 
     .logo-area {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
     }
 
-    .logo-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
-      animation: pulse 2s infinite;
+    .logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28);
       flex-shrink: 0;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.3); }
+    .logo-badge svg {
+      width: 14px;
+      height: 14px;
     }
 
     .logo-text {
@@ -167,6 +210,160 @@
     #logoutBtn:active {
       background: var(--red);
       color: #fff;
+    }
+
+    .header-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 1px solid var(--border);
+      padding: 8px 14px 0;
+      margin: 0 14px;
+      position: relative;
+    }
+
+    #statsToggleBtn {
+      position: absolute;
+      top: -9px;
+      left: 14px;
+      background: var(--surface);
+      border: none;
+      padding: 0 6px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    #statsBody {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #statsBody.collapsed {
+      grid-template-rows: 0fr;
+    }
+
+    #statsBody>.stats-inner {
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #statsBody.collapsed>.stats-inner {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .hstat-chips {
+      display: flex;
+      gap: 6px;
+    }
+
+    .hstat-chip {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .hstat-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .hstat-icon {
+      font-size: 11px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .hstat-label {
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hstat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .hstat-chip.total {
+      border-color: rgba(37, 99, 235, 0.25);
+    }
+
+    .hstat-chip.total .hstat-num {
+      color: var(--accent);
+    }
+
+    .hstat-chip.located {
+      border-color: rgba(5, 150, 105, 0.25);
+    }
+
+    .hstat-chip.located .hstat-num {
+      color: var(--green);
+    }
+
+    .hstat-chip.pending {
+      border-color: rgba(220, 38, 38, 0.25);
+    }
+
+    .hstat-chip.pending .hstat-num {
+      color: var(--red);
+    }
+
+    .header-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 20px;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      transition: width 0.6s ease;
+    }
+
+    .progress-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      min-width: 32px;
+      text-align: right;
     }
 
     /* ─── Search Box ─── */
@@ -229,7 +426,6 @@
       display: flex;
     }
 
-    /* ─── Dropdown ─── */
     #dropdown {
       position: fixed;
       background: var(--surface);
@@ -238,26 +434,36 @@
       box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
       z-index: 1000;
       overflow: hidden;
-      max-height: 55vh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      display: none;
+      max-height: 0;
       opacity: 0;
       transform: translateY(-6px) scale(0.98);
       transform-origin: top;
-      transition: opacity 0.12s ease, transform 0.12s ease;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease, transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
       touch-action: pan-y;
     }
 
     #dropdown.open {
-      display: block;
+      max-height: 55vh;
       opacity: 1;
       transform: translateY(0) scale(1);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      pointer-events: auto;
     }
 
-    #dropdown::-webkit-scrollbar { width: 4px; }
-    #dropdown::-webkit-scrollbar-track { background: var(--surface); }
-    #dropdown::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    #dropdown::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #dropdown::-webkit-scrollbar-track {
+      background: var(--surface);
+    }
+
+    #dropdown::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
 
     .dd-item {
       display: flex;
@@ -271,8 +477,13 @@
       touch-action: manipulation;
     }
 
-    .dd-item:last-child { border-bottom: none; }
-    .dd-item:active { background: var(--surface2); }
+    .dd-item:last-child {
+      border-bottom: none;
+    }
+
+    .dd-item:active {
+      background: var(--surface2);
+    }
 
     .dd-name {
       font-size: 13px;
@@ -338,6 +549,20 @@
 
     /* ─── Main Content ─── */
     .content-stack {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows 0.34s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+    }
+
+    .content-stack.open {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .content-stack>.content-stack-inner {
+      overflow: hidden;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -352,6 +577,22 @@
       box-shadow: var(--card-shadow);
     }
 
+    @keyframes revealIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .item-card.reveal {
+      animation: revealIn 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .item-card-empty {
       display: flex;
       flex-direction: column;
@@ -362,15 +603,26 @@
       height: 130px;
     }
 
-    .empty-icon { font-size: 32px; opacity: 0.3; }
-    .empty-text { font-size: 13px; }
+    .empty-icon {
+      font-size: 32px;
+      opacity: 0.3;
+    }
+
+    .empty-text {
+      font-size: 13px;
+    }
 
     .item-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 10px;
       margin-bottom: 14px;
+      margin-top: 10px;
+      border: 1.5px solid #C5EBD9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      position: relative;
     }
 
     .item-name {
@@ -382,13 +634,10 @@
 
     .item-sap {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--accent2);
-      background: rgba(8, 145, 178, 0.08);
-      padding: 3px 8px;
-      border-radius: 6px;
       white-space: nowrap;
-      border: 1px solid rgba(8, 145, 178, 0.18);
       flex-shrink: 0;
     }
 
@@ -421,6 +670,11 @@
       flex-wrap: wrap;
     }
 
+    .actions-row .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
     .btn {
       padding: 10px 16px;
       border-radius: 10px;
@@ -443,7 +697,9 @@
       box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
     }
 
-    .btn-primary:active { background: #1d4ed8; }
+    .btn-primary:active {
+      background: #1d4ed8;
+    }
 
     .btn-ghost {
       background: var(--surface2);
@@ -462,7 +718,9 @@
       box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
     }
 
-    .btn-success:active { background: #047857; }
+    .btn-success:active {
+      background: #047857;
+    }
 
     .btn-info {
       background: rgba(37, 99, 235, 0.08);
@@ -474,7 +732,10 @@
       background: rgba(37, 99, 235, 0.16);
     }
 
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     /* ─── Update Form ─── */
     .form-card {
@@ -513,8 +774,13 @@
       -webkit-appearance: none;
     }
 
-    .form-input:focus { border-color: var(--accent); }
-    .form-input:disabled { opacity: 0.55; }
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .form-input:disabled {
+      opacity: 0.55;
+    }
 
     /* regular input (non-mono) for add item form */
     .form-input-reg {
@@ -533,7 +799,9 @@
       -webkit-appearance: none;
     }
 
-    .form-input-reg:focus { border-color: var(--accent); }
+    .form-input-reg:focus {
+      border-color: var(--accent);
+    }
 
     .ai-badge {
       display: inline-flex;
@@ -618,8 +886,28 @@
       cursor: pointer;
     }
 
-    #aiPanelBody { display: none; }
-    #aiPanelBody.open { display: block; }
+    #aiPanelBody {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #aiPanelBody.open {
+      grid-template-rows: 1fr;
+    }
+
+    #aiPanelBody>.ai-inner {
+      overflow: hidden;
+      min-height: 0;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #aiPanelBody.open>.ai-inner {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     .similar-item {
       padding: 11px 12px;
@@ -633,8 +921,13 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .similar-item:active { border-color: var(--accent); }
-    .similar-item:last-child { margin-bottom: 0; }
+    .similar-item:active {
+      border-color: var(--accent);
+    }
+
+    .similar-item:last-child {
+      margin-bottom: 0;
+    }
 
     .si-name {
       font-size: 12px;
@@ -696,7 +989,63 @@
       gap: 12px;
     }
 
-    .radio-group { display: flex; gap: 20px; }
+    /* ─── Download Bar collapse toggle ─── */
+    .dlbar-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dlbar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #dlToggleBtn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    #dlBarBody {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #dlBarBody.collapsed {
+      grid-template-rows: 0fr;
+    }
+
+    #dlBarBody>.dlbar-inner {
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #dlBarBody.collapsed>.dlbar-inner {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+    }
 
     .radio-label {
       display: flex;
@@ -734,7 +1083,9 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-dl:active { opacity: 0.88; }
+    .btn-dl:active {
+      opacity: 0.88;
+    }
 
     /* ─── Toast ─── */
     #toastEl {
@@ -758,7 +1109,9 @@
       max-width: calc(100vw - 32px);
     }
 
-    #toastEl.show { transform: translateX(-50%) translateY(0); }
+    #toastEl.show {
+      transform: translateX(-50%) translateY(0);
+    }
 
     .toast-dot {
       width: 8px;
@@ -871,13 +1224,48 @@
 
     <!-- Header -->
     <header>
-      <div class="logo-area">
-        <div class="logo-dot"></div>
-        <div class="logo-text">Indexing</div>
+      <div class="header-stripe"></div>
+      <div class="header-top">
+        <div class="logo-area" onclick="toggleStats()" style="cursor:pointer;">
+  <div class="logo-badge">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="logo-text">INDEXING-C34A</div>
+        </div>
+        <div class="user-area">
+          <div id="welcomeUser">Guest</div>
+          <button id="logoutBtn" onclick="logout()">Logout</button>
+        </div>
       </div>
-      <div class="user-area">
-        <div id="welcomeUser">Guest</div>
-        <button id="logoutBtn" onclick="logout()">Logout</button>
+      <div class="header-stats">
+        
+        <div id="statsBody">
+          <div class="stats-inner">
+            <div class="hstat-chips">
+              <div class="hstat-chip total">
+                <span class="hstat-left"><span class="hstat-icon">📦</span><span class="hstat-label">Total
+                    Items</span></span>
+                <span class="hstat-num" id="statTotal">0</span>
+              </div>
+              <div class="hstat-chip located">
+                <span class="hstat-left"><span class="hstat-icon">📍</span><span
+                    class="hstat-label">Located</span></span>
+                <span class="hstat-num" id="statLocated">0</span>
+              </div>
+              <div class="hstat-chip pending">
+                <span class="hstat-left"><span class="hstat-icon">⏳</span><span
+                    class="hstat-label">Pending</span></span>
+                <span class="hstat-num" id="statPending">0</span>
+              </div>
+            </div>
+            <div class="header-progress">
+              <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%;"></div>
+              </div>
+              <div class="progress-pct" id="progressPct">0%</div>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -890,73 +1278,86 @@
     </div>
 
     <!-- Single-column stack -->
-    <div class="content-stack" id="contentStack" style="display:none;">
+    <div class="content-stack" id="contentStack">
+      <div class="content-stack-inner">
 
-      <!-- Item Card (normal) or Add Item Card -->
-      <div class="item-card" id="itemCard">
-        <div class="item-card-empty">
-          <div class="empty-icon">🗂️</div>
-          <div class="empty-text">Search for an item to get started</div>
-        </div>
-      </div>
-
-      <!-- AI Panel (collapsible) -->
-      <div class="ai-panel" id="aiPanelWrapper">
-        <div class="ai-panel-header">
-          <div class="ai-dot"></div>
-          <h3>Similar Items</h3>
-          <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
-        </div>
-        <div id="aiPanelBody">
-          <div id="aiPanel">
-            <div class="ai-empty">Select an item to see similar locations</div>
+        <!-- Item Card (normal) or Add Item Card -->
+        <div class="item-card" id="itemCard">
+          <div class="item-card-empty">
+            <div class="empty-icon">🗂️</div>
+            <div class="empty-text">Search for an item to get started</div>
           </div>
         </div>
-      </div>
 
+        <!-- AI Panel (collapsible) -->
+        <div class="ai-panel" id="aiPanelWrapper">
+          <div class="ai-panel-header">
+            <div class="ai-dot"></div>
+            <h3>Similar Items</h3>
+            <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
+          </div>
+          <div id="aiPanelBody">
+            <div class="ai-inner">
+              <div id="aiPanel">
+                <div class="ai-empty">Select an item to see similar locations</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Download Bar -->
-    <div class="download-bar">
-      <div class="dl-tabs">
-        <button class="dl-tab active" id="tabNormal" onclick="switchTab('normal')">📥 Download</button>
-        <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">📤 Upload & Enrich</button>
+    <div class="download-bar" id="downloadBar">
+      <div class="dlbar-toggle-row">
+        <span class="dlbar-title">📥 Download & Upload</span>
+        <button id="dlToggleBtn" onclick="toggleDlBar()">Hide ▴</button>
       </div>
 
-      <!-- Normal download -->
-      <div id="panelNormal">
-        <div class="radio-group">
-          <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Location</label>
-          <label class="radio-label"><input type="radio" name="dlType" value="without"> Without Location</label>
+      <div id="dlBarBody">
+        <div class="dlbar-inner">
+          <div class="dl-tabs">
+            <button class="dl-tab active" id="tabNormal" onclick="switchTab('normal')">📥 Download</button>
+            <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">📤 Upload & Enrich</button>
+          </div>
+
+          <!-- Normal download -->
+          <div id="panelNormal">
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Location</label>
+              <label class="radio-label"><input type="radio" name="dlType" value="without"> Without Location</label>
+              <label class="radio-label"><input type="radio" name="dlType" value="full"> Full Backup</label>
+            </div>
+            <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download CSV
+            </button>
+          </div>
+
+          <!-- Upload & Enrich panel -->
+          <div id="panelUpload" style="display:none;">
+            <label class="upload-zone" id="uploadZone">
+              <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
+                onchange="handleUpload(this)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span id="uploadLabel">CSV ya Excel file chunein</span>
+              <span style="font-size:11px;color:var(--muted);margin-top:2px;">Any format — SAP column
+                auto-detect</span>
+            </label>
+            <div id="uploadStatus" style="display:none;"></div>
+          </div>
         </div>
-        <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download CSV
-        </button>
-      </div>
-
-      <!-- Upload & Enrich panel -->
-      <div id="panelUpload" style="display:none;">
-        <div class="upload-hint">Upload kisi bhi CSV/Excel — SAP code column automatically dhundha jayega. Last column
-          mein Location add hokar download hoga.</div>
-        <label class="upload-zone" id="uploadZone">
-          <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
-            onchange="handleUpload(this)">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          <span id="uploadLabel">CSV ya Excel file chunein</span>
-          <span style="font-size:11px;color:var(--muted);margin-top:2px;">Any format — SAP column auto-detect</span>
-        </label>
-        <div id="uploadStatus" style="display:none;"></div>
       </div>
     </div>
 
@@ -972,13 +1373,14 @@
     let userName = "Guest";
     let aiPanelOpen = false;
     let addItemMode = false; // track if we're showing add-item form
+let pendingUpdates = {};
 
     // ─── Toast ───
     let toastTimer;
     function showToast(msg, type = "blue") {
       const el = document.getElementById('toastEl');
       const dot = document.getElementById('toastDot');
-      const colors = { blue: '#2563eb', green: '#059669', red: '#dc2626', amber: '#b45309' };
+      const colors = {blue: '#2563eb', green: '#059669', red: '#dc2626', amber: '#b45309'};
       dot.style.background = colors[type] || colors.blue;
       document.getElementById('toastMsg').textContent = msg;
       el.classList.add('show');
@@ -993,6 +1395,20 @@
       const btn = document.getElementById('aiToggleBtn');
       body.classList.toggle('open', aiPanelOpen);
       btn.textContent = aiPanelOpen ? 'Hide ▴' : 'Show ▾';
+    }
+
+    // ─── Header Stats ───
+    function renderStats() {
+      const total = itemMaster.length;
+      const located = itemMaster.filter(i => i.location && i.location.trim()).length;
+      const pending = total - located;
+      const pct = total ? Math.round((located / total) * 100) : 0;
+      document.getElementById('statTotal').textContent = total.toLocaleString();
+      document.getElementById('statLocated').textContent = located.toLocaleString();
+      document.getElementById('statPending').textContent = pending.toLocaleString();
+      document.getElementById('progressPct').textContent = pct + '%';
+      const fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = pct + '%';
     }
 
     // ─── Highlight ───
@@ -1051,13 +1467,13 @@
       dropdownEl.innerHTML = html;
 
       dropdownEl.querySelectorAll('.dd-item').forEach((el, i) => {
-        el.addEventListener('click', () => { pickItem(i); });
-        el.addEventListener('mousedown', (e) => { e.preventDefault(); });
+        el.addEventListener('click', () => {pickItem(i);});
+        el.addEventListener('mousedown', (e) => {e.preventDefault();});
       });
 
       const addBtn = document.getElementById('ddAddBtn');
       if (addBtn) {
-        addBtn.addEventListener('mousedown', (e) => { e.preventDefault(); });
+        addBtn.addEventListener('mousedown', (e) => {e.preventDefault();});
         addBtn.addEventListener('click', () => {
           closeDropdown();
           showAddItemForm(query);
@@ -1075,29 +1491,32 @@
 
     function revealContent() {
       const stack = document.getElementById('contentStack');
-      if (stack.style.display === 'none') stack.style.display = 'flex';
+      stack.classList.add('open');
     }
 
-    function pickItem(i) {
+       function pickItem(i) {
       currentItem = ddItems[i];
+      sessionStorage.setItem('lastSearchTerm', currentItem.name);
       addItemMode = false;
       searchBox.value = currentItem.name;
       closeDropdown();
-      revealContent();
       showNormalCard();
       renderItem();
       document.getElementById('aiPanelWrapper').style.display = '';
       if (!aiPanelOpen) toggleAI();
       renderAI();
+      revealContent();
       setTimeout(() => {
-        document.getElementById('itemCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('itemCard').scrollIntoView({behavior: 'smooth', block: 'start'});
       }, 100);
     }
 
     function showNormalCard() {
-      // Restore item-card class (in case it was add-item-card before)
+      // Restore item-card class (in case it was add-item-card before) + smooth reveal
       const card = document.getElementById('itemCard');
-      card.className = 'item-card';
+      card.classList.remove('reveal');
+      void card.offsetWidth; // restart animation
+      card.className = 'item-card reveal';
     }
 
     // ─── SAP pad ───
@@ -1120,28 +1539,32 @@
       doSearch(val);
     });
     searchBox.addEventListener('blur', () => {
-      const padded = padSAP(searchBox.value.trim());
-      if (/^\d{10}$/.test(padded) && padded !== searchBox.value.trim()) {
-        searchBox.value = padded;
-        doSearch(padded);
+      const raw = searchBox.value.trim();
+      const isPureNumeric = /^\d+$/.test(raw);
+      if (isPureNumeric) {
+        const padded = padSAP(raw);
+        if (/^\d{10}$/.test(padded) && padded !== raw) {
+          searchBox.value = padded;
+          doSearch(padded);
+        }
       }
       setTimeout(closeDropdown, 200);
     });
     searchBox.addEventListener('keydown', e => {
       const rows = dropdownEl.querySelectorAll('.dd-item');
-      if (e.key === 'ArrowDown') { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, rows.length - 1); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex)); }
-      if (e.key === 'ArrowUp') { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex)); }
-      if (e.key === 'Enter') { if (ddIndex >= 0) pickItem(ddIndex); else { closeDropdown(); } searchBox.blur(); }
-      if (e.key === 'Escape') { closeDropdown(); searchBox.blur(); }
+      if (e.key === 'ArrowDown') {e.preventDefault(); ddIndex = Math.min(ddIndex + 1, rows.length - 1); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex));}
+      if (e.key === 'ArrowUp') {e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); rows.forEach((r, i) => r.classList.toggle('active', i === ddIndex));}
+      if (e.key === 'Enter') {if (ddIndex >= 0) pickItem(ddIndex); else {closeDropdown();} searchBox.blur();}
+      if (e.key === 'Escape') {closeDropdown(); searchBox.blur();}
     });
 
-    window.addEventListener('scroll', () => { if (dropdownEl.classList.contains('open')) positionDropdown(); }, true);
+    window.addEventListener('scroll', () => {if (dropdownEl.classList.contains('open')) positionDropdown();}, true);
     window.addEventListener('resize', () => closeDropdown());
 
     function resetToEmptyState() {
       currentItem = null;
       addItemMode = false;
-      document.getElementById('contentStack').style.display = 'none';
+      document.getElementById('contentStack').classList.remove('open');
       const card = document.getElementById('itemCard');
       card.className = 'item-card';
       card.innerHTML = `<div class="item-card-empty"><div class="empty-icon">🗂️</div><div class="empty-text">Search for an item to get started</div></div>`;
@@ -1150,7 +1573,7 @@
     }
 
     function doSearch(query) {
-      if (!query) { closeDropdown(); resetToEmptyState(); return; }
+      if (!query) {closeDropdown(); resetToEmptyState(); return;}
       const q = query.toLowerCase();
       const isNumeric = /^\d+$/.test(query);
       const normalizedQuery = isNumeric ? padSAP(query) : null;
@@ -1161,15 +1584,16 @@
       }).slice(0, 25);
 
       const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
-      if (exact) {
+            if (exact) {
         currentItem = exact;
+        sessionStorage.setItem('lastSearchTerm', exact.name);
         addItemMode = false;
-        revealContent();
         showNormalCard();
         renderItem();
         document.getElementById('aiPanelWrapper').style.display = '';
         renderAI();
         closeDropdown();
+        revealContent();
         return;
       }
 
@@ -1183,9 +1607,11 @@
       const hasLoc = currentItem.location && currentItem.location.trim();
       document.getElementById('itemCard').innerHTML = `
         <div class="item-header">
-          <div class="item-name">${currentItem.name}</div>
-          <div class="item-sap">${currentItem.sap}</div>
-        </div>
+  <span style="position:absolute; top:-9px; left:12px; background:var(--surface); padding:0 6px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); font-weight:700;">Description and SAP Code</span>
+  <div class="item-name">${currentItem.name}</div>
+  <div style="width:1px; align-self:stretch; background:#C5EBD9; flex-shrink:0;"></div>
+  <div class="item-sap">${currentItem.sap}</div>
+</div>
         <div class="loc-pill ${hasLoc ? 'has' : 'no'}">
           ${hasLoc ? '📍 ' + currentItem.location : '❌ Not Assigned'}
         </div>
@@ -1203,13 +1629,13 @@
       `;
     }
 
-    // ─── Show Add Item Form ───
     function showAddItemForm(prefill) {
       addItemMode = true;
-      revealContent();
 
       const card = document.getElementById('itemCard');
-      card.className = 'item-card';
+      card.classList.remove('reveal');
+      void card.offsetWidth;
+      card.className = 'item-card reveal';
       card.innerHTML = `
         <div class="add-item-header">
           <span style="font-size:18px;">➕</span>
@@ -1240,11 +1666,12 @@
 
       // Hide AI panel when in add-item mode
       document.getElementById('aiPanelWrapper').style.display = 'none';
+      revealContent();
 
       setTimeout(() => {
         const sapInp = document.getElementById('newSap');
         if (sapInp) sapInp.focus();
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        card.scrollIntoView({behavior: 'smooth', block: 'start'});
       }, 100);
     }
 
@@ -1263,8 +1690,8 @@
       const store = document.getElementById('newStore').value.trim().toUpperCase();
       const loc = document.getElementById('newLoc').value.trim().toUpperCase();
 
-      if (!sapRaw) { showToast("SAP Code enter karein", "red"); document.getElementById('newSap').focus(); return; }
-      if (!name) { showToast("Description enter karein", "red"); document.getElementById('newName').focus(); return; }
+      if (!sapRaw) {showToast("SAP Code enter karein", "red"); document.getElementById('newSap').focus(); return;}
+      if (!name) {showToast("Description enter karein", "red"); document.getElementById('newName').focus(); return;}
 
       // Check if SAP already exists
       const existing = itemMaster.find(i => String(i.sap) === sap);
@@ -1282,7 +1709,7 @@
       }
 
       const btn = document.getElementById('addItemBtn');
-      if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving...'; }
+      if (btn) {btn.disabled = true; btn.textContent = '⏳ Saving...';}
 
       showToast("Saving...", "blue");
 
@@ -1300,6 +1727,7 @@
             updation_date: new Date().toLocaleDateString()
           };
           itemMaster.push(newItem);
+          renderStats();
 
           showToast("Item add ho gaya ✓", "green");
 
@@ -1309,14 +1737,14 @@
           showNormalCard();
           renderItem();
           document.getElementById('aiPanelWrapper').style.display = '';
-          if (!aiPanelOpen) { toggleAI(); }
+          if (!aiPanelOpen) {toggleAI();}
           renderAI();
           searchBox.value = name;
           document.getElementById('clearSearch').classList.add('visible');
         })
         .catch(() => {
           showToast("Save failed — check connection", "red");
-          if (btn) { btn.disabled = false; btn.textContent = '💾 Save to Sheet'; }
+          if (btn) {btn.disabled = false; btn.textContent = '💾 Save to Sheet';}
         });
     }
 
@@ -1331,7 +1759,7 @@
       return String(str || '').toUpperCase().split(/[^A-Z0-9.]+/).filter(Boolean);
     }
 
-    function isCode(tok) { return /\d/.test(tok); }
+    function isCode(tok) {return /\d/.test(tok);}
 
     function getCategory(name) {
       const raw = String(name || '').toUpperCase().trim();
@@ -1347,14 +1775,14 @@
       let score = categoryHit ? 8 : 0;
       tokensB.forEach(tok => {
         if (STOPWORDS.has(tok) || tok === catB) return;
-        if (setA.has(tok)) { score += isCode(tok) ? 4 : 2; }
+        if (setA.has(tok)) {score += isCode(tok) ? 4 : 2;}
         else if (isCode(tok) && tok.length >= 2) {
           for (const a of setA) {
-            if (isCode(a) && a.length >= 2 && (a.includes(tok) || tok.includes(a))) { score += 2; break; }
+            if (isCode(a) && a.length >= 2 && (a.includes(tok) || tok.includes(a))) {score += 2; break;}
           }
         }
       });
-      return { score, categoryHit };
+      return {score, categoryHit};
     }
 
     function renderAI() {
@@ -1364,17 +1792,17 @@
       setTimeout(() => {
         const scored = itemMaster
           .filter(i => i.location && i.location.trim() && i.sn !== currentItem.sn)
-          .map(i => { const { score, categoryHit } = computeScore(currentItem.name, i.name); return { item: i, score, categoryHit }; })
+          .map(i => {const {score, categoryHit} = computeScore(currentItem.name, i.name); return {item: i, score, categoryHit};})
           .filter(x => x.score > 0)
           .sort((a, b) => (b.categoryHit - a.categoryHit) || (b.score - a.score))
           .slice(0, 7);
 
-        if (!scored.length) { panel.innerHTML = `<div class="ai-empty">No similar items with locations found</div>`; return; }
+        if (!scored.length) {panel.innerHTML = `<div class="ai-empty">No similar items with locations found</div>`; return;}
 
         const locMap = {};
-        scored.forEach(({ item, score, categoryHit }) => {
-          if (!locMap[item.location]) locMap[item.location] = { items: [], weight: 0 };
-          locMap[item.location].items.push({ item, score, categoryHit });
+        scored.forEach(({item, score, categoryHit}) => {
+          if (!locMap[item.location]) locMap[item.location] = {items: [], weight: 0};
+          locMap[item.location].items.push({item, score, categoryHit});
           locMap[item.location].weight += score + (categoryHit ? 3 : 0);
         });
         const bestLoc = Object.entries(locMap).sort((a, b) => b[1].weight - a[1].weight)[0];
@@ -1389,7 +1817,7 @@
             <div style="font-size:11px; color:var(--muted); margin-top:2px;">${bestLoc[1].items.length} similar item(s)</div>
             <button class="btn btn-ghost" style="margin-top:10px; padding:8px 14px; font-size:12px; min-height:40px;" ontouchstart="" onclick="applySuggestion('${bestLoc[0]}')">Use This →</button>
           </div>
-          ${scored.map(({ item, score, categoryHit }) => `
+          ${scored.map(({item, score, categoryHit}) => `
             <div class="similar-item" ontouchstart="" onclick="applySuggestion('${item.location}')">
               <div class="si-name">${categoryHit ? '<span class="si-tag">Same Category</span>' : ''}${item.name}</div>
               <div class="si-row">
@@ -1406,8 +1834,8 @@
       showUpdateForm();
       setTimeout(() => {
         const inp = document.getElementById('updateLocation');
-        if (inp) { inp.value = loc.toUpperCase(); inp.focus(); }
-        document.getElementById('itemCard').scrollIntoView({ behavior: 'smooth' });
+        if (inp) {inp.value = loc.toUpperCase(); inp.focus();}
+        document.getElementById('itemCard').scrollIntoView({behavior: 'smooth'});
       }, 80);
     }
 
@@ -1426,7 +1854,14 @@
           <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
                  autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
                  inputmode="text">
-          <button class="btn btn-success" id="updateBtn" onclick="updateLocation()" style="width:100%; font-size:14px; justify-content:center;">Save Location</button>
+                    <button class="btn btn-success" id="updateBtn" onclick="updateLocation()" style="width:100%; font-size:14px; justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Save Location
+          </button>
         </div>
       `;
       setTimeout(() => {
@@ -1436,25 +1871,28 @@
     }
 
     function updateLocation() {
-      const btn = document.getElementById('updateBtn');
-      const locInput = document.getElementById('updateLocation');
-      const loc = locInput.value.trim().toUpperCase();
-      if (!loc) { showToast("Enter a location first", "red"); return; }
+  const btn = document.getElementById('updateBtn');
+  const locInput = document.getElementById('updateLocation');
+  const loc = locInput.value.trim().toUpperCase();
+  if (!loc) {showToast("Enter a location first", "red"); return;}
 
-      localStorage.setItem("lastLocationText", loc);
-      btn.disabled = true;
-      btn.textContent = '⏳ Saving...';
-      currentItem.location = loc;
+  const sn = currentItem.sn;
+  localStorage.setItem("lastLocationText", loc);
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
+  currentItem.location = loc;
+  pendingUpdates[sn] = loc;
+  renderStats();
 
-      const pill = document.querySelector('.loc-pill');
-      if (pill) { pill.className = 'loc-pill has'; pill.textContent = '📍 ' + loc; }
-      showToast("Saved! Syncing…", "green");
+  const pill = document.querySelector('.loc-pill');
+  if (pill) {pill.className = 'loc-pill has'; pill.textContent = '📍 ' + loc;}
+  showToast("Saved! Syncing…", "green");
 
-      fetch(`${API}?action=update&sn=${currentItem.sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
-        .then(() => showToast("Server sync done ✓", "green"))
-        .catch(() => showToast("Server sync failed", "red"));
+  fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
+    .then(() => {delete pendingUpdates[sn]; showToast("Server sync done ✓", "green");})
+    .catch(() => showToast("Server sync failed", "red"));
 
-      setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Updated ✓'; } }, 600);
+      setTimeout(() => {if (btn) {btn.disabled = false; btn.textContent = 'Updated ✓';} }, 600);
     }
 
     function viewPhotos() {
@@ -1478,10 +1916,10 @@
       const reader = new FileReader();
 
       reader.onload = function (e) {
-        const workbook = XLSX.read(e.target.result, { type: "array" });
+        const workbook = XLSX.read(e.target.result, {type: "array"});
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        const data = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
 
         const locMap = {};
         itemMaster.forEach(i => {
@@ -1529,15 +1967,20 @@
         itemMaster.filter(i => i.location && i.location.trim()).forEach(i =>
           rows.push([i.sap || '', i.name || '', i.store || '', i.location || '', i.updation_date || '', i.update_by || '']));
         filename = 'material_with_location.csv';
-      } else {
+      } else if (type === 'without') {
         rows = [["SAP", "Description", "Store"]];
         itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
           rows.push([i.sap || '', i.name || '', i.store || '']));
         filename = 'material_without_location.csv';
+      } else {
+        rows = [["SAP", "Description", "Store", "Location", "Updated Date", "Update By"]];
+        itemMaster.forEach(i =>
+          rows.push([i.sap || '', i.name || '', i.store || '', i.location || '(Not Assigned)', i.updation_date || '', i.update_by || '']));
+        filename = 'material_full_backup.csv';
       }
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
       a.download = filename;
       a.click();
       showToast(`Downloaded: ${filename}`, "blue");
@@ -1556,9 +1999,17 @@
 
     // ─── Auth ───
     document.addEventListener('DOMContentLoaded', () => {
-      if (!sessionStorage.getItem('loggedIn')) { window.location.href = 'index.html'; return; }
+      if (!sessionStorage.getItem('loggedIn')) {window.location.href = 'index.html'; return;}
       userName = sessionStorage.getItem('userName') || 'Guest';
       document.getElementById('welcomeUser').textContent = '👤 ' + userName;
+
+      const statsBody = document.getElementById('statsBody');
+statsBody.classList.toggle('collapsed', !statsOpen);
+
+      const dlBody = document.getElementById('dlBarBody');
+      const dlBtn = document.getElementById('dlToggleBtn');
+      dlBody.classList.toggle('collapsed', !dlOpen);
+      dlBtn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
     });
 
     function logout() {
@@ -1566,20 +2017,72 @@
       window.location.href = 'index.html';
     }
 
-    // ─── Load Data ───
+    // ─── Load Data (cache-first for instant load) ───
+    const CACHE_KEY = 'itemMasterCache';
     const prog = document.getElementById('loadProgress');
-    prog.textContent = 'Connecting to server…';
-    fetch(API + '?action=getItems')
-      .then(r => { prog.textContent = 'Parsing data…'; return r.json(); })
+
+        const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        itemMaster = parsed.data || [];
+        renderStats();
+        document.getElementById('spinnerOverlay').style.display = 'none';
+        showToast(`${itemMaster.length.toLocaleString()} items loaded (cached)`, 'blue');
+        const lastTerm = sessionStorage.getItem('lastSearchTerm');
+        if (lastTerm) { searchBox.value = lastTerm; doSearch(lastTerm); }
+      } catch (e) { /* ignore bad cache */}
+    } else {
+      prog.textContent = 'Connecting to server…';
+    }
+
+        fetch(API + '?action=getItems')
+      .then(r => {if (!cached) prog.textContent = 'Parsing data…'; return r.json();})
       .then(data => {
         itemMaster = data;
+        Object.keys(pendingUpdates).forEach(sn => {
+          const it = itemMaster.find(i => String(i.sn) === String(sn));
+          if (it) it.location = pendingUpdates[sn];
+        });
+        renderStats();
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({data, ts: Date.now()}));
+        } catch (e) {
+          console.warn('Cache save skipped (storage full):', e);
+        }
         document.getElementById('spinnerOverlay').style.display = 'none';
-        showToast(`${data.length.toLocaleString()} items loaded`, 'green');
+        showToast(`${data.length.toLocaleString()} items synced`, 'green');
+        const lastTerm = sessionStorage.getItem('lastSearchTerm');
+        if (lastTerm) { searchBox.value = lastTerm; doSearch(lastTerm); }
       })
-      .catch(() => {
-        prog.textContent = 'Load failed — check connection';
-        showToast('Failed to load items', 'red');
+      .catch((err) => {
+        console.error('Load error:', err);
+        if (!cached) {
+          prog.textContent = 'Load failed — check connection';
+          showToast('Failed to load items', 'red');
+        } else {
+          showToast('Sync failed — using cached data', 'amber');
+        }
       });
+
+    let statsOpen = localStorage.getItem('statsCollapsed') !== 'true';
+    function toggleStats() {
+  statsOpen = !statsOpen;
+  const body = document.getElementById('statsBody');
+  body.classList.toggle('collapsed', !statsOpen);
+  localStorage.setItem('statsCollapsed', (!statsOpen).toString());
+}
+
+    // ─── Download Bar Toggle (persisted like statsCollapsed) ───
+    let dlOpen = localStorage.getItem('dlBarCollapsed') !== 'true';
+    function toggleDlBar() {
+      dlOpen = !dlOpen;
+      const body = document.getElementById('dlBarBody');
+      const btn = document.getElementById('dlToggleBtn');
+      body.classList.toggle('collapsed', !dlOpen);
+      btn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
+      localStorage.setItem('dlBarCollapsed', (!dlOpen).toString());
+    }
   </script>
 </body>
 
