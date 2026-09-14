@@ -1201,6 +1201,32 @@
       border: 1px solid var(--border);
       background: var(--surface2);
     }
+
+@media (max-width: 480px) {
+  .header-stats {
+    margin: 0;
+    padding: 8px 0 0;
+  }
+  .hstat-chips {
+    gap: 0;
+  }
+  .hstat-chip {
+    border-radius: 0;
+    justify-content: center;
+    border-left: none;
+    border-right: none;
+  }
+  .hstat-chip:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+  .hstat-icon,
+  .hstat-label {
+    display: none;
+  }
+  .hstat-num {
+    font-size: 16px;
+  }
+}
   </style>
 </head>
 
