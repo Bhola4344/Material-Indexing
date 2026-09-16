@@ -211,16 +211,15 @@
       background: var(--red);
       color: #fff;
     }
-
-    .header-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      border-top: 1px solid var(--border);
-      padding: 8px 14px 0;
-      margin: 0 14px;
-      position: relative;
-    }
+.header-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+  padding: 8px 14px 0;   /* isko waisa hi rehne do */
+  margin: 0;             /* sirf ye "0 14px" se "0" karo */
+  position: relative;
+}
 
     #statsToggleBtn {
       position: absolute;
@@ -336,36 +335,15 @@
       color: var(--red);
     }
 
-    .header-progress {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+.hstat-chip.stock {
+  border-color: rgba(8, 145, 178, 0.25);
+}
 
-    .progress-track {
-      flex: 1;
-      height: 6px;
-      border-radius: 20px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
+.hstat-chip.stock .hstat-num {
+  color: var(--accent2);
+}
 
-    .progress-fill {
-      height: 100%;
-      border-radius: 20px;
-      background: linear-gradient(90deg, var(--accent), var(--green));
-      transition: width 0.6s ease;
-    }
-
-    .progress-pct {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--green);
-      min-width: 32px;
-      text-align: right;
-    }
+   
 
     /* ─── Search Box ─── */
     .search-wrap {
@@ -1048,13 +1026,15 @@
       gap: 20px;
     }
 
-    .radio-label {
+              .radio-label {
       display: flex;
       align-items: center;
       gap: 7px;
       font-size: 13px;
       cursor: pointer;
       min-height: 36px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .radio-label input {
@@ -1156,6 +1136,56 @@
       border-color: var(--accent);
     }
 
+/* ─── Stock Upload Processing Panel ─── */
+.proc-panel {
+  display: none;
+  border: 1.5px solid rgba(37, 99, 235, 0.25);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.04), transparent);
+  border-radius: 12px;
+  padding: 16px;
+}
+.proc-panel.active { display: block; }
+
+.proc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+
+.proc-spin {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--accent);
+  animation: procSpin 0.8s linear infinite; flex-shrink: 0;
+}
+.proc-spin.done { border: none; background: var(--green); position: relative; animation: none; }
+.proc-spin.done::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+.proc-spin.err { border: none; background: var(--red); position: relative; animation: none; }
+.proc-spin.err::after { content: '✕'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; }
+@keyframes procSpin { to { transform: rotate(360deg); } }
+
+.proc-title { font-size: 14px; font-weight: 700; }
+.proc-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+.progress-track { height: 8px; background: var(--surface2); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 14px; }
+.progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 20px; transition: width .35s cubic-bezier(.4,0,.2,1); }
+
+.steps { display: flex; flex-direction: column; gap: 8px; }
+.step { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500; color: var(--muted); transition: color .2s; }
+.step.active { color: var(--text); font-weight: 700; }
+.step.done { color: var(--green); }
+.step-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; transition: all .2s; }
+.step.active .step-dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.step.active .step-dot::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.step.done .step-dot { border-color: var(--green); background: var(--green); }
+.step.done .step-dot::after { content: '✓'; color: #fff; font-size: 9px; }
+
+.proc-result { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.proc-result.show { display: block; }
+.proc-result-stats { display: flex; gap: 8px; margin-bottom: 10px; }
+.pstat { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); }
+.pstat-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; line-height: 1; }
+.pstat-label { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); font-weight: 700; margin-top: 4px; }
+.pstat.total .pstat-num { color: var(--accent); }
+.pstat.matched .pstat-num { color: var(--green); }
+.pstat.skipped .pstat-num { color: var(--amber); }
+.proc-result-msg { font-size: 12.5px; color: var(--muted); text-align: center; margin-bottom: 10px; line-height: 1.5; }
+
     /* ─── Upload Zone ─── */
     .upload-hint {
       font-size: 12px;
@@ -1208,8 +1238,8 @@
 
 @media (max-width: 480px) {
   .header-stats {
-    margin: 0 14px;
-    padding: 8px 0 0;
+    margin: 0;           
+  padding: 8px 14px 0;
   }
   .hstat-chips {
     gap: 6px;
@@ -1243,8 +1273,8 @@
   .user-area {
     flex-shrink: 0;
   }
-  #welcomeUser {
-    max-width: 70px;
+    #welcomeUser {
+    max-width: 100px;
     padding: 4px 7px;
     font-size: 11px;
   }
@@ -1266,12 +1296,10 @@
 </head>
 
 <body>
-
-  <!-- Spinner -->
-  <div id="spinnerOverlay">
-    <div class="spin-ring"></div>
-    <div id="loadProgress">Loading items...</div>
-  </div>
+<div id="spinnerOverlay">
+  <div class="spin-ring"></div>
+  <div id="loadProgress">Loading items...</div>
+</div>
 
   <!-- Toast -->
   <div id="toastEl">
@@ -1304,28 +1332,27 @@
         <div id="statsBody">
           <div class="stats-inner">
             <div class="hstat-chips">
-              <div class="hstat-chip total">
-                <span class="hstat-left"><span class="hstat-icon">📦</span><span class="hstat-label">Total
-                    Items</span></span>
-                <span class="hstat-num" id="statTotal">0</span>
-              </div>
-              <div class="hstat-chip located">
-                <span class="hstat-left"><span class="hstat-icon">📍</span><span
-                    class="hstat-label">Located</span></span>
-                <span class="hstat-num" id="statLocated">0</span>
-              </div>
-              <div class="hstat-chip pending">
-                <span class="hstat-left"><span class="hstat-icon">⏳</span><span
-                    class="hstat-label">Pending</span></span>
-                <span class="hstat-num" id="statPending">0</span>
-              </div>
-            </div>
-            <div class="header-progress">
-              <div class="progress-track">
-                <div class="progress-fill" id="progressFill" style="width:0%;"></div>
-              </div>
-              <div class="progress-pct" id="progressPct">0%</div>
-            </div>
+  <div class="hstat-chip total">
+    <span class="hstat-left"><span class="hstat-icon">📦</span><span class="hstat-label">Total</span></span>
+    <span class="hstat-num" id="statTotal">0</span>
+  </div>
+<div class="hstat-chip stock">
+    <span class="hstat-left"><span class="hstat-icon">📊</span><span
+        class="hstat-label">In Stock</span></span>
+    <span class="hstat-num" id="statStock">0</span>
+  </div>
+  <div class="hstat-chip located">
+    <span class="hstat-left"><span class="hstat-icon">📍</span><span
+        class="hstat-label">Located</span></span>
+    <span class="hstat-num" id="statLocated">0</span>
+  </div>
+  <div class="hstat-chip pending">
+    <span class="hstat-left"><span class="hstat-icon">⏳</span><span
+        class="hstat-label">Pending</span></span>
+    <span class="hstat-num" id="statPending">0</span>
+  </div>
+</div>
+            
           </div>
         </div>
       </div>
@@ -1354,7 +1381,7 @@
         <!-- AI Panel (collapsible) -->
         <div class="ai-panel" id="aiPanelWrapper">
           <div class="ai-panel-header">
-            <div class="ai-dot"></div>
+            <span style="font-size:15px; line-height:1;">🧩</span>
             <h3>Similar Items</h3>
             <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
           </div>
@@ -1382,14 +1409,16 @@
           <div class="dl-tabs">
             <button class="dl-tab active" id="tabNormal" onclick="switchTab('normal')">📥 Download</button>
             <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">📤 Upload & Enrich</button>
+	    <button class="dl-tab" id="tabStock" onclick="switchTab('stock')">📊 Stock Upload</button>
           </div>
 
           <!-- Normal download -->
           <div id="panelNormal">
-            <div class="radio-group">
-              <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Location</label>
-              <label class="radio-label"><input type="radio" name="dlType" value="without"> Without Location</label>
-              <label class="radio-label"><input type="radio" name="dlType" value="full"> Full Backup</label>
+            <div class="radio-group" style="flex-wrap:wrap; row-gap:8px;">
+              <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Loc</label>
+              <label class="radio-label"><input type="radio" name="dlType" value="without"> No Loc</label>
+              <label class="radio-label"><input type="radio" name="dlType" value="stock"> With Stock</label>
+              <label class="radio-label"><input type="radio" name="dlType" value="full"> Backup</label>
             </div>
             <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -1419,14 +1448,53 @@
             </label>
             <div id="uploadStatus" style="display:none;"></div>
           </div>
-        </div>
+
+<div id="panelStock" style="display:none;">
+  <label class="upload-zone" id="stockUploadZone">
+    <input type="file" id="stockUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleStockUpload(this)">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+    <span>Stock CSV ya Excel file chunein</span>
+    <span style="font-size:11px;color:var(--muted);margin-top:2px;">SAP code + Stock Qty column auto-detect</span>
+  </label>
+
+  <div class="proc-panel" id="stockProcPanel">
+    <div class="proc-head">
+      <div class="proc-spin" id="stockProcSpin"></div>
+      <div>
+        <div class="proc-title" id="stockProcTitle">Processing file…</div>
+        <div class="proc-sub" id="stockProcSub"></div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="stockProgFill"></div></div>
+    <div class="steps" id="stockStepsList">
+      <div class="step" data-step="0"><div class="step-dot"></div><span>Reading file</span></div>
+      <div class="step" data-step="1"><div class="step-dot"></div><span>Detecting SAP &amp; Stock columns</span></div>
+      <div class="step" data-step="2"><div class="step-dot"></div><span>Validating rows</span></div>
+      <div class="step" data-step="3"><div class="step-dot"></div><span>Uploading to sheet</span></div>
+    </div>
+    <div class="proc-result" id="stockResultBox">
+      <div class="proc-result-stats">
+        <div class="pstat total"><div class="pstat-num" id="stockRTotal">0</div><div class="pstat-label">Rows Found</div></div>
+        <div class="pstat matched"><div class="pstat-num" id="stockRMatched">0</div><div class="pstat-label">Updated</div></div>
+        <div class="pstat skipped"><div class="pstat-num" id="stockRSkipped">0</div><div class="pstat-label">Skipped</div></div>
+      </div>
+      <div class="proc-result-msg" id="stockResultMsg"></div>
+      <button class="btn btn-ghost" style="width:100%;" onclick="resetStockUpload()">↺ Upload Another File</button>
+    </div>
+  </div>
+</div>        </div>
       </div>
     </div>
 
   </div>
 
   <script>
-    const API = "https://script.google.com/macros/s/AKfycbza_aWWX9UzfhIgEe5pg0TE29-JtAKn_FoUUtbBtCUCAHHUj-FJzO4twhsawDNCaKJq/exec";
+    const API = "https://script.google.com/macros/s/AKfycbwM-wm71DJIMuHDjo27YtRxyFq8GWHRFmWcBhpRvILoz18Mn2j-Q9QVOLQCZPXCwAhP/exec";
 
     let itemMaster = [];
     let currentItem = null;
@@ -1461,17 +1529,17 @@ let pendingUpdates = {};
 
     // ─── Header Stats ───
     function renderStats() {
-      const total = itemMaster.length;
-      const located = itemMaster.filter(i => i.location && i.location.trim()).length;
-      const pending = total - located;
-      const pct = total ? Math.round((located / total) * 100) : 0;
-      document.getElementById('statTotal').textContent = total.toLocaleString();
-      document.getElementById('statLocated').textContent = located.toLocaleString();
-      document.getElementById('statPending').textContent = pending.toLocaleString();
-      document.getElementById('progressPct').textContent = pct + '%';
-      const fill = document.getElementById('progressFill');
-      if (fill) fill.style.width = pct + '%';
-    }
+  const total = itemMaster.length;
+  const located = itemMaster.filter(i => i.location && i.location.trim()).length;
+  const pending = total - located;
+  const inStock = itemMaster.filter(i => i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "").length;
+  const pct = total ? Math.round((located / total) * 100) : 0;
+  document.getElementById('statTotal').textContent = total.toLocaleString();
+  document.getElementById('statLocated').textContent = located.toLocaleString();
+  document.getElementById('statPending').textContent = pending.toLocaleString();
+  const stockEl = document.getElementById('statStock');
+  if (stockEl) stockEl.textContent = inStock.toLocaleString();
+}
 
     // ─── Highlight ───
     function highlight(text, q) {
@@ -1556,11 +1624,12 @@ let pendingUpdates = {};
       stack.classList.add('open');
     }
 
-       function pickItem(i) {
+           function pickItem(i) {
       currentItem = ddItems[i];
       sessionStorage.setItem('lastSearchTerm', currentItem.name);
       addItemMode = false;
       searchBox.value = currentItem.name;
+      document.getElementById('clearSearch').classList.add('visible');
       closeDropdown();
       showNormalCard();
       renderItem();
@@ -1645,11 +1714,12 @@ let pendingUpdates = {};
         return i.name.toLowerCase().includes(q) || sapMatch;
       }).slice(0, 25);
 
-      const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
+            const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
             if (exact) {
         currentItem = exact;
         sessionStorage.setItem('lastSearchTerm', exact.name);
         addItemMode = false;
+        document.getElementById('clearSearch').classList.add('visible');
         showNormalCard();
         renderItem();
         document.getElementById('aiPanelWrapper').style.display = '';
@@ -1712,9 +1782,7 @@ let pendingUpdates = {};
                placeholder="Item description" autocomplete="off" autocorrect="off" spellcheck="false"
                autocapitalize="characters">
 
-        <label class="form-label">Store</label>
-        <input class="form-input-reg" id="newStore" placeholder="e.g. MAIN STORE"
-               autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        
 
         <label class="form-label">Location (optional)</label>
         <input class="form-input" id="newLoc" placeholder="e.g. A-01-03"
@@ -1749,7 +1817,7 @@ let pendingUpdates = {};
       const sapRaw = document.getElementById('newSap').value.trim();
       const sap = padSAP(sapRaw);
       const name = document.getElementById('newName').value.trim().toUpperCase();
-      const store = document.getElementById('newStore').value.trim().toUpperCase();
+      
       const loc = document.getElementById('newLoc').value.trim().toUpperCase();
 
       if (!sapRaw) {showToast("SAP Code enter karein", "red"); document.getElementById('newSap').focus(); return;}
@@ -1775,14 +1843,13 @@ let pendingUpdates = {};
 
       showToast("Saving...", "blue");
 
-      fetch(`${API}?action=add&sap=${encodeURIComponent(sap)}&description=${encodeURIComponent(name)}&store=${encodeURIComponent(store)}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
+      fetch(`${API}?action=add&sap=${encodeURIComponent(sap)}&description=${encodeURIComponent(name)}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
         .then(r => r.json())
         .then(res => {
           // Add to local list so it's searchable immediately
           const newItem = {
             sap: sap,
             name: name,
-            store: store,
             location: loc,
             sn: Date.now(),
             update_by: userName,
@@ -1964,11 +2031,13 @@ let pendingUpdates = {};
 
     // ─── Tab Switch ───
     function switchTab(tab) {
-      document.getElementById('panelNormal').style.display = tab === 'normal' ? 'block' : 'none';
-      document.getElementById('panelUpload').style.display = tab === 'upload' ? 'block' : 'none';
-      document.getElementById('tabNormal').classList.toggle('active', tab === 'normal');
-      document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
-    }
+  document.getElementById('panelNormal').style.display = tab === 'normal' ? 'block' : 'none';
+  document.getElementById('panelUpload').style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById('panelStock').style.display = tab === 'stock' ? 'block' : 'none';
+  document.getElementById('tabNormal').classList.toggle('active', tab === 'normal');
+  document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
+  document.getElementById('tabStock').classList.toggle('active', tab === 'stock');
+}
 
     // ─── Upload & Enrich ───
     function handleUpload(input) {
@@ -2020,24 +2089,213 @@ let pendingUpdates = {};
       reader.readAsArrayBuffer(file);
     }
 
+function detectStockColumns(headerRow, dataRows) {
+  const headers = headerRow.map(h => String(h || '').toUpperCase().trim());
+  const sapKeywords = ['SAP', 'MATERIAL', 'ITEM CODE', 'PARTNO', 'PART NO', 'CODE'];
+  const stockKeywords = ['STOCK', 'QTY', 'QUANTITY', 'BALANCE', 'AVAILABLE', 'SOH', 'CURR'];
+
+  let sapCol = -1, stockCol = -1;
+
+  // Pass 1: header keyword match
+  headers.forEach((h, i) => {
+    if (sapCol === -1 && sapKeywords.some(k => h.includes(k))) sapCol = i;
+  });
+  headers.forEach((h, i) => {
+    if (stockCol === -1 && i !== sapCol && stockKeywords.some(k => h.includes(k))) stockCol = i;
+  });
+
+  // Pass 2: data-based fallback for SAP column (match against known itemMaster SAP set)
+  if (sapCol === -1) {
+    const knownSaps = new Set(itemMaster.map(i => String(i.sap).trim()));
+    let bestScore = 0;
+    const numCols = headers.length;
+    for (let c = 0; c < numCols; c++) {
+      let hits = 0, total = 0;
+      dataRows.slice(0, 50).forEach(row => {
+        const raw = String(row[c] || '').replace(/\.0$/, '').replace(/\D/g, '');
+        if (!raw) return;
+        total++;
+        const padded = padSAP(raw);
+        if (knownSaps.has(padded)) hits++;
+      });
+      const score = total ? hits / total : 0;
+      if (score > bestScore && score > 0.3) { bestScore = score; sapCol = c; }
+    }
+  }
+
+  // Pass 3: data-based fallback for STOCK column (first other mostly-numeric column)
+  if (stockCol === -1) {
+    const numCols = headers.length;
+    for (let c = 0; c < numCols; c++) {
+      if (c === sapCol) continue;
+      let numericCount = 0, total = 0;
+      dataRows.slice(0, 50).forEach(row => {
+        const v = row[c];
+        if (v === '' || v === undefined || v === null) return;
+        total++;
+        if (!isNaN(parseFloat(v))) numericCount++;
+      });
+      if (total > 0 && numericCount / total > 0.7) { stockCol = c; break; }
+    }
+  }
+
+  return { sapCol, stockCol };
+}
+
+const stockZone = document.getElementById('stockUploadZone');
+const stockPanel = document.getElementById('stockProcPanel');
+const stockSpin = document.getElementById('stockProcSpin');
+const stockTitle = document.getElementById('stockProcTitle');
+const stockSub = document.getElementById('stockProcSub');
+const stockFill = document.getElementById('stockProgFill');
+const stockStepsList = document.getElementById('stockStepsList');
+const stockResultBox = document.getElementById('stockResultBox');
+
+function stockSetStep(i, pct) {
+  stockStepsList.querySelectorAll('.step').forEach((s, idx) => {
+    s.classList.remove('active');
+    if (idx < i) s.classList.add('done'); else s.classList.remove('done');
+  });
+  const cur = stockStepsList.querySelector(`.step[data-step="${i}"]`);
+  if (cur) { cur.classList.remove('done'); cur.classList.add('active'); }
+  stockFill.style.width = pct + '%';
+}
+
+function stockFinishSuccess(total, matched, skipped) {
+  stockStepsList.querySelectorAll('.step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+  stockFill.style.width = '100%';
+  stockSpin.className = 'proc-spin done';
+  stockTitle.textContent = 'Upload complete';
+  document.getElementById('stockRTotal').textContent = total;
+  document.getElementById('stockRMatched').textContent = matched;
+  document.getElementById('stockRSkipped').textContent = skipped;
+  document.getElementById('stockResultMsg').textContent = `${matched} item(s) ka stock sheet me update ho gaya.`;
+  stockResultBox.classList.add('show');
+  showToast('Stock updated ✓', 'green');
+}
+
+function stockFinishError(msg) {
+  stockSpin.className = 'proc-spin err';
+  stockTitle.textContent = 'Could not process file';
+  document.getElementById('stockResultMsg').textContent = msg;
+  document.getElementById('stockRTotal').textContent = '—';
+  document.getElementById('stockRMatched').textContent = '—';
+  document.getElementById('stockRSkipped').textContent = '—';
+  stockFill.style.width = '100%';
+  stockResultBox.classList.add('show');
+  stockStepsList.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  showToast('Stock upload failed', 'red');
+}
+
+function resetStockUpload() {
+  stockZone.style.display = 'flex';
+  stockPanel.classList.remove('active');
+  stockResultBox.classList.remove('show');
+  stockFill.style.width = '0%';
+  stockSpin.className = 'proc-spin';
+  stockStepsList.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'done'));
+  document.getElementById('stockUploadFile').value = '';
+}
+
+function handleStockUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  stockZone.style.display = 'none';
+  stockPanel.classList.add('active');
+  stockResultBox.classList.remove('show');
+  stockSub.textContent = file.name;
+  stockTitle.textContent = 'Processing file…';
+  stockSpin.className = 'proc-spin';
+  stockFill.style.width = '0%';
+  stockStepsList.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'done'));
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    stockSetStep(0, 15);
+
+    setTimeout(() => {
+      const workbook = XLSX.read(e.target.result, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+      if (!data || data.length < 2) {
+        stockFinishError('File me data nahi mila.');
+        return;
+      }
+
+      stockSetStep(1, 40);
+      const headerRow = data[0];
+      const dataRows = data.slice(1);
+      const { sapCol, stockCol } = detectStockColumns(headerRow, dataRows);
+
+      setTimeout(() => {
+        if (sapCol === -1 || stockCol === -1) {
+          stockFinishError('SAP code ya Stock column detect nahi ho paya. File format check karein.');
+          return;
+        }
+
+        stockSetStep(2, 70);
+
+        const updates = [];
+        let total = 0, matched = 0, skipped = 0;
+        dataRows.forEach(row => {
+          const rawSap = String(row[sapCol] || '').replace(/\.0$/, '').replace(/\D/g, '');
+          if (!rawSap) return;
+          total++;
+          const sap = padSAP(rawSap);
+          const rawStock = String(row[stockCol]).trim();
+          if (!/^\d+(\.\d+)?$/.test(rawStock)) { skipped++; return; }
+          const stockVal = parseFloat(rawStock);
+          updates.push({ sap, stock: stockVal });
+        });
+
+        if (!updates.length) {
+          setTimeout(() => stockFinishError('Koi valid SAP+Stock pair nahi mila.'), 300);
+          return;
+        }
+
+        setTimeout(() => {
+          stockSetStep(3, 90);
+
+          fetch(API, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateStock', updates })
+          })
+            .then(r => r.json())
+            .then(res => {
+              matched = res.updated;
+              stockFinishSuccess(total, matched, skipped);
+            })
+            .catch(() => {
+              stockFinishError('Upload failed — check connection.');
+            });
+        }, 400);
+      }, 400);
+    }, 300);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
     // ─── Download ───
     function handleDownload() {
       const type = document.querySelector('input[name="dlType"]:checked').value;
       let rows, filename;
       if (type === 'with') {
-        rows = [["SAP", "Description", "Store", "Location", "Updated Date", "Update By"]];
-        itemMaster.filter(i => i.location && i.location.trim()).forEach(i =>
-          rows.push([i.sap || '', i.name || '', i.store || '', i.location || '', i.updation_date || '', i.update_by || '']));
+        rows = [["SAP", "Description", "Location", "Updated Date", "Update By"]];
+itemMaster.filter(i => i.location && i.location.trim()).forEach(i =>
+  rows.push([i.sap || '', i.name || '', i.location || '', i.updation_date || '', i.update_by || '']));
         filename = 'material_with_location.csv';
       } else if (type === 'without') {
-        rows = [["SAP", "Description", "Store"]];
-        itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
-          rows.push([i.sap || '', i.name || '', i.store || '']));
+        rows = [["SAP", "Description"]];
+itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
+  rows.push([i.sap || '', i.name || '']));
         filename = 'material_without_location.csv';
       } else {
-        rows = [["SAP", "Description", "Store", "Location", "Updated Date", "Update By"]];
-        itemMaster.forEach(i =>
-          rows.push([i.sap || '', i.name || '', i.store || '', i.location || '(Not Assigned)', i.updation_date || '', i.update_by || '']));
+        rows = [["SAP", "Description", "Location", "Updated Date", "Update By"]];
+itemMaster.forEach(i =>
+  rows.push([i.sap || '', i.name || '', i.location || '(Not Assigned)', i.updation_date || '', i.update_by || '']));
         filename = 'material_full_backup.csv';
       }
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -2062,8 +2320,9 @@ let pendingUpdates = {};
     // ─── Auth ───
     document.addEventListener('DOMContentLoaded', () => {
       if (!sessionStorage.getItem('loggedIn')) {window.location.href = 'index.html'; return;}
-      userName = sessionStorage.getItem('userName') || 'Guest';
-      document.getElementById('welcomeUser').textContent = '👤 ' + userName;
+            userName = sessionStorage.getItem('userName') || 'Guest';
+      const firstName = userName.trim().split(/\s+/)[0];
+      document.getElementById('welcomeUser').textContent = '👤 ' + firstName;
 
       const statsBody = document.getElementById('statsBody');
 statsBody.classList.toggle('collapsed', !statsOpen);
@@ -2090,9 +2349,9 @@ statsBody.classList.toggle('collapsed', !statsOpen);
         itemMaster = parsed.data || [];
         renderStats();
         document.getElementById('spinnerOverlay').style.display = 'none';
-        showToast(`${itemMaster.length.toLocaleString()} items loaded (cached)`, 'blue');
+                showToast(`${itemMaster.length.toLocaleString()} items loaded (cached)`, 'blue');
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
-        if (lastTerm) { searchBox.value = lastTerm; doSearch(lastTerm); }
+        if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
       } catch (e) { /* ignore bad cache */}
     } else {
       prog.textContent = 'Connecting to server…';
@@ -2113,9 +2372,9 @@ statsBody.classList.toggle('collapsed', !statsOpen);
           console.warn('Cache save skipped (storage full):', e);
         }
         document.getElementById('spinnerOverlay').style.display = 'none';
-        showToast(`${data.length.toLocaleString()} items synced`, 'green');
+                showToast(`${data.length.toLocaleString()} items synced`, 'green');
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
-        if (lastTerm) { searchBox.value = lastTerm; doSearch(lastTerm); }
+        if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
       })
       .catch((err) => {
         console.error('Load error:', err);
