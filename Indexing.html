@@ -1292,10 +1292,79 @@
     font-size: 12px;
   }
 }
+
+.bell-wrap { position: relative; }
+#bellBtn {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+#bellBtn:active { border-color: var(--accent); background: rgba(37,99,235,0.06); }
+#bellBtn.has-alert svg { animation: ringShake 2.2s ease-in-out infinite; }
+@keyframes ringShake {
+  0%, 92%, 100% { transform: rotate(0deg); }
+  93% { transform: rotate(-12deg); } 94% { transform: rotate(10deg); }
+  95% { transform: rotate(-8deg); } 96% { transform: rotate(6deg); }
+  97% { transform: rotate(-3deg); } 98% { transform: rotate(0deg); }
+}
+.bell-badge {
+  position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px;
+  padding: 0 4px; border-radius: 20px; background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--surface); box-shadow: 0 2px 6px rgba(220,38,38,0.4);
+}
+.bell-badge.hidden { display: none; }
+
+#notifPanel {
+  position: fixed; width: 340px; max-width: calc(100vw - 24px);
+  border-radius: 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.2); z-index: 500;
+  opacity: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+  max-height: 0;
+  transform: translateY(-8px) scale(0.97); transform-origin: top right;
+  transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, transform 0.24s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+}
+#notifPanel.open {
+  max-height: 80vh;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.notif-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(220,38,38,0.04), transparent); }
+.notif-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.notif-title-icon { width: 22px; height: 22px; border-radius: 7px; background: rgba(220,38,38,0.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.notif-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 13px; flex-shrink: 0; }
+.notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px; }
+.notif-list::-webkit-scrollbar { width: 4px; }
+.notif-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.notif-row { border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; margin-bottom: 6px; background: var(--surface); transition: border-color 0.2s; }
+.notif-row:last-child { margin-bottom: 0; }
+.notif-row.updating { border-color: rgba(37,99,235,0.35); }
+.notif-row.done { animation: rowClear 0.4s ease forwards; }
+@keyframes rowClear { to { opacity: 0; transform: scale(0.9) translateX(30px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
+.notif-row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.notif-name { font-size: 12.5px; font-weight: 600; line-height: 1.35; flex: 1; }
+.notif-stock-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(8,145,178,0.1); color: var(--accent2); white-space: nowrap; border: 1px solid rgba(8,145,178,0.2); }
+.notif-row-body { display: flex; gap: 6px; align-items: center; }
+.notif-inline-input { flex: 1; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text); outline: none; transition: border-color 0.2s; min-width: 0; }
+.notif-inline-input:focus { border-color: var(--accent); background: var(--surface); }
+.notif-save-btn { flex-shrink: 0; background: var(--accent); color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; -webkit-tap-highlight-color: transparent; }
+.notif-save-btn.saved { background: var(--green); }
+.notif-empty { padding: 34px 16px; text-align: center; color: var(--muted); font-size: 12.5px; }
+.notif-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); text-align: center; background: var(--surface2); }
+#notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.15); z-index: 490; }
+#notifBackdrop.open { display: block; }
   </style>
 </head>
 
 <body>
+<div id="notifBackdrop"></div>
 <div id="spinnerOverlay">
   <div class="spin-ring"></div>
   <div id="loadProgress">Loading items...</div>
@@ -1323,9 +1392,28 @@
           <div class="logo-text"><span class="logo-full">INDEXING-C34A</span><span class="logo-short">IND-C34A</span></div>
         </div>
         <div class="user-area">
-          <div id="welcomeUser">Guest</div>
-          <button id="logoutBtn" onclick="logout()">Logout</button>
+  <div class="bell-wrap">
+    <button id="bellBtn" onclick="toggleNotif()" aria-label="Notifications">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="bell-badge hidden" id="bellBadge">0</span>
+    </button>
+    <div id="notifPanel">      <div class="notif-header">
+        <div>
+          <div class="notif-title"><span class="notif-title-icon">📊</span>In Stock, No Location</div>
+          <div class="notif-sub" id="notifSub">0 items need a location</div>
         </div>
+        <button class="notif-close" onclick="closeNotif()">✕</button>
+      </div>
+      <div class="notif-list" id="notifList"></div>
+      <div class="notif-footer">Tap Save ✓ to assign — list updates live</div>
+    </div>
+  </div>
+  <div id="welcomeUser">Guest</div>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
+</div>
       </div>
       <div class="header-stats">
         
@@ -1505,6 +1593,20 @@
     let addItemMode = false; // track if we're showing add-item form
 let pendingUpdates = {};
 
+function positionNotifPanel() {
+  const btn = document.getElementById('bellBtn');
+  const panel = document.getElementById('notifPanel');
+  const rect = btn.getBoundingClientRect();
+  const panelWidth = Math.min(340, window.innerWidth - 24);
+  let left = rect.right - panelWidth;
+  if (left < 12) left = 12;
+  panel.style.width = panelWidth + 'px';
+  panel.style.left = left + 'px';
+  panel.style.top = (rect.bottom + 8) + 'px';
+}
+
+window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); });
+
     // ─── Toast ───
     let toastTimer;
     function showToast(msg, type = "blue") {
@@ -1539,6 +1641,93 @@ let pendingUpdates = {};
   document.getElementById('statPending').textContent = pending.toLocaleString();
   const stockEl = document.getElementById('statStock');
   if (stockEl) stockEl.textContent = inStock.toLocaleString();
+
+if (document.getElementById('bellBadge')) {
+  const c = getStockNoLocationItems().length;
+  document.getElementById('bellBadge').textContent = c;
+  document.getElementById('bellBadge').classList.toggle('hidden', c === 0);
+  document.getElementById('bellBtn').classList.toggle('has-alert', c > 0);
+}
+}
+
+let notifOpen = false;
+
+function getStockNoLocationItems() {
+  return itemMaster.filter(i =>
+    i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "" &&
+    (!i.location || !i.location.trim())
+  );
+}
+
+function toggleNotif() {
+  notifOpen = !notifOpen;
+  if (notifOpen) positionNotifPanel();
+  document.getElementById('notifPanel').classList.toggle('open', notifOpen);
+  document.getElementById('notifBackdrop').classList.toggle('open', notifOpen);
+  if (notifOpen) renderNotifList();
+}
+function closeNotif() {
+  notifOpen = false;
+  document.getElementById('notifPanel').classList.remove('open');
+  document.getElementById('notifBackdrop').classList.remove('open');
+}
+
+function renderNotifList() {
+  const items = getStockNoLocationItems();
+  const count = items.length;
+
+  document.getElementById('bellBadge').textContent = count;
+  document.getElementById('bellBadge').classList.toggle('hidden', count === 0);
+  document.getElementById('bellBtn').classList.toggle('has-alert', count > 0);
+  document.getElementById('notifSub').textContent = count === 0
+    ? 'Sab items located hain 🎉' : `${count} item${count > 1 ? 's' : ''} need${count === 1 ? 's' : ''} a location`;
+
+  const list = document.getElementById('notifList');
+  if (count === 0) {
+    list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <div class="notif-row" id="nrow-${item.sn}">
+      <div class="notif-row-top">
+        <div class="notif-name">${item.name}</div>
+        <span class="notif-stock-chip">📦 ${item.curr_stock}</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2); margin-bottom:8px;">${item.sap}</div>
+      <div class="notif-row-body">
+        <input class="notif-inline-input" id="ninp-${item.sn}" placeholder="e.g. A-01-03" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+        <button class="notif-save-btn" id="nbtn-${item.sn}" onclick="saveNotifItem(${item.sn})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveNotifItem(sn) {
+  const inp = document.getElementById(`ninp-${sn}`);
+  const loc = inp.value.trim().toUpperCase();
+  if (!loc) { inp.focus(); return; }
+
+  const item = itemMaster.find(i => i.sn === sn);
+  const row = document.getElementById(`nrow-${sn}`);
+  const btn = document.getElementById(`nbtn-${sn}`);
+  row.classList.add('updating');
+  btn.classList.add('saved');
+
+  item.location = loc;
+  pendingUpdates[sn] = loc;
+  renderStats();
+
+  fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
+    .then(() => { delete pendingUpdates[sn]; })
+    .catch(() => showToast("Server sync failed", "red"));
+
+  setTimeout(() => {
+    row.classList.add('done');
+    setTimeout(renderNotifList, 380);
+  }, 380);
 }
 
     // ─── Highlight ───
@@ -1734,9 +1923,10 @@ let pendingUpdates = {};
     }
 
     // ─── Render Item ───
-    function renderItem() {
+        function renderItem() {
       if (!currentItem) return;
       const hasLoc = currentItem.location && currentItem.location.trim();
+      const hasStock = currentItem.curr_stock !== undefined && currentItem.curr_stock !== null && String(currentItem.curr_stock).trim() !== "";
       document.getElementById('itemCard').innerHTML = `
         <div class="item-header">
   <span style="position:absolute; top:-9px; left:12px; background:var(--surface); padding:0 6px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); font-weight:700;">Description and SAP Code</span>
@@ -1744,8 +1934,13 @@ let pendingUpdates = {};
   <div style="width:1px; align-self:stretch; background:#C5EBD9; flex-shrink:0;"></div>
   <div class="item-sap">${currentItem.sap}</div>
 </div>
-        <div class="loc-pill ${hasLoc ? 'has' : 'no'}">
-          ${hasLoc ? '📍 ' + currentItem.location : '❌ Not Assigned'}
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+          <div class="loc-pill ${hasLoc ? 'has' : 'no'}" style="margin-bottom:0;">
+            ${hasLoc ? '📍 ' + currentItem.location : '❌ Not Assigned'}
+          </div>
+          <div class="loc-pill" style="margin-bottom:0; background:rgba(8,145,178,0.1); color:var(--accent2); border:1px solid rgba(8,145,178,0.2);">
+            📊 ${hasStock ? currentItem.curr_stock : 'No Stock'}
+          </div>
         </div>
         <div class="actions-row">
           <button class="btn btn-primary" onclick="showUpdateForm()">✏️ <span class="btn-full-text">Update Location</span><span class="btn-short-text">Update</span></button>
