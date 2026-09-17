@@ -1447,6 +1447,23 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+
+.notif-search-wrap { padding: 0 12px 10px; position: relative; }
+.notif-search-icon {
+  position: absolute; left: 24px; top: 50%; transform: translateY(-58%);
+  color: var(--muted); font-size: 14px; pointer-events: none; line-height: 1;
+}
+#notifSearchBox {
+  width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; padding: 9px 32px 9px 32px;
+  outline: none; transition: border-color 0.2s, background 0.2s;
+}
+#notifSearchBox:focus { border-color: var(--accent); background: var(--surface); }
+#notifSearchClear {
+  position: absolute; right: 20px; top: 50%; transform: translateY(-58%);
+  background: var(--border); border: none; border-radius: 50%; width: 18px; height: 18px;
+  align-items: center; justify-content: center; cursor: pointer; font-size: 10px; color: var(--muted); line-height: 1;
+}
   </style>
 </head>
 
@@ -1476,7 +1493,7 @@
   <div class="logo-badge">
             <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
           </div>
-          <div class="logo-text"><span class="logo-full">INDEXING-C34A</span><span class="logo-short">IND-C34A</span></div>
+          <div class="logo-text"><span class="logo-full">INDEXING</span><span class="logo-short">IND</span></div>
         </div>
         <div class="user-area">
   <div class="bell-wrap">
@@ -1502,9 +1519,14 @@
           <span class="num" id="notifCountBadge">0</span>
           <span class="lbl">Pending</span>
         </div>
-        <button class="notif-close" onclick="closeNotif()">✕</button>
+                <button class="notif-close" onclick="closeNotif()">✕</button>
       </div>
     </div>
+      <div class="notif-search-wrap">
+        <span class="notif-search-icon">🔍</span>
+        <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
+        <button id="notifSearchClear" onclick="clearNotifSearch()" style="display:none;">✕</button>
+      </div>
       <div class="notif-list" id="notifList"></div>
       <div class="notif-footer">Tap Save ✓ to assign — list updates live</div>
     </div>
@@ -1696,6 +1718,7 @@
     let aiPanelOpen = false;
     let addItemMode = false; // track if we're showing add-item form
 let pendingUpdates = {};
+let pendingStockUpdates = {};
 
 function positionNotifPanel() {
   const shell = document.querySelector('.app-shell');
@@ -1756,10 +1779,11 @@ if (document.getElementById('bellBadge')) {
 let notifOpen = false;
 
 function getStockNoLocationItems() {
-  return itemMaster.filter(i =>
-    i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "" &&
-    (!i.location || !i.location.trim())
-  );
+  return itemMaster.filter(i => {
+    const stockVal = parseFloat(i.curr_stock);
+    const hasStock = i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "" && !isNaN(stockVal) && stockVal > 0;
+    return hasStock && (!i.location || !i.location.trim());
+  });
 }
 
 function toggleNotif() {
@@ -1775,30 +1799,64 @@ function closeNotif() {
   document.getElementById('notifBackdrop').classList.remove('open');
 }
 
-function renderNotifList() {
-  const items = getStockNoLocationItems();
-  const count = items.length;
+let notifSearchQuery = "";
 
-  document.getElementById('bellBadge').textContent = count;
-  document.getElementById('bellBadge').classList.toggle('hidden', count === 0);
-  document.getElementById('bellBtn').classList.toggle('has-alert', count > 0);
-  document.getElementById('notifCountBadge').textContent = count;
-document.getElementById('notifSub').textContent = count === 0
-    ? 'Sab items located hain 🎉' : 'Assign a location to clear the list';
+function onNotifSearchInput(val) {
+  notifSearchQuery = val.trim();
+  document.getElementById('notifSearchClear').style.display = notifSearchQuery ? 'flex' : 'none';
+  renderNotifList();
+}
+
+function clearNotifSearch() {
+  notifSearchQuery = "";
+  document.getElementById('notifSearchBox').value = "";
+  document.getElementById('notifSearchClear').style.display = 'none';
+  renderNotifList();
+}
+
+function highlightNotif(text, q) {
+  if (!q) return text;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return String(text).replace(re, '<mark>$1</mark>');
+}
+
+function renderNotifList() {
+  const allItems = getStockNoLocationItems();
+  const totalCount = allItems.length;
+
+  let items = allItems;
+  if (notifSearchQuery) {
+    const q = notifSearchQuery.toLowerCase();
+    items = allItems.filter(i =>
+      i.name.toLowerCase().includes(q) || String(i.sap).toLowerCase().includes(q)
+    );
+  }
+
+  document.getElementById('bellBadge').textContent = totalCount;
+  document.getElementById('bellBadge').classList.toggle('hidden', totalCount === 0);
+  document.getElementById('bellBtn').classList.toggle('has-alert', totalCount > 0);
+  document.getElementById('notifCountBadge').textContent = totalCount;
+  document.getElementById('notifSub').textContent = notifSearchQuery
+    ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
+    : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
 
   const list = document.getElementById('notifList');
-  if (count === 0) {
+  if (totalCount === 0) {
     list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
+    return;
+  }
+  if (items.length === 0) {
+    list.innerHTML = `<div class="notif-empty">No items match "${notifSearchQuery}"</div>`;
     return;
   }
 
   list.innerHTML = items.map(item => `
     <div class="notif-row" id="nrow-${item.sn}">
       <div class="notif-row-top">
-        <div class="notif-name">${item.name}</div>
+        <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
         <span class="notif-stock-chip">📦 ${item.curr_stock}</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2); margin-bottom:8px;">${item.sap}</div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2); margin-bottom:8px;">${highlightNotif(item.sap, notifSearchQuery)}</div>
       <div class="notif-row-body">
         <input class="notif-inline-input" id="ninp-${item.sn}" placeholder="e.g. A-01-03" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
         <button class="notif-save-btn" id="nbtn-${item.sn}" onclick="saveNotifItem(${item.sn})">
@@ -2555,20 +2613,36 @@ function handleStockUpload(input) {
           return;
         }
 
-        setTimeout(() => {
+               setTimeout(() => {
           stockSetStep(3, 90);
+
+          // Optimistic update — local data + UI turant update, fetch response ka wait nahi karna
+          const stockMap = {};
+          updates.forEach(u => {
+            stockMap[u.sap] = u.stock;
+            pendingStockUpdates[u.sap] = u.stock;
+          });
+          itemMaster.forEach(i => {
+            const sapKey = padSAP(String(i.sap || '').trim());
+            if (stockMap.hasOwnProperty(sapKey)) {
+              i.curr_stock = stockMap[sapKey];
+            }
+          });
+          renderStats();
+          if (notifOpen) renderNotifList();
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ data: itemMaster, ts: Date.now() }));
+          } catch (e) { /* ignore */ }
+
+          stockFinishSuccess(total, updates.length, skipped);
 
           fetch(API, {
             method: 'POST',
             body: JSON.stringify({ action: 'updateStock', updates })
           })
             .then(r => r.json())
-            .then(res => {
-              matched = res.updated;
-              stockFinishSuccess(total, matched, skipped);
-            })
             .catch(() => {
-              stockFinishError('Upload failed — check connection.');
+              showToast('Server sync unconfirmed — data saved locally', 'amber');
             });
         }, 400);
       }, 400);
@@ -2658,13 +2732,19 @@ statsBody.classList.toggle('collapsed', !statsOpen);
 
         fetch(API + '?action=getItems')
       .then(r => {if (!cached) prog.textContent = 'Parsing data…'; return r.json();})
-      .then(data => {
+            .then(data => {
         itemMaster = data;
         Object.keys(pendingUpdates).forEach(sn => {
           const it = itemMaster.find(i => String(i.sn) === String(sn));
           if (it) it.location = pendingUpdates[sn];
         });
+        Object.keys(pendingStockUpdates).forEach(sap => {
+          const it = itemMaster.find(i => padSAP(String(i.sap || '').trim()) === sap);
+          if (it) it.curr_stock = pendingStockUpdates[sap];
+        });
+        pendingStockUpdates = {};
         renderStats();
+        if (notifOpen) renderNotifList();
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({data, ts: Date.now()}));
         } catch (e) {
