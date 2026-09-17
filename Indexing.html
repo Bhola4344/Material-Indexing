@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Store Indexing</title>
+    <title>Store Indexing</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
     rel="stylesheet">
@@ -1581,8 +1583,12 @@
 
   </div>
 
-  <script>
+   <script>
     const API = "https://script.google.com/macros/s/AKfycbwM-wm71DJIMuHDjo27YtRxyFq8GWHRFmWcBhpRvILoz18Mn2j-Q9QVOLQCZPXCwAhP/exec";
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+    }
 
     let itemMaster = [];
     let currentItem = null;
