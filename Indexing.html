@@ -1493,7 +1493,7 @@
   <div class="logo-badge">
             <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
           </div>
-          <div class="logo-text"><span class="logo-full">INDEXING</span><span class="logo-short">IND</span></div>
+          <div class="logo-text"><span class="logo-full">INDEXING</span><span class="logo-short">INDEXING</span></div>
         </div>
         <div class="user-area">
   <div class="bell-wrap">
@@ -1824,12 +1824,9 @@ function renderNotifList() {
   const allItems = getStockNoLocationItems();
   const totalCount = allItems.length;
 
-  let items = allItems;
+    let items = allItems;
   if (notifSearchQuery) {
-    const q = notifSearchQuery.toLowerCase();
-    items = allItems.filter(i =>
-      i.name.toLowerCase().includes(q) || String(i.sap).toLowerCase().includes(q)
-    );
+    items = allItems.filter(i => matchesNotifSearch(i, notifSearchQuery));
   }
 
   document.getElementById('bellBadge').textContent = totalCount;
@@ -1871,6 +1868,7 @@ function saveNotifItem(sn) {
   const inp = document.getElementById(`ninp-${sn}`);
   const loc = inp.value.trim().toUpperCase();
   if (!loc) { inp.focus(); return; }
+  localStorage.setItem("lastLocationText", loc);
 
   const item = itemMaster.find(i => i.sn === sn);
   const row = document.getElementById(`nrow-${sn}`);
@@ -2013,6 +2011,34 @@ function saveNotifItem(sn) {
       return prefix + '0'.repeat(zerosNeeded) + suffix;
     }
 
+
+    // ─── Flexible SAP match (handles under/over-padded numeric input) ───
+    function normalizeSAP(str) {
+      const digits = String(str || '').replace(/\D/g, '');
+      if (digits.length <= 2) return digits;
+      const prefix = digits.slice(0, 2);
+      const rest = digits.slice(2).replace(/^0+/, '');
+      return prefix + rest;
+    }
+
+        function normalizeText(str) {
+      return String(str || '').toLowerCase().replace(/[-\s\/]/g, '');
+    }
+
+    function matchesNotifSearch(item, query) {
+      const q = query.trim();
+      if (!q) return true;
+      if (/^\d+$/.test(q)) {
+        const nq = normalizeSAP(q);
+        const nsap = normalizeSAP(item.sap);
+        if (nsap === nq || nsap.includes(nq)) return true;
+        if (String(item.sap).includes(q)) return true;
+      }
+      const nameLower = item.name.toLowerCase();
+      const qLower = q.toLowerCase();
+      return nameLower.includes(qLower) || normalizeText(item.name).includes(normalizeText(q));
+    }
+
     // ─── Search ───
     const searchBox = document.getElementById('searchBox');
     searchBox.addEventListener('input', () => {
@@ -2054,15 +2080,18 @@ function saveNotifItem(sn) {
       document.getElementById('aiPanelWrapper').style.display = '';
     }
 
-    function doSearch(query) {
+      function doSearch(query) {
       if (!query) {closeDropdown(); resetToEmptyState(); return;}
       const q = query.toLowerCase();
+      const qNoSep = q.replace(/[-\s]/g, '');
       const isNumeric = /^\d+$/.test(query);
       const normalizedQuery = isNumeric ? padSAP(query) : null;
       const results = itemMaster.filter(i => {
         const sapStr = String(i.sap).toLowerCase();
         const sapMatch = sapStr.includes(q) || (normalizedQuery && sapStr.includes(normalizedQuery.toLowerCase()));
-        return i.name.toLowerCase().includes(q) || sapMatch;
+        const nameLower = i.name.toLowerCase();
+        const nameMatch = nameLower.includes(q) || nameLower.replace(/[-\s]/g, '').includes(qNoSep);
+        return nameMatch || sapMatch;
       }).slice(0, 25);
 
             const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
@@ -2679,10 +2708,11 @@ itemMaster.forEach(i =>
       showToast(`Downloaded: ${filename}`, "blue");
     }
 
-    // ─── Double-space autofill ───
+        // ─── Double-space autofill ───
     document.addEventListener('input', e => {
-      const locBox = document.getElementById('updateLocation');
-      if (!locBox || document.activeElement !== locBox) return;
+      const locBox = e.target;
+      const isLocField = locBox.id === 'updateLocation' || locBox.classList.contains('notif-inline-input');
+      if (!isLocField) return;
       if (e.inputType && e.inputType.startsWith('delete')) return;
       if (locBox.value.endsWith('  ')) {
         const saved = localStorage.getItem('lastLocationText');
@@ -2755,7 +2785,7 @@ statsBody.classList.toggle('collapsed', !statsOpen);
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
         if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
       })
-      .catch((err) => {
+            .catch((err) => {
         console.error('Load error:', err);
         if (!cached) {
           prog.textContent = 'Load failed — check connection';
@@ -2764,6 +2794,52 @@ statsBody.classList.toggle('collapsed', !statsOpen);
           showToast('Sync failed — using cached data', 'amber');
         }
       });
+
+    // ─── Silent Background Refresh (cross-device sync) ───
+    let silentRefreshInFlight = false;
+
+    function silentRefresh() {
+      if (silentRefreshInFlight) return;
+      silentRefreshInFlight = true;
+
+      fetch(API + '?action=getItems')
+        .then(r => r.json())
+        .then(data => {
+          Object.keys(pendingUpdates).forEach(sn => {
+            const it = data.find(i => String(i.sn) === String(sn));
+            if (it) it.location = pendingUpdates[sn];
+          });
+          Object.keys(pendingStockUpdates).forEach(sap => {
+            const it = data.find(i => padSAP(String(i.sap || '').trim()) === sap);
+            if (it) it.curr_stock = pendingStockUpdates[sap];
+          });
+
+          itemMaster = data;
+          renderStats();
+          if (notifOpen) renderNotifList();
+
+          const formOpen = document.getElementById('updateLocation');
+          if (currentItem && !addItemMode && !formOpen) {
+            const updated = itemMaster.find(i => i.sn === currentItem.sn);
+            if (updated) { currentItem = updated; renderItem(); renderAI(); }
+          } else if (currentItem) {
+            const updated = itemMaster.find(i => i.sn === currentItem.sn);
+            if (updated) currentItem = updated;
+          }
+
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+          } catch (e) { /* ignore */ }
+        })
+        .catch(() => {})
+        .finally(() => { silentRefreshInFlight = false; });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') silentRefresh();
+    });
+
+    setInterval(silentRefresh, 30000);
 
     let statsOpen = localStorage.getItem('statsCollapsed') !== 'true';
     function toggleStats() {
