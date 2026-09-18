@@ -33,10 +33,12 @@
       align-items: center;
       background: var(--bg);
       font-family: 'Segoe UI', Inter, sans-serif;
+      padding: 16px;
     }
 
     .login-card {
       width: 300px;
+      max-width: 100%;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -58,15 +60,8 @@
     }
 
     @keyframes fade {
-      from {
-        opacity: 0;
-        transform: translateY(10px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0)
-      }
+      from { opacity: 0; transform: translateY(10px) }
+      to { opacity: 1; transform: translateY(0) }
     }
 
     .logo-wrap {
@@ -89,20 +84,8 @@
       box-shadow: 0 5px 12px rgba(36, 84, 224, .28);
     }
 
-    .logo-badge svg {
-      width: 18px;
-      height: 18px
-    }
-
-    .logo-badge svg path,
-    .logo-badge svg rect {
-      stroke: #fff !important
-    }
-
-    .logo-badge svg {
-      width: 18px;
-      height: 18px
-    }
+    .logo-badge svg { width: 18px; height: 18px }
+    .logo-badge svg path, .logo-badge svg rect { stroke: #fff !important }
 
     .logo-title {
       font-size: 15px;
@@ -161,11 +144,7 @@
       background: #fff;
     }
 
-    .pw-wrap {
-      position: relative;
-      flex: 1;
-      display: flex
-    }
+    .pw-wrap { position: relative; flex: 1; display: flex }
 
     .pw-wrap input {
       flex: 1;
@@ -190,9 +169,7 @@
       padding: 4px
     }
 
-    .eye-btn:hover {
-      color: var(--primary)
-    }
+    .eye-btn:hover { color: var(--primary) }
 
     .eye-btn:focus-visible,
     input:focus-visible,
@@ -234,9 +211,7 @@
       padding: 0
     }
 
-    .forgot-lnk:hover {
-      text-decoration: underline
-    }
+    .forgot-lnk:hover { text-decoration: underline }
 
     .login-btn {
       width: 100%;
@@ -259,14 +234,8 @@
       box-shadow: 0 8px 20px rgba(36, 84, 224, .32)
     }
 
-    .login-btn:active:not(:disabled) {
-      transform: scale(.97)
-    }
-
-    .login-btn:disabled {
-      cursor: not-allowed;
-      opacity: .85
-    }
+    .login-btn:active:not(:disabled) { transform: scale(.97) }
+    .login-btn:disabled { cursor: not-allowed; opacity: .85 }
 
     .btn-inner {
       display: flex;
@@ -284,12 +253,7 @@
       pointer-events: none
     }
 
-    @keyframes rpl {
-      to {
-        transform: scale(4);
-        opacity: 0
-      }
-    }
+    @keyframes rpl { to { transform: scale(4); opacity: 0 } }
 
     .btn-spinner {
       width: 18px;
@@ -302,33 +266,19 @@
       flex-shrink: 0
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg)
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg) } }
 
     .login-btn.success {
       background: var(--success);
       box-shadow: 0 8px 20px rgba(22, 163, 74, .32)
     }
 
-    .login-btn.success .btn-inner {
-      animation: popIn .3s ease
-    }
+    .login-btn.success .btn-inner { animation: popIn .3s ease }
 
     @keyframes popIn {
-      0% {
-        transform: scale(.8)
-      }
-
-      60% {
-        transform: scale(1.1)
-      }
-
-      100% {
-        transform: scale(1)
-      }
+      0% { transform: scale(.8) }
+      60% { transform: scale(1.1) }
+      100% { transform: scale(1) }
     }
 
     .login-btn.error {
@@ -336,32 +286,14 @@
       box-shadow: 0 8px 20px rgba(220, 38, 38, .32)
     }
 
-    .login-btn.shake {
-      animation: shake .4s ease
-    }
+    .login-btn.shake { animation: shake .4s ease }
 
     @keyframes shake {
-
-      0%,
-      100% {
-        transform: translateX(0)
-      }
-
-      20% {
-        transform: translateX(-7px)
-      }
-
-      40% {
-        transform: translateX(7px)
-      }
-
-      60% {
-        transform: translateX(-4px)
-      }
-
-      80% {
-        transform: translateX(4px)
-      }
+      0%, 100% { transform: translateX(0) }
+      20% { transform: translateX(-7px) }
+      40% { transform: translateX(7px) }
+      60% { transform: translateX(-4px) }
+      80% { transform: translateX(4px) }
     }
 
     #toastBox {
@@ -382,20 +314,11 @@
       animation: tsl .3s ease
     }
 
-    .toast-msg.is-error {
-      background: #7a2020
-    }
+    .toast-msg.is-error { background: #7a2020 }
 
     @keyframes tsl {
-      from {
-        transform: translateX(80px);
-        opacity: 0
-      }
-
-      to {
-        transform: translateX(0);
-        opacity: 1
-      }
+      from { transform: translateX(80px); opacity: 0 }
+      to { transform: translateX(0); opacity: 1 }
     }
 
     .overlay {
@@ -408,9 +331,7 @@
       z-index: 999
     }
 
-    .overlay.open {
-      display: flex
-    }
+    .overlay.open { display: flex }
 
     .modal-card {
       width: 310px;
@@ -436,24 +357,11 @@
       margin: 0 0 16px
     }
 
-    .modal-card .field-group {
-      margin-bottom: 12px
-    }
+    .modal-card .field-group { margin-bottom: 12px }
+    .modal-card .field-group input { padding: 9px 12px }
+    .modal-card .field-group .icon { width: 38px; font-size: 13px }
 
-    .modal-card .field-group input {
-      padding: 9px 12px
-    }
-
-    .modal-card .field-group .icon {
-      width: 38px;
-      font-size: 13px
-    }
-
-    .mbtns {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px
-    }
+    .mbtns { display: flex; gap: 8px; margin-top: 4px }
 
     .mbtns button {
       flex: 1;
@@ -470,9 +378,7 @@
       color: var(--text)
     }
 
-    .mbtn-cancel:hover {
-      background: #f8fafc
-    }
+    .mbtn-cancel:hover { background: #f8fafc }
 
     .mbtn-submit {
       background: var(--primary);
@@ -480,15 +386,78 @@
       color: #fff
     }
 
-    .mbtn-submit:hover {
-      background: var(--primary-dark)
+    .mbtn-submit:hover { background: var(--primary-dark) }
+
+    /* NEW: Create Account line below the Login button (view only, no click action) */
+    .card-footer {
+      padding: 0 24px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .card-footer .footer-text {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .create-acc-lnk {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 11.5px;
+      margin-left: 4px;
+    }
+
+    /* CHANGE: mobile sizing — bigger card, bigger text/tap targets on small screens */
+    @media (max-width: 480px) {
+      .login-card {
+        width: 100%;
+        max-width: 380px;
+        border-radius: 18px;
+      }
+
+      .login-card form { padding: 0 26px }
+
+      .logo-badge { width: 46px; height: 46px; }
+      .logo-badge svg { width: 22px; height: 22px }
+      .logo-title { font-size: 18px; }
+      .logo-sub { font-size: 12px; }
+      label.field-label { font-size: 11.5px; }
+      .field-group { margin-bottom: 13px; }
+      .field-group .icon { width: 38px; font-size: 14px; }
+
+      .field-group input,
+      .pw-wrap input {
+        padding: 12px 12px;
+        font-size: 15px;
+      }
+
+      .pw-wrap input { padding-right: 38px; }
+
+      .opts-row { font-size: 13px; margin-bottom: 18px; }
+      .forgot-lnk { font-size: 14px; }
+
+      .login-btn {
+        padding: 13px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .card-footer {
+        padding: 0 26px;
+        margin-top: 20px;
+        padding-top: 16px;
+      }
+
+      .card-footer .footer-text,
+      .create-acc-lnk {
+        font-size: 13.5px;
+      }
     }
 
     @media (prefers-reduced-motion:reduce) {
-      * {
-        animation: none !important;
-        transition: none !important
-      }
+      * { animation: none !important; transition: none !important }
     }
   </style>
 
@@ -535,6 +504,10 @@
         </div>
       </button>
     </form>
+    <div class="card-footer">
+      <span class="footer-text">New here?</span>
+      <span class="create-acc-lnk">Create Account</span>
+    </div>
   </div>
 
   <div class="overlay" id="forgotOverlay" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
