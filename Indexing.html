@@ -1425,44 +1425,69 @@
 .notif-count-chip {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  gap: 7px;
+  padding: 4px 7px 4px 9px;
+  border-radius: 7px;
   background: var(--surface2);
   border: 1px solid rgba(220,38,38,0.25);
 }
 
 .notif-count-chip .num {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--red);
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .notif-count-chip .lbl {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--muted);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  line-height: 1.1;
 }
 
-.notif-search-wrap { padding: 0 12px 10px; position: relative; }
-.notif-search-icon {
-  position: absolute; left: 24px; top: 50%; transform: translateY(-58%);
-  color: var(--muted); font-size: 14px; pointer-events: none; line-height: 1;
+.notif-dl-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: none;
+  color: #fff;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s, background 0.15s;
 }
+.notif-dl-btn:active { transform: scale(0.88); background: #b91c1c; }
+.notif-dl-btn svg { width: 11px; height: 11px; }
+
+.notif-search-wrap {
+  margin: 0 12px 10px; display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 9px 10px 9px 12px; transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.notif-search-wrap:focus-within {
+  border-color: var(--amber); background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(180,83,9,0.12);
+}
+.notif-search-icon { font-size: 14px; color: var(--muted); flex-shrink: 0; }
 #notifSearchBox {
-  width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px;
-  color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; padding: 9px 32px 9px 32px;
-  outline: none; transition: border-color 0.2s, background 0.2s;
+  flex: 1; min-width: 0; background: none; border: none; outline: none;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; padding: 0;
 }
-#notifSearchBox:focus { border-color: var(--accent); background: var(--surface); }
 #notifSearchClear {
-  position: absolute; right: 20px; top: 50%; transform: translateY(-58%);
-  background: var(--border); border: none; border-radius: 50%; width: 18px; height: 18px;
-  align-items: center; justify-content: center; cursor: pointer; font-size: 10px; color: var(--muted); line-height: 1;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 50%;
+  width: 20px; height: 20px; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 10px; color: var(--muted); flex-shrink: 0; padding: 0;
+}
+.notif-live-badge {
+  font-size: 10.5px; font-weight: 700; color: var(--amber); background: rgba(180,83,9,0.1);
+  padding: 5px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
 }
   </style>
 </head>
@@ -1515,17 +1540,27 @@
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <div class="notif-count-chip">
-          <span class="num" id="notifCountBadge">0</span>
-          <span class="lbl">Pending</span>
+                <div class="notif-count-chip">
+          <div style="display:flex; flex-direction:column;">
+            <span class="num" id="notifCountBadge">0</span>
+            <span class="lbl">Pending</span>
+          </div>
+          <button class="notif-dl-btn" onclick="downloadPendingFromNotif()" aria-label="Download pending list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
         </div>
                 <button class="notif-close" onclick="closeNotif()">✕</button>
       </div>
     </div>
-      <div class="notif-search-wrap">
+            <div class="notif-search-wrap">
         <span class="notif-search-icon">🔍</span>
         <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
         <button id="notifSearchClear" onclick="clearNotifSearch()" style="display:none;">✕</button>
+        <span class="notif-live-badge" id="notifLiveBadge">0 found</span>
       </div>
       <div class="notif-list" id="notifList"></div>
       <div class="notif-footer">Tap Save ✓ to assign — list updates live</div>
@@ -1786,6 +1821,19 @@ function getStockNoLocationItems() {
   });
 }
 
+function downloadPendingFromNotif() {
+  const items = getStockNoLocationItems();
+  if (!items.length) { showToast("Koi pending item nahi hai 🎉", "green"); return; }
+  const rows = [["SAP", "Description", "Stock Qty"]];
+  items.forEach(i => rows.push([i.sap || '', i.name || '', i.curr_stock || '']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+  a.download = 'in_stock_no_location.csv';
+  a.click();
+  showToast('Downloaded: in_stock_no_location.csv', "blue");
+}
+
 function toggleNotif() {
   notifOpen = !notifOpen;
   if (notifOpen) positionNotifPanel();
@@ -1800,27 +1848,44 @@ function closeNotif() {
 }
 
 let notifSearchQuery = "";
+let notifSearchDebounceTimer = null;
+let lastRenderedNotifQuery = null;
 
 function onNotifSearchInput(val) {
   notifSearchQuery = val.trim();
   document.getElementById('notifSearchClear').style.display = notifSearchQuery ? 'flex' : 'none';
-  renderNotifList();
+  clearTimeout(notifSearchDebounceTimer);
+  notifSearchDebounceTimer = setTimeout(() => {
+    if (notifSearchQuery === lastRenderedNotifQuery) return;
+    lastRenderedNotifQuery = notifSearchQuery;
+    renderNotifList();
+  }, 150);
 }
 
 function clearNotifSearch() {
   notifSearchQuery = "";
+  lastRenderedNotifQuery = null;
   document.getElementById('notifSearchBox').value = "";
   document.getElementById('notifSearchClear').style.display = 'none';
+  clearTimeout(notifSearchDebounceTimer);
   renderNotifList();
 }
 
+let _notifHighlightRe = null;
+
+function buildNotifHighlightRe(q) {
+  if (!q) { _notifHighlightRe = null; return; }
+  _notifHighlightRe = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+}
+
 function highlightNotif(text, q) {
-  if (!q) return text;
-  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return String(text).replace(re, '<mark>$1</mark>');
+  if (!q || !_notifHighlightRe) return text;
+  _notifHighlightRe.lastIndex = 0;
+  return String(text).replace(_notifHighlightRe, '<mark>$1</mark>');
 }
 
 function renderNotifList() {
+  buildNotifHighlightRe(notifSearchQuery);
   const allItems = getStockNoLocationItems();
   const totalCount = allItems.length;
 
@@ -1832,7 +1897,8 @@ function renderNotifList() {
   document.getElementById('bellBadge').textContent = totalCount;
   document.getElementById('bellBadge').classList.toggle('hidden', totalCount === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', totalCount > 0);
-  document.getElementById('notifCountBadge').textContent = totalCount;
+    document.getElementById('notifCountBadge').textContent = totalCount;
+  document.getElementById('notifLiveBadge').textContent = (notifSearchQuery ? items.length : totalCount) + ' found';
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
     : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
