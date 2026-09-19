@@ -1366,6 +1366,17 @@
 #notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.15); z-index: 490; }
 #notifBackdrop.open { display: block; }
 
+.notif-photo-btn {
+  width: 24px; height: 24px; border-radius: 7px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.notif-photo-btn:active { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,0.06); }
+.notif-photo-btn svg { width: 13px; height: 13px; }
+
 .dlbar-footer-v2 {
   text-align: center;
   padding-top: 8px;
@@ -1919,7 +1930,15 @@ function renderNotifList() {
         <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
         <span class="notif-stock-chip">📦 ${item.curr_stock}</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2); margin-bottom:8px;">${highlightNotif(item.sap, notifSearchQuery)}</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2);">${highlightNotif(item.sap, notifSearchQuery)}</span>
+        <button class="notif-photo-btn" onclick="viewPhotoFor(${item.sn})" aria-label="View photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </button>
+      </div>
       <div class="notif-row-body">
         <input class="notif-inline-input" id="ninp-${item.sn}" placeholder="e.g. A-01-03" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
         <button class="notif-save-btn" id="nbtn-${item.sn}" onclick="saveNotifItem(${item.sn})">
@@ -2480,6 +2499,12 @@ function saveNotifItem(sn) {
       if (!currentItem) return;
       window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(currentItem.name)}`, '_blank');
     }
+
+function viewPhotoFor(sn) {
+  const item = itemMaster.find(i => i.sn === sn);
+  if (!item) return;
+  window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(item.name)}`, '_blank');
+}
 
     // ─── Tab Switch ───
     function switchTab(tab) {
