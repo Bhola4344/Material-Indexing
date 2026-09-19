@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store Index Login</title>
+  <title>Store Index Login — Thin Stripe</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e73ff">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
- <style>
+  <style>
     :root {
       --primary: #2454e0;
       --primary-dark: #1c3fb8;
@@ -97,7 +97,6 @@
 
     .field-group {
       display: flex;
-      align-items: stretch;
       margin-bottom: 10px;
       border-radius: 8px;
       overflow: visible;
@@ -124,8 +123,7 @@
 
     .field-group .icon i { line-height: 1; }
 
-    .field-group input,
-    .pw-wrap input {
+    .field-group input {
       flex: 1;
       padding: 8px 10px;
       border: none;
@@ -139,10 +137,21 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .pw-wrap { position: relative; flex: 1; display: flex }
+    .pw-wrap { position: relative; flex: 1; min-width: 0 }
 
     .pw-wrap input {
+      display: block;
+      width: 100%;
       padding: 8px 34px 8px 10px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      border-radius: 0 7px 7px 0;
+      -webkit-appearance: none;
+      appearance: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     input::-ms-reveal,
