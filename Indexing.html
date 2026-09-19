@@ -2881,10 +2881,16 @@ statsBody.classList.toggle('collapsed', !statsOpen);
           });
 
           itemMaster = data;
-          renderStats();
-          if (notifOpen) renderNotifList();
+renderStats();
 
-          const formOpen = document.getElementById('updateLocation');
+// user notif list ke andar type kar raha hai ya nahi, check karo
+const activeEl = document.activeElement;
+const notifListEl = document.getElementById('notifList');
+const typingInNotif = notifListEl && activeEl && notifListEl.contains(activeEl);
+
+if (notifOpen && !typingInNotif) renderNotifList();
+
+const formOpen = document.getElementById('updateLocation');
           if (currentItem && !addItemMode && !formOpen) {
             const updated = itemMaster.find(i => i.sn === currentItem.sn);
             if (updated) { currentItem = updated; renderItem(); renderAI(); }
