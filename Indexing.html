@@ -12,7 +12,7 @@
     rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
   <style>
     *,
     *::before,
@@ -2645,6 +2645,16 @@ function viewPhotoFor(sn) {
 
 // ─── Scanner ───
 let html5QrCode = null;
+let ocrWorker = null;
+
+function onScanDecoded(decodedText) {
+  closeScanner();
+  const result = extractSapOrDescription(decodedText);
+  searchBox.value = result.value;
+  document.getElementById('clearSearch').classList.add('visible');
+  doSearch(result.value);
+  showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
+}
 
 function openScanner() {
   document.getElementById('scannerOverlay').classList.add('open');
@@ -2695,10 +2705,8 @@ async function captureAndReadText() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
 
-    const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
-      logger: () => {}
-    });
-
+    if (!ocrWorker) { ocrWorker = await Tesseract.createWorker('eng'); }
+const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
 
     if (!cleaned) {
@@ -2710,10 +2718,11 @@ async function captureAndReadText() {
       return;
     }
 
-    statusEl.textContent = 'Text mila ✓';
-    const result = extractSapOrDescription(cleaned);
+   statusEl.textContent = 'Text mila ✓';
+const result = extractSapOrDescription(cleaned);
 
-    closeScanner();
+ocrInProgress = false;
+closeScanner();
 
     searchBox.value = result.value;
     document.getElementById('clearSearch').classList.add('visible');
