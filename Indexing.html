@@ -409,53 +409,59 @@
       display: flex;
     }
 
-        #scanBtn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      border-radius: 10px;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 0.15s;
-    }
-    #scanBtn:active {
-      transform: translateY(-50%) scale(0.9);
-    }
-    #scanBtn svg {
-      width: 16px;
-      height: 16px;
-    }
+      #scanBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, color 0.15s;
+}
+#scanBtn:active {
+  transform: translateY(-50%) scale(0.9);
+  color: var(--accent2);
+}
+#scanBtn svg {
+  width: 19px;
+  height: 19px;
+}
 
-          .loc-scan-btn {
-      position: absolute;
-      right: 6px;
-      top: 50%;
-      margin-top: -18px;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: transparent;
-      border: none;
-      padding: 0;
-      line-height: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--accent);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .loc-scan-btn svg { width: 19px; height: 19px; display: block; }
+      .loc-scan-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, color 0.15s;
+}
+.loc-scan-btn:active {
+  transform: translateY(-50%) scale(0.9);
+  color: var(--accent2);
+}
+.loc-scan-btn svg { width: 19px; height: 19px; display: block; }
     .loc-scan-btn-sm {
       position: absolute;
       right: 4px;
@@ -2668,10 +2674,10 @@ function fillLocationField(targetId, loc) {
             New Location
             ${currentItem.location ? '' : '<span class="ai-badge">✨ Ready</span>'}
           </label>
-                    <div style="position:relative;">
+                                <div style="position:relative; display:flex; align-items:center; margin-bottom:12px;">
             <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
                    autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                   inputmode="text" style="padding-right:44px;">
+                   inputmode="text" style="padding-right:44px; margin-bottom:0;">
             <button type="button" class="loc-scan-btn" onclick="openScanner('updateLocation')" aria-label="Scan location">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
