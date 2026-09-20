@@ -2659,6 +2659,11 @@ function onScanDecoded(decodedText) {
 function openScanner() {
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerStatus').textContent = '';
+  ocrInProgress = false;
+  const ocrBtn = document.getElementById('ocrCaptureBtn');
+  const ocrLabel = document.getElementById('ocrBtnLabel');
+  if (ocrBtn) ocrBtn.disabled = false;
+  if (ocrLabel) ocrLabel.textContent = 'Read Text (No QR/Barcode)';
   html5QrCode = new Html5Qrcode("scannerReader");
   html5QrCode.start(
     { facingMode: "environment" },
@@ -2733,10 +2738,12 @@ const { data: { text } } = await ocrWorker.recognize(canvas);
       return;
     }
 
-   statusEl.textContent = 'Text mila ✓';
+      statusEl.textContent = 'Text mila ✓';
 const result = extractSapOrDescription(cleaned);
 
 ocrInProgress = false;
+if (btn) btn.disabled = false;
+if (label) label.textContent = 'Read Text (No QR/Barcode)';
 closeScanner();
 
     searchBox.value = result.value;
