@@ -2698,14 +2698,29 @@ async function captureAndReadText() {
   if (label) label.textContent = 'Reading...';
   statusEl.textContent = 'Text padha ja raha hai...';
 
-  try {
+    try {
+    // Downscale karo — bada frame OCR ko slow karta hai
+    const MAX_DIM = 900;
+    let targetW = videoEl.videoWidth;
+    let targetH = videoEl.videoHeight;
+    if (targetW > MAX_DIM) {
+      const scale = MAX_DIM / targetW;
+      targetW = MAX_DIM;
+      targetH = Math.round(videoEl.videoHeight * scale);
+    }
     const canvas = document.createElement('canvas');
-    canvas.width = videoEl.videoWidth;
-    canvas.height = videoEl.videoHeight;
+    canvas.width = targetW;
+    canvas.height = targetH;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(videoEl, 0, 0, targetW, targetH);
 
-    if (!ocrWorker) { ocrWorker = await Tesseract.createWorker('eng'); }
+    if (!ocrWorker) {
+      ocrWorker = await Tesseract.createWorker('eng');
+      await ocrWorker.setParameters({
+        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-',
+        tessedit_pageseg_mode: '6'
+      });
+    }
 const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
 
