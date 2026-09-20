@@ -10,7 +10,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
     rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     *,
     *::before,
@@ -362,7 +363,7 @@
       pointer-events: none;
     }
 
-    #searchBox {
+      #searchBox {
       width: 100%;
       background: var(--surface);
       border: 2px solid var(--border);
@@ -370,7 +371,7 @@
       color: var(--text);
       font-family: 'Inter', sans-serif;
       font-size: 16px;
-      padding: 14px 44px 14px 44px;
+      padding: 14px 84px 14px 44px;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       -webkit-appearance: none;
@@ -385,9 +386,9 @@
       color: var(--muted);
     }
 
-    #clearSearch {
+        #clearSearch {
       position: absolute;
-      right: 12px;
+      right: 44px;
       top: 50%;
       transform: translateY(-50%);
       background: var(--surface2);
@@ -403,8 +404,98 @@
       color: var(--muted);
     }
 
-    #clearSearch.visible {
+        #clearSearch.visible {
       display: flex;
+    }
+
+        #scanBtn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.15s;
+    }
+    #scanBtn:active {
+      transform: translateY(-50%) scale(0.9);
+    }
+    #scanBtn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ─── Scanner Overlay ─── */
+    #scannerOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 22, 0.95);
+      z-index: 10000;
+      display: none;
+      flex-direction: column;
+    }
+    #scannerOverlay.open {
+      display: flex;
+    }
+    .scanner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top, 0px));
+      color: #fff;
+    }
+    .scanner-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #scannerCloseBtn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #scannerReader {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #scannerReader video, #scannerReader canvas {
+      border-radius: 12px;
+      max-width: 100%;
+    }
+    .scanner-hint {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 12px;
+      padding: 14px;
+      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+    .scanner-status {
+      text-align: center;
+      color: #fbbf24;
+      font-size: 12px;
+      padding: 0 20px 10px;
+      min-height: 16px;
     }
 
     #dropdown {
@@ -1516,8 +1607,19 @@
     <span id="toastMsg"></span>
   </div>
 
-  <!-- Floating dropdown -->
+   <!-- Floating dropdown -->
   <div id="dropdown"></div>
+
+  <!-- Scanner Overlay -->
+  <div id="scannerOverlay">
+    <div class="scanner-header">
+      <h3>📷 Scan Item Code</h3>
+      <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+    </div>
+    <div id="scannerReader"></div>
+    <div class="scanner-status" id="scannerStatus"></div>
+    <div class="scanner-hint">Point the camera at a barcode or QR code</div>
+  </div>
 
   <div class="app-shell">
 
@@ -1613,11 +1715,17 @@
     </header>
 
     <!-- Search -->
-    <div class="search-wrap" id="searchWrap">
+        <div class="search-wrap" id="searchWrap">
       <span class="search-icon">🔍</span>
       <input id="searchBox" type="text" inputmode="search" placeholder="Search SAP code or description..."
         autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
       <button id="clearSearch" onclick="clearSearch()" aria-label="Clear search">✕</button>
+      <button id="scanBtn" onclick="openScanner()" aria-label="Scan barcode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+          <line x1="7" y1="12" x2="17" y2="12"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Single-column stack -->
@@ -2096,6 +2204,23 @@ function saveNotifItem(sn) {
       return prefix + '0'.repeat(zerosNeeded) + suffix;
     }
 
+// ─── Extract SAP code or Description from scanned sticker text ───
+function extractSapOrDescription(rawText) {
+  const text = String(rawText || '').trim();
+
+  // Step 1: SAP code priority — 9 ya 10 digit ka koi bhi number sequence dhoondo
+  const digitMatches = text.match(/\d{9,10}/g);
+  if (digitMatches && digitMatches.length) {
+    // sabse lamba match lo (10-digit priority)
+    const best = digitMatches.sort((a, b) => b.length - a.length)[0];
+    return { type: 'sap', value: padSAP(best) };
+  }
+
+  // Step 2: SAP nahi mila — poora text ko description maan lo
+  // (dash ho ya na ho, doSearch already dash/space ignore karke match karta hai)
+  return { type: 'desc', value: text };
+}
+
 
     // ─── Flexible SAP match (handles under/over-padded numeric input) ───
     function normalizeSAP(str) {
@@ -2504,6 +2629,44 @@ function viewPhotoFor(sn) {
   const item = itemMaster.find(i => i.sn === sn);
   if (!item) return;
   window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(item.name)}`, '_blank');
+}
+
+// ─── Scanner ───
+let html5QrCode = null;
+
+function openScanner() {
+  document.getElementById('scannerOverlay').classList.add('open');
+  document.getElementById('scannerStatus').textContent = '';
+  html5QrCode = new Html5Qrcode("scannerReader");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 150 } },
+    onScanDecoded,
+    (errMsg) => { /* per-frame scan errors, ignore silently */ }
+  ).catch(err => {
+    document.getElementById('scannerStatus').textContent = 'Camera access failed';
+  });
+}
+
+function closeScanner() {
+  document.getElementById('scannerOverlay').classList.remove('open');
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+    html5QrCode = null;
+  }
+}
+
+function onScanDecoded(decodedText) {
+  document.getElementById('scannerStatus').textContent = 'Scanned ✓';
+  const result = extractSapOrDescription(decodedText);
+
+  closeScanner();
+
+  searchBox.value = result.value;
+  document.getElementById('clearSearch').classList.add('visible');
+  doSearch(result.value);
+
+  showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
     // ─── Tab Switch ───
