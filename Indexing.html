@@ -2221,7 +2221,7 @@ function extractSapOrDescription(rawText) {
   const text = String(rawText || '').trim();
 
   // Step 1: SAP code priority — 9 ya 10 digit ka koi bhi number sequence dhoondo
-  const digitMatches = text.match(/\d{9,10}/g);
+  const digitMatches = text.match(/(?<!\d)\d{10}(?!\d)/g);
   if (digitMatches && digitMatches.length) {
     // sabse lamba match lo (10-digit priority)
     const best = digitMatches.sort((a, b) => b.length - a.length)[0];
