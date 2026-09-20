@@ -436,6 +436,45 @@
       height: 16px;
     }
 
+          .loc-scan-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      margin-top: -18px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      line-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--accent);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .loc-scan-btn svg { width: 19px; height: 19px; display: block; }
+    .loc-scan-btn-sm {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--accent);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .loc-scan-btn-sm svg { width: 14px; height: 14px; }
+
     /* ─── Scanner Overlay ─── */
     #scannerOverlay {
       position: fixed;
@@ -2060,7 +2099,15 @@ function renderNotifList() {
         </button>
       </div>
       <div class="notif-row-body">
-        <input class="notif-inline-input" id="ninp-${item.sn}" placeholder="e.g. A-01-03" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                <div style="position:relative; flex:3 1 0; min-width:0;">
+          <input class="notif-inline-input" id="ninp-${item.sn}" placeholder="e.g. A-01-03" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" style="width:100%; padding-right:34px;">
+          <button type="button" class="loc-scan-btn-sm" onclick="openScanner('ninp-${item.sn}')" aria-label="Scan location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <line x1="7" y1="12" x2="17" y2="12"/>
+            </svg>
+          </button>
+        </div>
         <button class="notif-save-btn" id="nbtn-${item.sn}" onclick="saveNotifItem(${item.sn})">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save
 </button>
@@ -2231,6 +2278,39 @@ function extractSapOrDescription(rawText) {
   // Step 2: SAP nahi mila — poora text ko description maan lo
   // (dash ho ya na ho, doSearch already dash/space ignore karke match karta hai)
   return { type: 'desc', value: text };
+}
+
+// ─── Extract Location from scanned sticker text ───
+function extractLocationFromText(rawText) {
+  const text = String(rawText || '').trim();
+
+  // Step 1: "LOC" keyword priority — usi line me uske baad jo bhi likha ho, wahi location
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+    if (m && m[1] && m[1].trim()) {
+      return m[1].trim().toUpperCase();
+    }
+  }
+
+  // Step 2: "LOC" nahi mila — alphanumeric mixed token dhoondo (letters + digits dono)
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const mixed = tokens.filter(t => /[A-Za-z]/.test(t) && /\d/.test(t));
+  if (mixed.length) {
+    mixed.sort((a, b) => b.length - a.length);
+    return mixed[0].toUpperCase();
+  }
+
+  // Step 3: kuch match nahi hua — poora cleaned text hi location maan lo
+  return text.toUpperCase();
+}
+
+function fillLocationField(targetId, loc) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.value = loc;
+  el.focus();
+  showToast(`Location mila: ${loc}`, 'green');
 }
 
 
@@ -2588,9 +2668,17 @@ function extractSapOrDescription(rawText) {
             New Location
             ${currentItem.location ? '' : '<span class="ai-badge">✨ Ready</span>'}
           </label>
-          <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
-                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-                 inputmode="text">
+                    <div style="position:relative;">
+            <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
+                   autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                   inputmode="text" style="padding-right:44px;">
+            <button type="button" class="loc-scan-btn" onclick="openScanner('updateLocation')" aria-label="Scan location">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+                <line x1="7" y1="12" x2="17" y2="12"/>
+              </svg>
+            </button>
+          </div>
                     <button class="btn btn-success" id="updateBtn" onclick="updateLocation()" style="width:100%; font-size:14px; justify-content:center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
@@ -2646,9 +2734,17 @@ function viewPhotoFor(sn) {
 // ─── Scanner ───
 let html5QrCode = null;
 let ocrWorker = null;
+let scanTarget = null; // null = search box; warna location input ki id
 
 function onScanDecoded(decodedText) {
+  const target = scanTarget;
   closeScanner();
+  if (target) {
+    const loc = extractLocationFromText(decodedText);
+    scanTarget = null;
+    fillLocationField(target, loc);
+    return;
+  }
   const result = extractSapOrDescription(decodedText);
   searchBox.value = result.value;
   document.getElementById('clearSearch').classList.add('visible');
@@ -2656,7 +2752,8 @@ function onScanDecoded(decodedText) {
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
-function openScanner() {
+function openScanner(targetId) {
+  scanTarget = targetId || null;
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerStatus').textContent = '';
   ocrInProgress = false;
@@ -2722,7 +2819,7 @@ async function captureAndReadText() {
     if (!ocrWorker) {
       ocrWorker = await Tesseract.createWorker('eng');
       await ocrWorker.setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-',
+        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
         tessedit_pageseg_mode: '6'
       });
     }
@@ -2739,13 +2836,21 @@ const { data: { text } } = await ocrWorker.recognize(canvas);
     }
 
       statusEl.textContent = 'Text mila ✓';
-const result = extractSapOrDescription(cleaned);
 
 ocrInProgress = false;
 if (btn) btn.disabled = false;
 if (label) label.textContent = 'Read Text (No QR/Barcode)';
 closeScanner();
 
+    if (scanTarget) {
+      const loc = extractLocationFromText(cleaned);
+      const target = scanTarget;
+      scanTarget = null;
+      fillLocationField(target, loc);
+      return;
+    }
+
+    const result = extractSapOrDescription(cleaned);
     searchBox.value = result.value;
     document.getElementById('clearSearch').classList.add('visible');
     doSearch(result.value);
