@@ -12,6 +12,7 @@
     rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     *,
     *::before,
@@ -1610,7 +1611,7 @@
    <!-- Floating dropdown -->
   <div id="dropdown"></div>
 
-  <!-- Scanner Overlay -->
+    <!-- Scanner Overlay -->
   <div id="scannerOverlay">
     <div class="scanner-header">
       <h3>📷 Scan Item Code</h3>
@@ -1618,7 +1619,18 @@
     </div>
     <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
-    <div class="scanner-hint">Point the camera at a barcode or QR code</div>
+    <button id="ocrCaptureBtn" onclick="captureAndReadText()" style="margin:0 16px 10px; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; font-size:13.5px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(37,99,235,0.35);">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7V5a2 2 0 0 1 2-2h2"/>
+        <path d="M4 17v2a2 2 0 0 0 2 2h2"/>
+        <path d="M20 7V5a2 2 0 0 0-2-2h-2"/>
+        <path d="M20 17v2a2 2 0 0 1-2 2h-2"/>
+        <line x1="8" y1="9" x2="16" y2="9"/>
+        <line x1="8" y1="13" x2="14" y2="13"/>
+      </svg>
+      <span id="ocrBtnLabel">Read Text (No QR/Barcode)</span>
+    </button>
+    <div class="scanner-hint">QR/Barcode automatic detect hota hai — plain text sticker ke liye upar wala button dabayein</div>
   </div>
 
   <div class="app-shell">
@@ -2656,17 +2668,67 @@ function closeScanner() {
   }
 }
 
-function onScanDecoded(decodedText) {
-  document.getElementById('scannerStatus').textContent = 'Scanned ✓';
-  const result = extractSapOrDescription(decodedText);
+// ─── OCR (plain text) capture ───
+let ocrInProgress = false;
 
-  closeScanner();
+async function captureAndReadText() {
+  if (ocrInProgress) return;
 
-  searchBox.value = result.value;
-  document.getElementById('clearSearch').classList.add('visible');
-  doSearch(result.value);
+  const videoEl = document.querySelector('#scannerReader video');
+  if (!videoEl || !videoEl.videoWidth) {
+    showToast('Camera abhi ready nahi hai, thoda ruk kar try karein', 'amber');
+    return;
+  }
 
-  showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
+  ocrInProgress = true;
+  const btn = document.getElementById('ocrCaptureBtn');
+  const label = document.getElementById('ocrBtnLabel');
+  const statusEl = document.getElementById('scannerStatus');
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = 'Reading...';
+  statusEl.textContent = 'Text padha ja raha hai...';
+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = videoEl.videoWidth;
+    canvas.height = videoEl.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+
+    const { data: { text } } = await Tesseract.recognize(canvas, 'eng', {
+      logger: () => {}
+    });
+
+    const cleaned = text.trim();
+
+    if (!cleaned) {
+      statusEl.textContent = 'Koi text nahi mila, dobara try karein';
+      showToast('Text detect nahi hua — clear photo lene ki koshish karein', 'amber');
+      ocrInProgress = false;
+      if (btn) btn.disabled = false;
+      if (label) label.textContent = 'Read Text (No QR/Barcode)';
+      return;
+    }
+
+    statusEl.textContent = 'Text mila ✓';
+    const result = extractSapOrDescription(cleaned);
+
+    closeScanner();
+
+    searchBox.value = result.value;
+    document.getElementById('clearSearch').classList.add('visible');
+    doSearch(result.value);
+
+    showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
+
+  } catch (err) {
+    console.error('OCR error:', err);
+    statusEl.textContent = 'OCR fail hua, dobara try karein';
+    showToast('Text padhne mein error aayi', 'red');
+    ocrInProgress = false;
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = 'Read Text (No QR/Barcode)';
+  }
 }
 
     // ─── Tab Switch ───
