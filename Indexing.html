@@ -1937,6 +1937,11 @@
 let pendingUpdates = {};
 let pendingStockUpdates = {};
 
+function itemsEqual(a, b) {
+  if (!a || !b) return a === b;
+  return a.location === b.location && String(a.curr_stock ?? '') === String(b.curr_stock ?? '');
+}
+
 function positionNotifPanel() {
   const shell = document.querySelector('.app-shell');
   const btn = document.getElementById('bellBtn');
@@ -3357,9 +3362,11 @@ statsBody.classList.toggle('collapsed', !statsOpen);
     // ─── Silent Background Refresh (cross-device sync) ───
     let silentRefreshInFlight = false;
 
-    function silentRefresh() {
+       function silentRefresh() {
       if (silentRefreshInFlight) return;
       silentRefreshInFlight = true;
+
+      const prevPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
 
       fetch(API + '?action=getItems')
         .then(r => r.json())
@@ -3381,12 +3388,21 @@ const activeEl = document.activeElement;
 const notifListEl = document.getElementById('notifList');
 const typingInNotif = notifListEl && activeEl && notifListEl.contains(activeEl);
 
-if (notifOpen && !typingInNotif) renderNotifList();
+if (notifOpen && !typingInNotif) {
+  const newPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
+  if (newPendingKey !== prevPendingKey) renderNotifList();
+}
 
 const formOpen = document.getElementById('updateLocation');
           if (currentItem && !addItemMode && !formOpen) {
             const updated = itemMaster.find(i => i.sn === currentItem.sn);
-            if (updated) { currentItem = updated; renderItem(); renderAI(); }
+            if (updated && !itemsEqual(updated, currentItem)) {
+              currentItem = updated;
+              renderItem();
+              renderAI();
+            } else if (updated) {
+              currentItem = updated;
+            }
           } else if (currentItem) {
             const updated = itemMaster.find(i => i.sn === currentItem.sn);
             if (updated) currentItem = updated;
