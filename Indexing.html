@@ -2890,9 +2890,11 @@ function checkTorchSupport() {
   if (!html5QrCode) return;
   try {
     const capabilities = html5QrCode.getRunningTrackCapabilities();
+    console.log('Camera capabilities:', capabilities); // debug — baad me hata dena
     torchSupported = !!(capabilities && capabilities.torch);
     document.getElementById('torchBtn').style.display = torchSupported ? 'flex' : 'none';
   } catch (e) {
+    console.log('Torch check error:', e); // debug — baad me hata dena
     torchSupported = false;
     document.getElementById('torchBtn').style.display = 'none';
   }
@@ -2914,22 +2916,43 @@ function onScanDecoded(decodedText) {
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
+async function getBackCameraId() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = devices.filter(d => d.kind === 'videoinput');
+    // "back" ya "rear" label wala camera dhoondo, warna last wala (mostly main camera hota hai)
+    const backCam = videoInputs.find(d => /back|rear/i.test(d.label))
+      || videoInputs[videoInputs.length - 1];
+    return backCam ? backCam.deviceId : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function openScanner(targetId) {
   scanTarget = targetId || null;
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
-   html5QrCode = new Html5Qrcode("scannerReader");
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 150 } },
-    onScanDecoded,
-    (errMsg) => { /* per-frame scan errors, ignore silently */ }
-  ).catch(err => {
-    document.getElementById('scannerStatus').textContent = 'Camera access failed';
-  });
+  html5QrCode = new Html5Qrcode("scannerReader");
 
-  setTimeout(checkTorchSupport, 500);
+  getBackCameraId().then(deviceId => {
+    const cameraConfig = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" };
+    html5QrCode.start(
+      cameraConfig,
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      onScanDecoded,
+      (errMsg) => { /* per-frame scan errors, ignore silently */ }
+    ).then(() => {
+      // Camera start hone ke baad thoda ruk kar torch check karo, aur agar pehli baar na mile to ek retry bhi karo
+      setTimeout(() => {
+        checkTorchSupport();
+        setTimeout(checkTorchSupport, 800); // retry — kuch devices pe pehli baar capability late aati hai
+      }, 400);
+    }).catch(err => {
+      document.getElementById('scannerStatus').textContent = 'Camera access failed';
+    });
+  });
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   autoOcrTimer = setInterval(() => {
