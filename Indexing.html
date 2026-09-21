@@ -560,6 +560,20 @@
       margin-top: 2px;
     }
 
+    #scanCandidatesList {
+      max-height: 46vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-top: 4px;
+    }
+    .cand-count-label {
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+      font-weight: 700;
+      margin: 0 16px 8px;
+      text-align: center;
+    }
+
     #dropdown {
       position: fixed;
       background: var(--surface);
@@ -2401,14 +2415,17 @@ function fillLocationField(targetId, loc) {
 
 function showScanCandidates(candidates, type) {
   const list = document.getElementById('scanCandidatesList');
+  const prevScroll = list.scrollTop; // re-render par scroll position preserve karo
   list.style.display = 'block';
-  list.innerHTML = candidates.map((c, i) => `
+  list.innerHTML = `<div class="cand-count-label">${candidates.length} item(s) mile — scroll karke chunein</div>` +
+    candidates.map((c, i) => `
     <div class="cand-row" data-i="${i}">
       <div style="flex:1;">
         <div class="cand-sap">${c.sap || c.location}</div>
         ${c.context ? `<div class="cand-ctx">${c.context}</div>` : ''}
       </div>
     </div>`).join('');
+  list.scrollTop = prevScroll;
 
   list.querySelectorAll('.cand-row').forEach(row => {
     row.addEventListener('click', () => {
@@ -2869,8 +2886,13 @@ function onScanDecoded(decodedText) {
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
+let scanSapAccum = {};  // saare OCR frames me mile SAP codes yahan jama hote hain
+let scanLocAccum = {};  // saare OCR frames me mile location candidates yahan jama hote hain
+
 function openScanner(targetId) {
   scanTarget = targetId || null;
+  scanSapAccum = {};
+  scanLocAccum = {};
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
@@ -2886,8 +2908,8 @@ function openScanner(targetId) {
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   autoOcrTimer = setInterval(() => {
-    const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
-    if (!ocrInProgress && !listVisible) captureAndReadText();
+    // list dikhne par bhi scanning band nahi karte — taaki naye items list me add hote rahein
+    if (!ocrInProgress) captureAndReadText();
   }, 1200);
 }
 
@@ -2899,6 +2921,8 @@ function closeScanner() {
   }
   if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
   document.getElementById('scanCandidatesList').style.display = 'none';
+  scanSapAccum = {};
+  scanLocAccum = {};
 }
 
 // ─── OCR (plain text) capture ───
@@ -2941,7 +2965,13 @@ async function captureAndReadText() {
     if (!cleaned) return;
 
     if (scanTarget) {
-      const locs = extractStrictLocationCandidates(cleaned);
+      // Strict + broad, dono tarah ke location patterns combine karo — taaki sahi option list se chhute na
+      const strictLocs = extractStrictLocationCandidates(cleaned);
+      const broadLocs = extractAllLocationCandidates(cleaned);
+      [...strictLocs, ...broadLocs].forEach(c => {
+        if (c.location && !(c.location in scanLocAccum)) scanLocAccum[c.location] = true;
+      });
+      const locs = Object.keys(scanLocAccum).map(location => ({ location }));
       if (locs.length === 0) return;
       if (locs.length === 1) {
         const target = scanTarget;
@@ -2949,24 +2979,21 @@ async function captureAndReadText() {
         closeScanner();
         fillLocationField(target, locs[0].location);
       } else {
-        statusEl.textContent = 'Multiple match mile, ek chunein 👇';
+        statusEl.textContent = `${locs.length} match mile, ek chunein 👇`;
         showScanCandidates(locs, 'loc');
       }
       return;
     }
 
+    // Har frame ke naye SAP codes ko purane accumulated list me jodo, kisi ko chhutne mat do
     const saps = extractAllSapCandidates(cleaned);
-    if (saps.length === 0) return;
-    if (saps.length === 1) {
-      closeScanner();
-      searchBox.value = saps[0].sap;
-      document.getElementById('clearSearch').classList.add('visible');
-      doSearch(saps[0].sap);
-      showToast(`SAP code mila: ${saps[0].sap}`, 'green');
-    } else {
-      statusEl.textContent = 'Multiple match mile, ek chunein 👇';
-      showScanCandidates(saps, 'sap');
-    }
+    saps.forEach(c => {
+      if (!(c.sap in scanSapAccum)) scanSapAccum[c.sap] = c.context;
+    });
+    const allSaps = Object.keys(scanSapAccum).map(sap => ({ sap, context: scanSapAccum[sap] }));
+    if (allSaps.length === 0) return;
+    statusEl.textContent = `${allSaps.length} item(s) mile — list se chunein 👇`;
+    showScanCandidates(allSaps, 'sap');
 
   } catch (err) {
     console.error('OCR error:', err);
