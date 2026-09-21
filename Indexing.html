@@ -2286,10 +2286,11 @@ function extractAllSapCandidates(rawText) {
       const sap = padSAP(m);
       if (seen.has(sap)) return;
       seen.add(sap);
-      results.push({ sap, context: line.trim().slice(0, 60) });
+      const desc = line.replace(m, '').replace(/[-:\s]+/g, ' ').trim().slice(0, 60);
+      results.push({ sap, context: desc });
     });
   });
-  return results; // agar koi 10-digit nahi mila, poore text ko fallback description candidate bana dena (jaisa purana extractSapOrDescription karta hai)
+  return results;
 }
 
 // ─── Extract SAP code or Description from scanned sticker text ───
@@ -2363,20 +2364,37 @@ function extractStrictLocationCandidates(rawText) {
   const text = String(rawText || '').trim();
   const seen = new Set();
   const results = [];
+  const codePattern = /\d{4}[A-Za-z]{2}\d{4}/;
+
+  // 1) "LOC" keyword wali line — usmein se bhi strict code hi nikaalo, poora tail text nahi
   text.split(/\r?\n/).forEach(line => {
     const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
-    if (m && m[1] && m[1].trim()) {
-      const loc = m[1].trim().toUpperCase();
-      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+    if (m && m[1]) {
+      const codeMatch = m[1].match(codePattern);
+      const loc = codeMatch ? codeMatch[0].toUpperCase() : m[1].trim().toUpperCase();
+      if (loc && !seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
     }
   });
-  const pattern = /\b\d{4}[A-Za-z]{2}\d{4}\b/g;
-  let m;
-  while ((m = pattern.exec(text)) !== null) {
-    const loc = m[0].toUpperCase();
+
+  // 2) Poore text mein strict pattern — global search
+  const globalPattern = new RegExp(codePattern.source, 'g');
+  let gm;
+  while ((gm = globalPattern.exec(text)) !== null) {
+    const loc = gm[0].toUpperCase();
     if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
   }
+
   return results;
+}
+
+function fillLocationField(targetId, loc) {
+  if (!targetId) return;
+  const inp = document.getElementById(targetId);
+  if (!inp) return;
+  inp.value = String(loc || '').toUpperCase();
+  inp.dispatchEvent(new Event('input', { bubbles: true }));
+  inp.focus();
+  showToast(`Location mila: ${inp.value}`, 'green');
 }
 
 
