@@ -457,6 +457,12 @@
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s, color 0.15s;
 }
+#torchBtn.on {
+  background: #f0a83d !important;
+  color: #1a1204 !important;
+  border-color: #f0a83d !important;
+}
+
 .loc-scan-btn:active {
   transform: translateY(-50%) scale(0.9);
   color: var(--accent2);
@@ -1680,6 +1686,16 @@
     </div>
     <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
+<div style="display:flex; justify-content:center; padding:10px 0 4px;">
+  <button id="torchBtn" onclick="toggleTorch()" aria-label="Toggle torch"
+    style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; display:none; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s, color 0.2s;">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 2h6v4l1.5 3v11a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 7.5 20V9L9 6V2z"/>
+      <line x1="9" y1="6" x2="15" y2="6"/>
+      <line x1="10" y1="12" x2="14" y2="12"/>
+    </svg>
+  </button>
+</div>
         <div id="scanCandidatesList" style="display:none;"></div>
     <div class="scanner-hint" id="scannerHint">📷 Camera ko SAP code ya location sticker ke paas le jaayein — apne aap detect ho jaayega</div>
   </div>
@@ -2857,6 +2873,30 @@ let html5QrCode = null;
 let ocrWorker = null;
 let scanTarget = null; // null = search box; warna location input ki id
 let autoOcrTimer = null;
+let torchOn = false;
+let torchSupported = false;
+
+function toggleTorch() {
+  if (!html5QrCode || !torchSupported) return;
+  torchOn = !torchOn;
+  html5QrCode.applyVideoConstraints({ advanced: [{ torch: torchOn }] })
+    .then(() => {
+      document.getElementById('torchBtn').classList.toggle('on', torchOn);
+    })
+    .catch(() => { showToast('Torch toggle failed', 'red'); });
+}
+
+function checkTorchSupport() {
+  if (!html5QrCode) return;
+  try {
+    const capabilities = html5QrCode.getRunningTrackCapabilities();
+    torchSupported = !!(capabilities && capabilities.torch);
+    document.getElementById('torchBtn').style.display = torchSupported ? 'flex' : 'none';
+  } catch (e) {
+    torchSupported = false;
+    document.getElementById('torchBtn').style.display = 'none';
+  }
+}
 
 function onScanDecoded(decodedText) {
   const target = scanTarget;
@@ -2889,6 +2929,8 @@ function openScanner(targetId) {
     document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
 
+  setTimeout(checkTorchSupport, 500);
+
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   autoOcrTimer = setInterval(() => {
     const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
@@ -2902,6 +2944,11 @@ function closeScanner() {
     html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
     html5QrCode = null;
   }
+  torchOn = false;
+  torchSupported = false;
+  const tb = document.getElementById('torchBtn');
+  tb.style.display = 'none';
+  tb.classList.remove('on');
   if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
   document.getElementById('scanCandidatesList').style.display = 'none';
 }
