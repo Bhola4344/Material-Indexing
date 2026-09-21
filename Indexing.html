@@ -536,12 +536,28 @@
       padding: 14px;
       padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     }
-    .scanner-status {
-      text-align: center;
-      color: #fbbf24;
-      font-size: 12px;
-      padding: 0 20px 10px;
-      min-height: 16px;
+   
+    .cand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin: 0 16px 8px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .cand-sap {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .cand-ctx {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 2px;
     }
 
     #dropdown {
@@ -1664,18 +1680,8 @@
     </div>
     <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
-    <button id="ocrCaptureBtn" onclick="captureAndReadText()" style="margin:0 16px 10px; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#fff; font-size:13.5px; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(37,99,235,0.35);">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 7V5a2 2 0 0 1 2-2h2"/>
-        <path d="M4 17v2a2 2 0 0 0 2 2h2"/>
-        <path d="M20 7V5a2 2 0 0 0-2-2h-2"/>
-        <path d="M20 17v2a2 2 0 0 1-2 2h-2"/>
-        <line x1="8" y1="9" x2="16" y2="9"/>
-        <line x1="8" y1="13" x2="14" y2="13"/>
-      </svg>
-      <span id="ocrBtnLabel">Read Text (No QR/Barcode)</span>
-    </button>
-    <div class="scanner-hint">QR/Barcode automatic detect hota hai — plain text sticker ke liye upar wala button dabayein</div>
+        <div id="scanCandidatesList" style="display:none;"></div>
+    <div class="scanner-hint" id="scannerHint">📷 Camera ko SAP code ya location sticker ke paas le jaayein — apne aap detect ho jaayega</div>
   </div>
 
   <div class="app-shell">
@@ -2269,6 +2275,23 @@ function saveNotifItem(sn) {
       return prefix + '0'.repeat(zerosNeeded) + suffix;
     }
 
+function extractAllSapCandidates(rawText) {
+  const lines = String(rawText || '').split(/\r?\n/);
+  const seen = new Set();
+  const results = [];
+  lines.forEach(line => {
+    const matches = line.match(/(?<!\d)\d{10}(?!\d)/g);
+    if (!matches) return;
+    matches.forEach(m => {
+      const sap = padSAP(m);
+      if (seen.has(sap)) return;
+      seen.add(sap);
+      results.push({ sap, context: line.trim().slice(0, 60) });
+    });
+  });
+  return results; // agar koi 10-digit nahi mila, poore text ko fallback description candidate bana dena (jaisa purana extractSapOrDescription karta hai)
+}
+
 // ─── Extract SAP code or Description from scanned sticker text ───
 function extractSapOrDescription(rawText) {
   const text = String(rawText || '').trim();
@@ -2311,12 +2334,81 @@ function extractLocationFromText(rawText) {
   return text.toUpperCase();
 }
 
-function fillLocationField(targetId, loc) {
-  const el = document.getElementById(targetId);
-  if (!el) return;
-  el.value = loc;
-  el.focus();
-  showToast(`Location mila: ${loc}`, 'green');
+function extractAllLocationCandidates(rawText) {
+  const text = String(rawText || '').trim();
+  const seen = new Set();
+  const results = [];
+
+  const lines = text.split(/\r?\n/);
+  lines.forEach(line => {
+    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+    if (m && m[1] && m[1].trim()) {
+      const loc = m[1].trim().toUpperCase();
+      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+    }
+  });
+
+  const tokens = text.split(/\s+/).filter(Boolean);
+  tokens.forEach(t => {
+    if (/[A-Za-z]/.test(t) && /\d/.test(t)) {
+      const loc = t.toUpperCase();
+      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+    }
+  });
+
+  return results;
+}
+
+function extractStrictLocationCandidates(rawText) {
+  const text = String(rawText || '').trim();
+  const seen = new Set();
+  const results = [];
+  text.split(/\r?\n/).forEach(line => {
+    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+    if (m && m[1] && m[1].trim()) {
+      const loc = m[1].trim().toUpperCase();
+      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+    }
+  });
+  const pattern = /\b\d{4}[A-Za-z]{2}\d{4}\b/g;
+  let m;
+  while ((m = pattern.exec(text)) !== null) {
+    const loc = m[0].toUpperCase();
+    if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+  }
+  return results;
+}
+
+
+
+function showScanCandidates(candidates, type) {
+  const list = document.getElementById('scanCandidatesList');
+  list.style.display = 'block';
+  list.innerHTML = candidates.map((c, i) => `
+    <div class="cand-row" data-i="${i}">
+      <div style="flex:1;">
+        <div class="cand-sap">${c.sap || c.location}</div>
+        ${c.context ? `<div class="cand-ctx">${c.context}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  list.querySelectorAll('.cand-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const c = candidates[+row.dataset.i];
+      list.style.display = 'none';
+      closeScanner();
+      if (type === 'sap') {
+        searchBox.value = c.sap;
+        document.getElementById('clearSearch').classList.add('visible');
+        doSearch(c.sap);
+        showToast(`SAP code select kiya: ${c.sap}`, 'green');
+      } else {
+        const target = scanTarget;
+        scanTarget = null;
+        fillLocationField(target, c.location);
+      }
+    });
+  });
 }
 
 
@@ -2741,6 +2833,7 @@ function viewPhotoFor(sn) {
 let html5QrCode = null;
 let ocrWorker = null;
 let scanTarget = null; // null = search box; warna location input ki id
+let autoOcrTimer = null;
 
 function onScanDecoded(decodedText) {
   const target = scanTarget;
@@ -2761,13 +2854,9 @@ function onScanDecoded(decodedText) {
 function openScanner(targetId) {
   scanTarget = targetId || null;
   document.getElementById('scannerOverlay').classList.add('open');
-  document.getElementById('scannerStatus').textContent = '';
+  document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
-  const ocrBtn = document.getElementById('ocrCaptureBtn');
-  const ocrLabel = document.getElementById('ocrBtnLabel');
-  if (ocrBtn) ocrBtn.disabled = false;
-  if (ocrLabel) ocrLabel.textContent = 'Read Text (No QR/Barcode)';
-  html5QrCode = new Html5Qrcode("scannerReader");
+   html5QrCode = new Html5Qrcode("scannerReader");
   html5QrCode.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 250, height: 150 } },
@@ -2776,6 +2865,12 @@ function openScanner(targetId) {
   ).catch(err => {
     document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
+
+  if (autoOcrTimer) clearInterval(autoOcrTimer);
+  autoOcrTimer = setInterval(() => {
+    const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
+    if (!ocrInProgress && !listVisible) captureAndReadText();
+  }, 1200);
 }
 
 function closeScanner() {
@@ -2784,6 +2879,8 @@ function closeScanner() {
     html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
     html5QrCode = null;
   }
+  if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
+  document.getElementById('scanCandidatesList').style.display = 'none';
 }
 
 // ─── OCR (plain text) capture ───
@@ -2793,21 +2890,12 @@ async function captureAndReadText() {
   if (ocrInProgress) return;
 
   const videoEl = document.querySelector('#scannerReader video');
-  if (!videoEl || !videoEl.videoWidth) {
-    showToast('Camera abhi ready nahi hai, thoda ruk kar try karein', 'amber');
-    return;
-  }
+  if (!videoEl || !videoEl.videoWidth) return;
 
   ocrInProgress = true;
-  const btn = document.getElementById('ocrCaptureBtn');
-  const label = document.getElementById('ocrBtnLabel');
   const statusEl = document.getElementById('scannerStatus');
-  if (btn) btn.disabled = true;
-  if (label) label.textContent = 'Reading...';
-  statusEl.textContent = 'Text padha ja raha hai...';
 
-    try {
-    // Downscale karo — bada frame OCR ko slow karta hai
+  try {
     const MAX_DIM = 900;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
@@ -2819,8 +2907,7 @@ async function captureAndReadText() {
     const canvas = document.createElement('canvas');
     canvas.width = targetW;
     canvas.height = targetH;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoEl, 0, 0, targetW, targetH);
+    canvas.getContext('2d').drawImage(videoEl, 0, 0, targetW, targetH);
 
     if (!ocrWorker) {
       ocrWorker = await Tesseract.createWorker('eng');
@@ -2829,47 +2916,43 @@ async function captureAndReadText() {
         tessedit_pageseg_mode: '6'
       });
     }
-const { data: { text } } = await ocrWorker.recognize(canvas);
+    const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
+    ocrInProgress = false;
 
-    if (!cleaned) {
-      statusEl.textContent = 'Koi text nahi mila, dobara try karein';
-      showToast('Text detect nahi hua — clear photo lene ki koshish karein', 'amber');
-      ocrInProgress = false;
-      if (btn) btn.disabled = false;
-      if (label) label.textContent = 'Read Text (No QR/Barcode)';
-      return;
-    }
-
-      statusEl.textContent = 'Text mila ✓';
-
-ocrInProgress = false;
-if (btn) btn.disabled = false;
-if (label) label.textContent = 'Read Text (No QR/Barcode)';
-closeScanner();
+    if (!cleaned) return;
 
     if (scanTarget) {
-      const loc = extractLocationFromText(cleaned);
-      const target = scanTarget;
-      scanTarget = null;
-      fillLocationField(target, loc);
+      const locs = extractStrictLocationCandidates(cleaned);
+      if (locs.length === 0) return;
+      if (locs.length === 1) {
+        const target = scanTarget;
+        scanTarget = null;
+        closeScanner();
+        fillLocationField(target, locs[0].location);
+      } else {
+        statusEl.textContent = 'Multiple match mile, ek chunein 👇';
+        showScanCandidates(locs, 'loc');
+      }
       return;
     }
 
-    const result = extractSapOrDescription(cleaned);
-    searchBox.value = result.value;
-    document.getElementById('clearSearch').classList.add('visible');
-    doSearch(result.value);
-
-    showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
+    const saps = extractAllSapCandidates(cleaned);
+    if (saps.length === 0) return;
+    if (saps.length === 1) {
+      closeScanner();
+      searchBox.value = saps[0].sap;
+      document.getElementById('clearSearch').classList.add('visible');
+      doSearch(saps[0].sap);
+      showToast(`SAP code mila: ${saps[0].sap}`, 'green');
+    } else {
+      statusEl.textContent = 'Multiple match mile, ek chunein 👇';
+      showScanCandidates(saps, 'sap');
+    }
 
   } catch (err) {
     console.error('OCR error:', err);
-    statusEl.textContent = 'OCR fail hua, dobara try karein';
-    showToast('Text padhne mein error aayi', 'red');
     ocrInProgress = false;
-    if (btn) btn.disabled = false;
-    if (label) label.textContent = 'Read Text (No QR/Barcode)';
   }
 }
 
