@@ -1780,7 +1780,7 @@
     <!-- Search -->
         <div class="search-wrap" id="searchWrap">
       <span class="search-icon">🔍</span>
-      <input id="searchBox" type="text" inputmode="search" placeholder="Search SAP code or description..."
+      <input id="searchBox" type="text" inputmode="search" placeholder="Search SAP code or Desc..."
         autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off">
       <button id="clearSearch" onclick="clearSearch()" aria-label="Clear search">✕</button>
       <button id="scanBtn" onclick="openScanner()" aria-label="Scan barcode">
@@ -2317,7 +2317,7 @@ function extractLocationFromText(rawText) {
   // Step 1: "LOC" keyword priority — usi line me uske baad jo bhi likha ho, wahi location
   const lines = text.split(/\r?\n/);
   for (const line of lines) {
-    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+        const m = line.match(/LOC(?:ATION)?\.?\s*[-:]?\s*(.+)/i);
     if (m && m[1] && m[1].trim()) {
       return m[1].trim().toUpperCase();
     }
@@ -2342,7 +2342,7 @@ function extractAllLocationCandidates(rawText) {
 
   const lines = text.split(/\r?\n/);
   lines.forEach(line => {
-    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+        const m = line.match(/LOC(?:ATION)?\.?\s*[-:]?\s*(.+)/i);
     if (m && m[1] && m[1].trim()) {
       const loc = m[1].trim().toUpperCase();
       if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
@@ -2368,7 +2368,7 @@ function extractStrictLocationCandidates(rawText) {
 
   // 1) "LOC" keyword wali line — usmein se bhi strict code hi nikaalo, poora tail text nahi
   text.split(/\r?\n/).forEach(line => {
-    const m = line.match(/LOC\.?\s*[-:]?\s*(.+)/i);
+        const m = line.match(/LOC(?:ATION)?\.?\s*[-:]?\s*(.+)/i);
     if (m && m[1]) {
       const codeMatch = m[1].match(codePattern);
       const loc = codeMatch ? codeMatch[0].toUpperCase() : m[1].trim().toUpperCase();
