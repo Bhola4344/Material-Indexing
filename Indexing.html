@@ -2441,10 +2441,10 @@ function showScanCandidates(candidates, type) {
       const c = candidates[+row.dataset.i];
       list.style.display = 'none';
       closeScanner();
-      if (type === 'sap') {
+            if (type === 'sap') {
         searchBox.value = c.sap;
         document.getElementById('clearSearch').classList.add('visible');
-        doSearch(c.sap);
+        doSearch(c.sap, true);
         showToast(`SAP code select kiya: ${c.sap}`, 'green');
       } else {
         const target = scanTarget;
