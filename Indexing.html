@@ -2524,7 +2524,7 @@ function showScanCandidates(candidates, type) {
       document.getElementById('aiPanelWrapper').style.display = '';
     }
 
-      function doSearch(query) {
+      function doSearch(query, fromScan) {
       if (!query) {closeDropdown(); resetToEmptyState(); return;}
       const q = query.toLowerCase().trim();
       const qNoSep = q.replace(/[-\s]/g, '');
@@ -2553,7 +2553,7 @@ function showScanCandidates(candidates, type) {
         document.getElementById('clearSearch').classList.add('visible');
         showNormalCard();
         renderItem();
-        if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
+        if (fromScan && (!currentItem.location || !currentItem.location.trim())) showUpdateForm();
         document.getElementById('aiPanelWrapper').style.display = '';
         renderAI();
         closeDropdown();
@@ -2926,7 +2926,7 @@ function onScanDecoded(decodedText) {
   const result = extractSapOrDescription(decodedText);
   searchBox.value = result.value;
   document.getElementById('clearSearch').classList.add('visible');
-  doSearch(result.value);
+  doSearch(result.value, true);
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
@@ -3066,7 +3066,7 @@ async function captureAndReadText() {
       closeScanner();
       searchBox.value = saps[0].sap;
       document.getElementById('clearSearch').classList.add('visible');
-      doSearch(saps[0].sap);
+      doSearch(saps[0].sap, true);
       showToast(`SAP code mila: ${saps[0].sap}`, 'green');
     } else {
       statusEl.textContent = 'Multiple match mile, ek chunein 👇';
