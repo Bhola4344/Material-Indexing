@@ -543,85 +543,6 @@
       padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     }
 
-#scannerSettingsBtn {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-#scannerSettingsPanel {
-  background: rgba(255, 255, 255, 0.06);
-  margin: 0 16px 10px;
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.ss-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ss-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.ss-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 2px;
-}
-
-.ss-toggle {
-  position: relative;
-  display: inline-block;
-  width: 42px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.ss-toggle input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.ss-slider {
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 24px;
-  transition: 0.2s;
-}
-
-.ss-slider::before {
-  content: '';
-  position: absolute;
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  top: 3px;
-  background: #fff;
-  border-radius: 50%;
-  transition: 0.2s;
-}
-
-.ss-toggle input:checked + .ss-slider {
-  background: var(--green);
-}
-
-.ss-toggle input:checked + .ss-slider::before {
-  transform: translateX(18px);
-}
    
     .cand-row {
       display: flex;
@@ -1765,23 +1686,7 @@
   <div id="scannerOverlay">
 <div class="scanner-header">
   <h3 id="scannerTitleText">📷 Scan Item Code</h3>
-  <div style="display:flex; align-items:center; gap:8px;">
-    <button id="scannerSettingsBtn" onclick="toggleScannerSettings()" aria-label="Scanner settings">⚙️</button>
-    <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
-  </div>
-</div>
-
-<div id="scannerSettingsPanel" style="display:none;">
-  <div class="ss-row">
-    <div>
-      <div class="ss-title">Scan open after login</div>
-      <div class="ss-sub">Login ke turant baad SAP scanner khud khul jaayega</div>
-    </div>
-    <label class="ss-toggle">
-      <input type="checkbox" id="scanOnLoginToggle" onchange="setScanOnLogin(this.checked)">
-      <span class="ss-slider"></span>
-    </label>
-  </div>
+  <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
 </div>
     <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
@@ -2977,23 +2882,7 @@ let autoOcrTimer = null;
 let torchOn = false;
 let torchSupported = false;
 
-function toggleScannerSettings() {
-  const panel = document.getElementById('scannerSettingsPanel');
-  const opening = panel.style.display === 'none';
-  panel.style.display = opening ? 'block' : 'none';
-  if (opening) {
-    document.getElementById('scanOnLoginToggle').checked =
-      localStorage.getItem('scanOnLoginEnabled') === 'true';
-  }
-}
 
-function setScanOnLogin(checked) {
-  localStorage.setItem('scanOnLoginEnabled', checked ? 'true' : 'false');
-}
-
-function setScanOnLogin(checked) {
-  localStorage.setItem('scanOnLoginEnabled', checked ? 'true' : 'false');
-}
 
 // 👇 YE NAYA FUNCTION ADD KARO
 async function maybeAutoOpenScanner() {
