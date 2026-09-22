@@ -2882,42 +2882,6 @@ let autoOcrTimer = null;
 let torchOn = false;
 let torchSupported = false;
 
-
-
-// 👇 YE NAYA FUNCTION ADD KARO
-async function maybeAutoOpenScanner() {
-  if (localStorage.getItem('scanOnLoginEnabled') !== 'true') return;
-
-  try {
-    const status = await navigator.permissions.query({ name: 'camera' });
-    if (status.state === 'granted') {
-      // Permission already mila hua hai — seedha khol do, tap ki zaroorat nahi
-      openScanner();
-    } else {
-      // Pehli baar — bina tap ke browser block kar dega, isliye ek tap-banner do
-      showAutoScanPrompt();
-    }
-  } catch (e) {
-    // Permissions API support nahi karta — safe fallback
-    showAutoScanPrompt();
-  }
-}
-
-function showAutoScanPrompt() {
-  const banner = document.createElement('div');
-  banner.id = 'autoScanBanner';
-  banner.style.cssText = `
-    position:fixed; top:calc(12px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%);
-    background:var(--accent); color:#fff; padding:10px 18px; border-radius:30px;
-    font-size:13px; font-weight:700; z-index:9997; box-shadow:0 6px 18px rgba(37,99,235,0.35);
-    cursor:pointer; display:flex; align-items:center; gap:8px;
-  `;
-  banner.innerHTML = '📷 Scanner shuru karne ke liye tap karein';
-  banner.onclick = () => { banner.remove(); openScanner(); };
-  document.body.appendChild(banner);
-  setTimeout(() => { if (document.getElementById('autoScanBanner')) banner.remove(); }, 6000);
-}
-
 function toggleTorch() {
   if (!html5QrCode || !torchSupported) return;
   torchOn = !torchOn;
@@ -3016,8 +2980,14 @@ function openScanner(targetId) {
 function closeScanner() {
   document.getElementById('scannerOverlay').classList.remove('open');
   if (html5QrCode) {
-    html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
-    html5QrCode = null;
+    const stopIt = () => html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+    if (torchOn && torchSupported) {
+      html5QrCode.applyVideoConstraints({ advanced: [{ torch: false }] })
+        .catch(() => {})
+        .finally(stopIt);
+    } else {
+      stopIt();
+    }
   }
   torchOn = false;
   torchSupported = false;
@@ -3471,10 +3441,6 @@ statsBody.classList.toggle('collapsed', !statsOpen);
                 showToast(`${data.length.toLocaleString()} items synced`, 'green');
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
         if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
-
-if (localStorage.getItem('scanOnLoginEnabled') === 'true') {
-  setTimeout(() => maybeAutoOpenScanner(), 300);
-}
       })
             .catch((err) => {
         console.error('Load error:', err);
