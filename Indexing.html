@@ -2526,26 +2526,34 @@ function showScanCandidates(candidates, type) {
 
       function doSearch(query) {
       if (!query) {closeDropdown(); resetToEmptyState(); return;}
-      const q = query.toLowerCase();
+      const q = query.toLowerCase().trim();
       const qNoSep = q.replace(/[-\s]/g, '');
       const isNumeric = /^\d+$/.test(query);
       const normalizedQuery = isNumeric ? padSAP(query) : null;
+      const qWords = q.split(/\s+/).filter(Boolean);
       const results = itemMaster.filter(i => {
         const sapStr = String(i.sap).toLowerCase();
         const sapMatch = sapStr.includes(q) || (normalizedQuery && sapStr.includes(normalizedQuery.toLowerCase()));
         const nameLower = i.name.toLowerCase();
-        const nameMatch = nameLower.includes(q) || nameLower.replace(/[-\s]/g, '').includes(qNoSep);
+        const nameMatch = nameLower.includes(q) || nameLower.replace(/[-\s]/g, '').includes(qNoSep)
+          || (qWords.length > 1 && qWords.every(w => nameLower.includes(w)));
         return nameMatch || sapMatch;
+      }).sort((a, b) => {
+        const aName = a.name.toLowerCase(), bName = b.name.toLowerCase();
+        const aScore = aName === q ? 3 : aName.startsWith(q) ? 2 : aName.includes(q) ? 1 : 0;
+        const bScore = bName === q ? 3 : bName.startsWith(q) ? 2 : bName.includes(q) ? 1 : 0;
+        return bScore - aScore;
       }).slice(0, 25);
 
-            const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
-            if (exact) {
+        const exact = results.find(i => i.name.toLowerCase() === q || String(i.sap) === q || (normalizedQuery && String(i.sap) === normalizedQuery));
+        if (exact) {
         currentItem = exact;
         sessionStorage.setItem('lastSearchTerm', exact.name);
         addItemMode = false;
         document.getElementById('clearSearch').classList.add('visible');
         showNormalCard();
         renderItem();
+        if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
         document.getElementById('aiPanelWrapper').style.display = '';
         renderAI();
         closeDropdown();
