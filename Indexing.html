@@ -542,6 +542,86 @@
       padding: 14px;
       padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     }
+
+#scannerSettingsBtn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#scannerSettingsPanel {
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 16px 10px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ss-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ss-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ss-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2px;
+}
+
+.ss-toggle {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.ss-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ss-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  transition: 0.2s;
+}
+
+.ss-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.ss-toggle input:checked + .ss-slider {
+  background: var(--green);
+}
+
+.ss-toggle input:checked + .ss-slider::before {
+  transform: translateX(18px);
+}
    
     .cand-row {
       display: flex;
@@ -809,6 +889,9 @@
       gap: 8px;
       flex-wrap: wrap;
     }
+.btn-short-text {
+  display: none;
+}
 
     .actions-row .btn {
       flex: 1;
@@ -1680,10 +1763,26 @@
 
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
-    <div class="scanner-header">
-      <h3>📷 Scan Item Code</h3>
-      <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+<div class="scanner-header">
+  <h3 id="scannerTitleText">📷 Scan Item Code</h3>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button id="scannerSettingsBtn" onclick="toggleScannerSettings()" aria-label="Scanner settings">⚙️</button>
+    <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+  </div>
+</div>
+
+<div id="scannerSettingsPanel" style="display:none;">
+  <div class="ss-row">
+    <div>
+      <div class="ss-title">Scan open after login</div>
+      <div class="ss-sub">Login ke turant baad SAP scanner khud khul jaayega</div>
     </div>
+    <label class="ss-toggle">
+      <input type="checkbox" id="scanOnLoginToggle" onchange="setScanOnLogin(this.checked)">
+      <span class="ss-slider"></span>
+    </label>
+  </div>
+</div>
     <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
 <div style="display:flex; justify-content:center; padding:10px 0 4px;">
@@ -2267,6 +2366,7 @@ function saveNotifItem(sn) {
       closeDropdown();
       showNormalCard();
       renderItem();
+if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
       document.getElementById('aiPanelWrapper').style.display = '';
       if (!aiPanelOpen) toggleAI();
       renderAI();
@@ -2690,6 +2790,7 @@ function showScanCandidates(candidates, type) {
           addItemMode = false;
           showNormalCard();
           renderItem();
+if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
           document.getElementById('aiPanelWrapper').style.display = '';
           if (!aiPanelOpen) {toggleAI();}
           renderAI();
@@ -2876,6 +2977,20 @@ let autoOcrTimer = null;
 let torchOn = false;
 let torchSupported = false;
 
+function toggleScannerSettings() {
+  const panel = document.getElementById('scannerSettingsPanel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if (opening) {
+    document.getElementById('scanOnLoginToggle').checked =
+      localStorage.getItem('scanOnLoginEnabled') === 'true';
+  }
+}
+
+function setScanOnLogin(checked) {
+  localStorage.setItem('scanOnLoginEnabled', checked ? 'true' : 'false');
+}
+
 function toggleTorch() {
   if (!html5QrCode || !torchSupported) return;
   torchOn = !torchOn;
@@ -2931,6 +3046,16 @@ async function getBackCameraId() {
 
 function openScanner(targetId) {
   scanTarget = targetId || null;
+
+  // 👇 yehi naya part hai
+  const isLocationScan = !!scanTarget;
+  document.getElementById('scannerTitleText').textContent = isLocationScan
+    ? '📷 Scan Location'
+    : '📷 Scan Item Code';
+  document.getElementById('scannerHint').textContent = isLocationScan
+    ? '📷 Camera ko location sticker ke paas le jaayein — apne aap detect ho jaayega'
+    : '📷 Camera ko SAP code sticker ke paas le jaayein — apne aap detect ho jaayega';
+
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
@@ -3358,6 +3483,7 @@ itemMaster.forEach(i =>
     document.addEventListener('DOMContentLoaded', () => {
       if (!sessionStorage.getItem('loggedIn')) {window.location.href = 'index.html'; return;}
             userName = sessionStorage.getItem('userName') || 'Guest';
+
       const firstName = userName.trim().split(/\s+/)[0];
       document.getElementById('welcomeUser').textContent = '👤 ' + firstName;
 
@@ -3418,6 +3544,10 @@ statsBody.classList.toggle('collapsed', !statsOpen);
                 showToast(`${data.length.toLocaleString()} items synced`, 'green');
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
         if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
+
+if (localStorage.getItem('scanOnLoginEnabled') === 'true') {
+  setTimeout(() => openScanner(), 300);
+}
       })
             .catch((err) => {
         console.error('Load error:', err);
