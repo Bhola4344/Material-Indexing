@@ -213,104 +213,6 @@
 
     .forgot-lnk:hover { text-decoration: underline }
 
-    /* ── Scan-on-Login toggle row ── */
-    .scan-toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: #eef1f8;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: 9px 11px;
-      margin-bottom: 14px;
-      transition: border-color .2s, background .2s;
-    }
-
-    .scan-toggle-row.active {
-      border-color: rgba(36, 84, 224, .35);
-      background: rgba(36, 84, 224, .06);
-    }
-
-    .str-left {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 0;
-    }
-
-    .str-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 7px;
-      background: #fff;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-    }
-
-    .str-text-title {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.3;
-    }
-
-    .str-text-sub {
-      font-size: 9.5px;
-      color: var(--muted);
-      line-height: 1.3;
-      margin-top: 1px;
-    }
-
-    .scan-toggle {
-      position: relative;
-      display: inline-block;
-      width: 36px;
-      height: 21px;
-      flex-shrink: 0;
-    }
-
-    .scan-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .scan-slider {
-      position: absolute;
-      inset: 0;
-      background: #cbd3e1;
-      border-radius: 24px;
-      transition: .2s;
-      cursor: pointer;
-    }
-
-    .scan-slider::before {
-      content: '';
-      position: absolute;
-      height: 15px;
-      width: 15px;
-      left: 3px;
-      top: 3px;
-      background: #fff;
-      border-radius: 50%;
-      transition: .2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.25);
-    }
-
-    .scan-toggle input:checked + .scan-slider {
-      background: var(--success);
-    }
-
-    .scan-toggle input:checked + .scan-slider::before {
-      transform: translateX(15px);
-    }
-
     .login-btn {
       width: 100%;
       padding: 9px;
@@ -536,14 +438,6 @@
       .opts-row { font-size: 13px; margin-bottom: 18px; }
       .forgot-lnk { font-size: 14px; }
 
-      .scan-toggle-row { padding: 11px 12px; margin-bottom: 16px; }
-      .str-icon { width: 30px; height: 30px; font-size: 13px; }
-      .str-text-title { font-size: 13px; }
-      .str-text-sub { font-size: 10.5px; }
-      .scan-toggle { width: 40px; height: 23px; }
-      .scan-slider::before { height: 17px; width: 17px; }
-      .scan-toggle input:checked + .scan-slider::before { transform: translateX(17px); }
-
       .login-btn {
         padding: 13px;
         font-size: 15px;
@@ -603,21 +497,6 @@
         <label><input type="checkbox" id="rememberMe"> Remember me</label>
         <button type="button" class="forgot-lnk" onclick="openForgot()">Forgot Password?</button>
       </div>
-
-      <!-- 👇 NEW: Scan on Login toggle -->
-      <div class="scan-toggle-row" id="scanToggleRow">
-        <div class="str-left">
-          <div class="str-icon"><i class="fa fa-camera" aria-hidden="true"></i></div>
-          <div>
-            <div class="str-text-title">Scan on Login</div>
-          </div>
-        </div>
-        <label class="scan-toggle">
-          <input type="checkbox" id="scanOnLoginToggle" onchange="setScanOnLogin(this.checked)">
-          <span class="scan-slider"></span>
-        </label>
-      </div>
-
       <button type="submit" class="login-btn" id="loginBtn">
         <div class="btn-inner" id="btnInner">
           <div class="btn-spinner" id="btnSpinner"></div>
@@ -666,18 +545,7 @@
       const sp = localStorage.getItem('si_savedPass');
       if (su) {document.getElementById('loginUsername').value = su; document.getElementById('rememberMe').checked = true;}
       if (sp) {document.getElementById('loginPassword').value = sp;}
-
-      // 👇 NEW: restore Scan on Login toggle state
-      const scanOn = localStorage.getItem('scanOnLoginEnabled') === 'true';
-      document.getElementById('scanOnLoginToggle').checked = scanOn;
-      document.getElementById('scanToggleRow').classList.toggle('active', scanOn);
     });
-
-    // 👇 NEW: save Scan on Login toggle state (same key used by Indexing.html)
-    function setScanOnLogin(checked) {
-      localStorage.setItem('scanOnLoginEnabled', checked ? 'true' : 'false');
-      document.getElementById('scanToggleRow').classList.toggle('active', checked);
-    }
 
     function toast(msg, isError) {
       const box = document.getElementById('toastBox');
