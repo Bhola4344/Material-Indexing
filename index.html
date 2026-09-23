@@ -667,7 +667,7 @@
       document.getElementById(id).classList.add('active');
     }
 
-    async function enrollFingerprint(){
+        async function enrollFingerprint(){
       const s = document.getElementById('offerStatus');
       if(!window.PublicKeyCredential){
         s.className='status show err'; s.innerText="This device/browser doesn't support fingerprint unlock.";
@@ -675,24 +675,26 @@
       }
       try{
         s.className='status show info'; s.innerText='Opening fingerprint prompt…';
-        await navigator.credentials.create({
+        const cred = await navigator.credentials.create({
           publicKey: {
             challenge: crypto.getRandomValues(new Uint8Array(32)),
             rp: { name: "Store Indexing" },
             user: { id: crypto.getRandomValues(new Uint8Array(16)), name: sessionStorage.getItem('userName')||"user", displayName: sessionStorage.getItem('userName')||"user" },
             pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "required", requireResidentKey: true },
             timeout: 60000
           }
         });
+        const credId = btoa(String.fromCharCode(...new Uint8Array(cred.rawId)));
         localStorage.setItem('si_fpEnabled', 'true');
+        localStorage.setItem('si_fpCredId', credId);
         location.href = 'Indexing.html';
       }catch(err){
         s.className='status show err'; s.innerText='Cancelled: '+err.message;
       }
     }
 
-       async function tryFingerprint(){
+             async function tryFingerprint(){
       const s = document.getElementById('lockStatus');
       if(!window.PublicKeyCredential){
         s.innerText='WebAuthn not available.';
@@ -700,9 +702,19 @@
       }
       try{
         s.innerText='Opening fingerprint prompt…';
-        await navigator.credentials.get({
-          publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), userVerification: "required", timeout: 60000 }
-        });
+        const savedId = localStorage.getItem('si_fpCredId');
+        const publicKeyOpts = {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          userVerification: "required",
+          timeout: 60000
+        };
+        if (savedId) {
+          const binary = atob(savedId);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+          publicKeyOpts.allowCredentials = [{ id: bytes, type: "public-key" }];
+        }
+        await navigator.credentials.get({ publicKey: publicKeyOpts });
         sessionStorage.setItem('loggedIn', 'true');
         location.href = 'Indexing.html';
       }catch(err){
