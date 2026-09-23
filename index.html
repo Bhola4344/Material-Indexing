@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store Index Login</title>
+  <title>Store Index Login — Thin Stripe</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e73ff">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -379,6 +379,24 @@
     }
 
     @media (prefers-reduced-motion:reduce) { * { animation: none !important; transition: none !important } }
+
+.fp-screen { text-align:center; padding: 4px 26px 6px; }
+.fp-big-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #eef1f8; color: var(--primary);
+  display:flex; align-items:center; justify-content:center;
+  font-size: 26px; margin: 4px auto 14px;
+}
+.fp-sub { font-size:12.5px; color:var(--muted); margin-bottom:18px; line-height:1.5 }
+.login-btn.ghost { background:#fff; border:1.5px solid var(--border); color:var(--text) }
+.login-btn.ghost:hover { background:#f8fafc }
+.step { display:none }
+.step.active { display:block }
+.status { font-size: 12px; margin-top: 12px; padding: 9px; border-radius: 8px; display:none; line-height:1.4; }
+.status.show { display:block }
+.status.ok { background: rgba(22,163,74,.12); color: var(--success) }
+.status.err { background: rgba(220,38,38,.12); color: var(--danger) }
+.status.info { background: rgba(36,84,224,.1); color: var(--primary) }
 </style>
 
 </head>
@@ -386,7 +404,8 @@
 <body>
   <div id="toastBox" role="status" aria-live="polite"></div>
   <div class="login-card">
-    <div class="banner"></div>
+        <div class="banner"></div>
+    <div class="step active" id="stepLogin">
     <div class="logo-wrap">
       <div class="logo-badge">
         <svg viewBox="0 0 24 24" fill="none">
@@ -424,9 +443,32 @@
         </div>
       </button>
     </form>
-    <div class="card-footer">
+        <div class="card-footer">
       <span class="footer-text">New here?</span>
       <span class="create-acc-lnk">Create Account</span>
+    </div>
+    </div>
+
+    <div class="step" id="stepOffer">
+      <div class="fp-screen">
+        <div class="fp-big-icon"><i class="fa fa-fingerprint"></i></div>
+        <div class="logo-title" style="margin-bottom:6px">Enable fingerprint unlock?</div>
+        <div class="fp-sub">Skip password next time — unlock with your phone's fingerprint/PIN</div>
+        <button class="login-btn" onclick="enrollFingerprint()"><i class="fa fa-fingerprint" style="margin-right:7px"></i>Enable</button>
+        <button class="login-btn ghost" onclick="location.href='Indexing.html'">Not now</button>
+        <div class="status" id="offerStatus"></div>
+      </div>
+    </div>
+
+    <div class="step" id="stepLock">
+      <div class="fp-screen">
+        <div class="fp-big-icon"><i class="fa fa-fingerprint"></i></div>
+        <div class="logo-title">Welcome back</div>
+        <div class="fp-sub">Unlock with your fingerprint/PIN</div>
+        <button class="login-btn" onclick="tryFingerprint()"><i class="fa fa-fingerprint" style="margin-right:7px"></i>Unlock</button>
+        <button class="login-btn ghost" onclick="show('stepLogin')">Use password instead</button>
+        <div class="status" id="lockStatus"></div>
+      </div>
     </div>
   </div>
 
@@ -463,8 +505,8 @@
     window.addEventListener('DOMContentLoaded', () => {
       const su = localStorage.getItem('si_savedUser');
       const sp = localStorage.getItem('si_savedPass');
-      if (su) {document.getElementById('loginUsername').value = su; document.getElementById('rememberMe').checked = true;}
-      if (sp) {document.getElementById('loginPassword').value = sp;}
+      if (su) {document.getElementById('loginUsername').value = su; document.getElementById('rememberMe').checked = true;}      if (sp) {document.getElementById('loginPassword').value = sp;}
+      if (localStorage.getItem('si_fpEnabled') === 'true') { show('stepLock'); }
     });
 
     function toast(msg, isError) {
@@ -538,8 +580,14 @@
           else {localStorage.removeItem('si_savedUser'); localStorage.removeItem('si_savedPass');}
           sessionStorage.setItem('loggedIn', 'true');
           sessionStorage.setItem('userName', data.name);
-          setSuccess();
-          setTimeout(() => location.href = 'Indexing.html', 1200);
+                    setSuccess();
+          setTimeout(() => {
+            if (localStorage.getItem('si_fpEnabled') === 'true') {
+              location.href = 'Indexing.html';
+            } else {
+              show('stepOffer');
+            }
+          }, 1200);
         } else {
           setError();
         }
@@ -563,12 +611,59 @@
       if (n !== c) {toast('Passwords do not match', true); return;}
       try {
         const res = await fetch(`${WEB_APP_URL}?action=resetPassword&Username=${encodeURIComponent(u)}&NewPassword=${encodeURIComponent(n)}`);
-        const data = await res.json();
-        if (data.status === 'success') {
+        const data = await res.json();        if (data.status === 'success') {
           toast('Password updated successfully!');
           closeForgot();
         } else {toast('Failed — Check Employee ID', true);}
       } catch (e) {toast('Network error', true);}
+    }
+
+    function show(id){
+      document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    async function enrollFingerprint(){
+      const s = document.getElementById('offerStatus');
+      if(!window.PublicKeyCredential){
+        s.className='status show err'; s.innerText="This device/browser doesn't support fingerprint unlock.";
+        return;
+      }
+      try{
+        s.className='status show info'; s.innerText='Opening fingerprint prompt…';
+        await navigator.credentials.create({
+          publicKey: {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            rp: { name: "Store Indexing" },
+            user: { id: crypto.getRandomValues(new Uint8Array(16)), name: sessionStorage.getItem('userName')||"user", displayName: sessionStorage.getItem('userName')||"user" },
+            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+            timeout: 60000
+          }
+        });
+        localStorage.setItem('si_fpEnabled', 'true');
+        location.href = 'Indexing.html';
+      }catch(err){
+        s.className='status show err'; s.innerText='Cancelled: '+err.message;
+      }
+    }
+
+    async function tryFingerprint(){
+      const s = document.getElementById('lockStatus');
+      if(!window.PublicKeyCredential){
+        s.className='status show err'; s.innerText='WebAuthn not available.';
+        return;
+      }
+      try{
+        s.className='status show info'; s.innerText='Opening fingerprint prompt…';
+        await navigator.credentials.get({
+          publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), userVerification: "required", timeout: 60000 }
+        });
+        sessionStorage.setItem('loggedIn', 'true');
+        location.href = 'Indexing.html';
+      }catch(err){
+        s.className='status show err'; s.innerText='Failed: '+err.message;
+      }
     }
   </script>
 </body>
