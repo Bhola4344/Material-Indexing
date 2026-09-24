@@ -3019,6 +3019,8 @@ async function getBackCameraId() {
 }
 
 function openScanner(targetId) {
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
 
   const isLocationScan = !!scanTarget;
@@ -3058,6 +3060,8 @@ function openScanner(targetId) {
 }
 
 function closeScanner() {
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
   document.getElementById('scannerOverlay').classList.remove('open');
   if (html5QrCode) {
     const stopIt = () => html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
