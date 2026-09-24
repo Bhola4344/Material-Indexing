@@ -2396,26 +2396,41 @@ function extractAllSapCandidates(rawText) {
 // ─── Extract SAP code or Description from scanned sticker text ───
 function extractSapOrDescription(rawText) {
   const text = String(rawText || '').trim();
+  const lines = text.split(/\r?\n/);
 
-  // Step 1: SAP code priority — 9 ya 10 digit ka koi bhi number sequence dhoondo
+  // Step 1: "SAP" keyword wali line — usi line ke digits nikaalo (beech me dash/space chalega)
+  for (const line of lines) {
+    const m = line.match(/\bSAP\b\.?\s*(?:CODE)?\s*[-:]?\s*([0-9\- ]{6,})/i);
+    if (m && m[1]) {
+      const digits = m[1].replace(/\D/g, '');
+      if (digits.length >= 6) return { type: 'sap', value: padSAP(digits) };
+    }
+  }
+
+  // Step 2: SAP keyword nahi mila — har line ko check karo, jis line me sirf 9-10 digit hi hon
+  for (const line of lines) {
+    const digits = line.replace(/\D/g, '');
+    if (digits.length === 9 || digits.length === 10) {
+      return { type: 'sap', value: padSAP(digits) };
+    }
+  }
+
+  // Step 3: original fallback — poore text me continuous 10-digit run dhoondo
   const digitMatches = text.match(/(?<!\d)[1-9]\d{9}(?!\d)/g);
   if (digitMatches && digitMatches.length) {
-    // sabse lamba match lo (10-digit priority)
     const best = digitMatches.sort((a, b) => b.length - a.length)[0];
     return { type: 'sap', value: padSAP(best) };
   }
 
-  // Step 2: SAP nahi mila — poora text ko description maan lo
-  // (dash ho ya na ho, doSearch already dash/space ignore karke match karta hai)
+  // Step 4: kuch bhi nahi mila — poora text ko description maan lo
   return { type: 'desc', value: text };
 }
-
 // ─── Extract Location from scanned sticker text ───
 function extractLocationFromText(rawText) {
   const text = String(rawText || '').trim();
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
   // Step 1: "LOC" keyword priority — usi line me uske baad jo bhi likha ho, wahi location
-  const lines = text.split(/\r?\n/);
   for (const line of lines) {
         const m = line.match(/\bLOC(?:ATION)?\b\.?\s*[-:]?\s*(.+)/i);
     if (m && m[1] && m[1].trim()) {
@@ -2423,7 +2438,15 @@ function extractLocationFromText(rawText) {
     }
   }
 
-  // Step 2: "LOC" nahi mila — alphanumeric mixed token dhoondo (letters + digits dono)
+  // Step 2: koi line jisme SIRF ek hi mixed alphanumeric token ho (isolated) — high confidence
+  for (const line of lines) {
+    const lineTokens = line.split(/\s+/).filter(Boolean);
+    if (lineTokens.length === 1 && /[A-Za-z]/.test(lineTokens[0]) && /\d/.test(lineTokens[0])) {
+      return lineTokens[0].toUpperCase();
+    }
+  }
+
+  // Step 3: LOC nahi mila, isolated line bhi nahi — poore text me mixed tokens me se sabse lamba
   const tokens = text.split(/\s+/).filter(Boolean);
   const mixed = tokens.filter(t => /[A-Za-z]/.test(t) && /\d/.test(t));
   if (mixed.length) {
@@ -2431,9 +2454,10 @@ function extractLocationFromText(rawText) {
     return mixed[0].toUpperCase();
   }
 
-  // Step 3: kuch match nahi hua — poora cleaned text hi location maan lo
+  // Step 4: kuch match nahi hua — poora cleaned text hi location maan lo
   return text.toUpperCase();
 }
+
 
 function extractAllLocationCandidates(rawText) {
   const text = String(rawText || '').trim();
@@ -3056,7 +3080,7 @@ function openScanner(targetId) {
    autoOcrTimer = setInterval(() => {
     const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
     if (!ocrInProgress && !listVisible) captureAndReadText();
-   }, 2000);
+   }, 800);
 }
 
 function closeScanner() {
@@ -3095,7 +3119,7 @@ async function captureAndReadText() {
   const statusEl = document.getElementById('scannerStatus');
 
   try {
-    const MAX_DIM = 720;
+    const MAX_DIM = 480;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
     if (targetW > MAX_DIM) {
@@ -3111,9 +3135,10 @@ async function captureAndReadText() {
 
     if (!ocrWorker) {
       ocrWorker = await Tesseract.createWorker('eng');
-      await ocrWorker.setParameters({
+            await ocrWorker.setParameters({
         tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
-        tessedit_pageseg_mode: '6'
+        tessedit_pageseg_mode: '6',
+        tessedit_ocr_engine_mode: '1'
       });
     }
     const { data: { text } } = await ocrWorker.recognize(canvas);
