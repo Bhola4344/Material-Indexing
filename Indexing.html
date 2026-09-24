@@ -3020,7 +3020,6 @@ async function getBackCameraId() {
 function openScanner(targetId) {
   scanTarget = targetId || null;
 
-  // 👇 yehi naya part hai
   const isLocationScan = !!scanTarget;
   document.getElementById('scannerTitleText').textContent = isLocationScan
     ? '📷 Scan Location'
@@ -3030,37 +3029,31 @@ function openScanner(targetId) {
     : '📷 Camera ko SAP code sticker ke paas le jaayein — apne aap detect ho jaayega';
 
   document.getElementById('scannerOverlay').classList.add('open');
-document.getElementById('scannerOverlay').classList.remove('cam-ready');
+  document.getElementById('scannerOverlay').classList.remove('cam-ready');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
   html5QrCode = new Html5Qrcode("scannerReader");
 
-  getBackCameraId().then(deviceId => {
-    const cameraConfig = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" };
-    html5QrCode.start(
-      cameraConfig,
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      onScanDecoded,
-      (errMsg) => { /* per-frame scan errors, ignore silently */ }
-    ).then(() => {
-setTimeout(() => {
-  document.getElementById('scannerOverlay').classList.add('cam-ready');
-}, 250);
-      // Camera start hone ke baad thoda ruk kar torch check karo, aur agar pehli baar na mile to ek retry bhi karo
-      setTimeout(() => {
-        checkTorchSupport();
-        setTimeout(checkTorchSupport, 800); // retry — kuch devices pe pehli baar capability late aati hai
-      }, 400);
-    }).catch(err => {
-      document.getElementById('scannerStatus').textContent = 'Camera access failed';
-    });
+  // seedha environment camera se start — deviceId lookup ka wait nahi
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 150 } },
+    onScanDecoded,
+    (errMsg) => { /* per-frame scan errors, ignore silently */ }
+  ).then(() => {
+    setTimeout(() => {
+      document.getElementById('scannerOverlay').classList.add('cam-ready');
+    }, 250);
+    setTimeout(checkTorchSupport, 500);
+  }).catch(err => {
+    document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   autoOcrTimer = setInterval(() => {
     const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
     if (!ocrInProgress && !listVisible) captureAndReadText();
-  }, 1200);
+  }, 1800);
 }
 
 function closeScanner() {
@@ -3097,7 +3090,7 @@ async function captureAndReadText() {
   const statusEl = document.getElementById('scannerStatus');
 
   try {
-    const MAX_DIM = 900;
+    const MAX_DIM = 640;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
     if (targetW > MAX_DIM) {
