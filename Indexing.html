@@ -594,6 +594,12 @@
   from { transform: translateY(14px); }
   to   { transform: translateY(173px); }
 }
+.scan-frame { visibility: hidden; }
+.scan-frame .corner, .scan-line { animation-play-state: paused; }
+
+#scannerOverlay.cam-ready .scan-frame { visibility: visible; }
+#scannerOverlay.cam-ready .scan-frame .corner,
+#scannerOverlay.cam-ready .scan-line { animation-play-state: running; }
     .scanner-hint {
       text-align: center;
       color: rgba(255, 255, 255, 0.65);
@@ -3024,6 +3030,7 @@ function openScanner(targetId) {
     : '📷 Camera ko SAP code sticker ke paas le jaayein — apne aap detect ho jaayega';
 
   document.getElementById('scannerOverlay').classList.add('open');
+document.getElementById('scannerOverlay').classList.remove('cam-ready');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
   html5QrCode = new Html5Qrcode("scannerReader");
@@ -3036,6 +3043,9 @@ function openScanner(targetId) {
       onScanDecoded,
       (errMsg) => { /* per-frame scan errors, ignore silently */ }
     ).then(() => {
+setTimeout(() => {
+  document.getElementById('scannerOverlay').classList.add('cam-ready');
+}, 250);
       // Camera start hone ke baad thoda ruk kar torch check karo, aur agar pehli baar na mile to ek retry bhi karo
       setTimeout(() => {
         checkTorchSupport();
