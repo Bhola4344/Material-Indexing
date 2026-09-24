@@ -487,29 +487,47 @@
     }
     .loc-scan-btn-sm svg { width: 14px; height: 14px; }
 
-    /* ─── Scanner Overlay ─── */
+        /* ─── Scanner Overlay (full-screen, PhonePe-style) ─── */
     #scannerOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(10, 14, 22, 0.95);
+      background: #1c1f1a;
       z-index: 10000;
       display: none;
-      flex-direction: column;
     }
     #scannerOverlay.open {
-      display: flex;
+      display: block;
     }
+
+    #scannerReader {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    #scannerReader video, #scannerReader canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+    }
+
     .scanner-header {
+      position: absolute;
+      z-index: 20;
+      top: 0; left: 0; right: 0;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      padding: 16px;
-      padding-top: calc(16px + env(safe-area-inset-top, 0px));
+      padding: calc(18px + env(safe-area-inset-top, 0px)) 18px 0;
       color: #fff;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), transparent);
     }
     .scanner-header h3 {
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -520,27 +538,107 @@
       color: #fff;
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: 50%;
       font-size: 16px;
       cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
-    #scannerReader {
-      flex: 1;
-      display: flex;
+
+    /* corner-bracket scan frame */
+    .scan-frame-overlay {
+      position: absolute;
+      z-index: 15;
+      top: 36%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 78vw;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
+      pointer-events: none;
+    }
+    .corner { position: absolute; width: 34px; height: 34px; }
+    .corner span { position: absolute; background: #8b3ffa; border-radius: 3px; box-shadow: 0 0 8px rgba(139,63,250,.55); }
+    .corner.tl { top: 10px; left: 10px; }
+    .corner.tl .h { top: 0; left: 0; width: 34px; height: 3.5px; }
+    .corner.tl .v { top: 0; left: 0; width: 3.5px; height: 34px; }
+    .corner.tr { top: 10px; right: 10px; }
+    .corner.tr .h { top: 0; right: 0; width: 34px; height: 3.5px; }
+    .corner.tr .v { top: 0; right: 0; width: 3.5px; height: 34px; }
+    .corner.bl { bottom: 10px; left: 10px; }
+    .corner.bl .h { bottom: 0; left: 0; width: 34px; height: 3.5px; }
+    .corner.bl .v { bottom: 0; left: 0; width: 3.5px; height: 34px; }
+    .corner.br { bottom: 10px; right: 10px; }
+    .corner.br .h { bottom: 0; right: 0; width: 34px; height: 3.5px; }
+    .corner.br .v { bottom: 0; right: 0; width: 3.5px; height: 34px; }
+
+    .scan-line {
+      position: absolute;
+      left: 18px; right: 18px;
+      height: 2.5px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, transparent, #b794f6, #8b3ffa, #b794f6, transparent);
+      box-shadow: 0 0 12px 2px rgba(139,63,250,.6);
+      animation: scanLineMove 2.2s ease-in-out infinite;
+    }
+    @keyframes scanLineMove {
+      0% { top: 20px; opacity: 0; }
+      10% { opacity: 1; }
+      50% { top: calc(100% - 22px); }
+      90% { opacity: 1; }
+      100% { top: 20px; opacity: 0; }
+    }
+
+    .scanner-status {
+      position: absolute;
+      z-index: 20;
+      top: calc(36% + 44px);
+      left: 0; right: 0;
+      text-align: center;
+      color: rgba(255,255,255,.85);
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    #torchBtn {
+      position: absolute;
+      z-index: 20;
+      left: 50%;
+      bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.16);
+      border: none;
+      color: #fff;
+      display: none;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
     }
-    #scannerReader video, #scannerReader canvas {
-      border-radius: 12px;
-      max-width: 100%;
+    #torchBtn.on {
+      background: #f5c518 !important;
+      color: #1a1204 !important;
     }
+
+    #scanCandidatesList {
+      position: absolute;
+      z-index: 20;
+      left: 0; right: 0;
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    }
+
     .scanner-hint {
+      position: absolute;
+      z-index: 20;
+      left: 0; right: 0;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
       text-align: center;
-      color: rgba(255, 255, 255, 0.65);
+      color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
-      padding: 14px;
-      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+      padding: 0 24px;
     }
 
    
@@ -1682,25 +1780,34 @@
    <!-- Floating dropdown -->
   <div id="dropdown"></div>
 
-    <!-- Scanner Overlay -->
+        <!-- Scanner Overlay -->
   <div id="scannerOverlay">
-<div class="scanner-header">
-  <h3 id="scannerTitleText">📷 Scan Item Code</h3>
-  <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
-</div>
     <div id="scannerReader"></div>
+
+    <div class="scanner-header">
+      <h3 id="scannerTitleText">📷 Scan Item Code</h3>
+      <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+    </div>
+
+    <div class="scan-frame-overlay">
+      <div class="corner tl"><span class="h"></span><span class="v"></span></div>
+      <div class="corner tr"><span class="h"></span><span class="v"></span></div>
+      <div class="corner bl"><span class="h"></span><span class="v"></span></div>
+      <div class="corner br"><span class="h"></span><span class="v"></span></div>
+      <div class="scan-line"></div>
+    </div>
+
     <div class="scanner-status" id="scannerStatus"></div>
-<div style="display:flex; justify-content:center; padding:10px 0 4px;">
-  <button id="torchBtn" onclick="toggleTorch()" aria-label="Toggle torch"
-    style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); color:#fff; display:none; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s, color 0.2s;">
-    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 2h6v4l1.5 3v11a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 7.5 20V9L9 6V2z"/>
-      <line x1="9" y1="6" x2="15" y2="6"/>
-      <line x1="10" y1="12" x2="14" y2="12"/>
-    </svg>
-  </button>
-</div>
-        <div id="scanCandidatesList" style="display:none;"></div>
+
+    <button id="torchBtn" onclick="toggleTorch()" aria-label="Toggle torch">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 2h6v4l1.5 3v11a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 7.5 20V9L9 6V2z"/>
+        <line x1="9" y1="6" x2="15" y2="6"/>
+        <line x1="10" y1="12" x2="14" y2="12"/>
+      </svg>
+    </button>
+
+    <div id="scanCandidatesList" style="display:none;"></div>
     <div class="scanner-hint" id="scannerHint">📷 Camera ko SAP code ya location sticker ke paas le jaayein — apne aap detect ho jaayega</div>
   </div>
 
