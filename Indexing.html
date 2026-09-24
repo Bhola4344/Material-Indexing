@@ -3098,9 +3098,9 @@ function openScanner(targetId) {
 
   getBackCameraId().then(deviceId => {
     const cameraConfig = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" };
-    html5QrCode.start(
+        html5QrCode.start(
       cameraConfig,
-      { fps: 10, qrbox: { width: 250, height: 150 } },
+      { fps: 10 },
       onScanDecoded,
       (errMsg) => { /* per-frame scan errors, ignore silently */ }
     ).then(() => {
