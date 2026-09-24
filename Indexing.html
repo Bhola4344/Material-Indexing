@@ -2959,6 +2959,7 @@ function viewPhotoFor(sn) {
 // ─── Scanner ───
 let html5QrCode = null;
 let ocrWorker = null;
+let ocrCanvas = null;
 let scanTarget = null; // null = search box; warna location input ki id
 let autoOcrTimer = null;
 let torchOn = false;
@@ -3050,10 +3051,10 @@ function openScanner(targetId) {
   });
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
-  autoOcrTimer = setInterval(() => {
+   autoOcrTimer = setInterval(() => {
     const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
     if (!ocrInProgress && !listVisible) captureAndReadText();
-  }, 1800);
+   }, 2000);
 }
 
 function closeScanner() {
@@ -3090,7 +3091,7 @@ async function captureAndReadText() {
   const statusEl = document.getElementById('scannerStatus');
 
   try {
-    const MAX_DIM = 640;
+    const MAX_DIM = 720;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
     if (targetW > MAX_DIM) {
@@ -3098,7 +3099,8 @@ async function captureAndReadText() {
       targetW = MAX_DIM;
       targetH = Math.round(videoEl.videoHeight * scale);
     }
-    const canvas = document.createElement('canvas');
+    if (!ocrCanvas) ocrCanvas = document.createElement('canvas');
+    const canvas = ocrCanvas;
     canvas.width = targetW;
     canvas.height = targetH;
     canvas.getContext('2d').drawImage(videoEl, 0, 0, targetW, targetH);
