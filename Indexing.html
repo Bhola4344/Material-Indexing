@@ -524,82 +524,17 @@
       font-size: 16px;
       cursor: pointer;
     }
-    .scanner-stage {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-#scannerReader {
-  width: 100%;
-}
-#scannerReader video, #scannerReader canvas {
-  max-width: 100%;
-}
-#scannerReader #qr-shaded-region {
-  display: none !important;
-}
-
-/* ─── Scan Frame ─── */
-/* ─── Scan Frame ─── */
-.scan-frame {
-  --d: 8px;
-  --s: 1.6s;
-  --c1: #2563eb;
-  --c2: #22d3ee;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(78vw, 300px);
-  height: 190px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-.scan-frame .corner {
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  border: 0 solid var(--c1);
-  will-change: transform;
-  animation-duration: var(--s);
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-.scan-frame .tl { top: 0;    left: 0;    border-top-width: 5px;    border-left-width: 5px;   border-top-left-radius: 18px;     animation-name: cmTL; }
-.scan-frame .tr { top: 0;    right: 0;   border-top-width: 5px;    border-right-width: 5px;  border-top-right-radius: 18px;    animation-name: cmTR; border-color: var(--c2); }
-.scan-frame .bl { bottom: 0; left: 0;    border-bottom-width: 5px; border-left-width: 5px;   border-bottom-left-radius: 18px;  animation-name: cmBL; border-color: var(--c2); }
-.scan-frame .br { bottom: 0; right: 0;   border-bottom-width: 5px; border-right-width: 5px;  border-bottom-right-radius: 18px; animation-name: cmBR; }
-
-@keyframes cmTL { from { transform: translate(0, 0); } to { transform: translate(var(--d), var(--d)); } }
-@keyframes cmTR { from { transform: translate(0, 0); } to { transform: translate(calc(var(--d) * -1), var(--d)); } }
-@keyframes cmBL { from { transform: translate(0, 0); } to { transform: translate(var(--d), calc(var(--d) * -1)); } }
-@keyframes cmBR { from { transform: translate(0, 0); } to { transform: translate(calc(var(--d) * -1), calc(var(--d) * -1)); } }
-
-.scan-line {
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 0;
-  height: 3px;
-  border-radius: 3px;
-  background: var(--c2);
-  box-shadow: 0 0 8px 1px rgba(34, 211, 238, 0.7);
-  will-change: transform;
-  animation: scanMove 1.1s ease-in-out infinite alternate;
-}
-@keyframes scanMove {
-  from { transform: translateY(14px); }
-  to   { transform: translateY(173px); }
-}
-.scan-frame { visibility: hidden; }
-.scan-frame .corner, .scan-line { animation-play-state: paused; }
-
-#scannerOverlay.cam-ready .scan-frame { visibility: visible; }
-#scannerOverlay.cam-ready .scan-frame .corner,
-#scannerOverlay.cam-ready .scan-line { animation-play-state: running; }
+    #scannerReader {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #scannerReader video, #scannerReader canvas {
+      border-radius: 12px;
+      max-width: 100%;
+    }
     .scanner-hint {
       text-align: center;
       color: rgba(255, 255, 255, 0.65);
@@ -1753,16 +1688,7 @@
   <h3 id="scannerTitleText">📷 Scan Item Code</h3>
   <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
 </div>
-    <div class="scanner-stage">
-  <div id="scannerReader"></div>
-  <div class="scan-frame">
-    <i class="corner tl"></i>
-    <i class="corner tr"></i>
-    <i class="corner bl"></i>
-    <i class="corner br"></i>
-    <span class="scan-line"></span>
-  </div>
-</div>
+    <div id="scannerReader"></div>
     <div class="scanner-status" id="scannerStatus"></div>
 <div style="display:flex; justify-content:center; padding:10px 0 4px;">
   <button id="torchBtn" onclick="toggleTorch()" aria-label="Toggle torch"
@@ -2959,7 +2885,6 @@ function viewPhotoFor(sn) {
 // ─── Scanner ───
 let html5QrCode = null;
 let ocrWorker = null;
-let ocrCanvas = null;
 let scanTarget = null; // null = search box; warna location input ki id
 let autoOcrTimer = null;
 let torchOn = false;
@@ -3019,10 +2944,9 @@ async function getBackCameraId() {
 }
 
 function openScanner(targetId) {
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
 
+  // 👇 yehi naya part hai
   const isLocationScan = !!scanTarget;
   document.getElementById('scannerTitleText').textContent = isLocationScan
     ? '📷 Scan Location'
@@ -3032,36 +2956,36 @@ function openScanner(targetId) {
     : '📷 Camera ko SAP code sticker ke paas le jaayein — apne aap detect ho jaayega';
 
   document.getElementById('scannerOverlay').classList.add('open');
-  document.getElementById('scannerOverlay').classList.remove('cam-ready');
   document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
   html5QrCode = new Html5Qrcode("scannerReader");
 
-  // seedha environment camera se start — deviceId lookup ka wait nahi
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 150 } },
-    onScanDecoded,
-    (errMsg) => { /* per-frame scan errors, ignore silently */ }
-  ).then(() => {
-    setTimeout(() => {
-      document.getElementById('scannerOverlay').classList.add('cam-ready');
-    }, 250);
-    setTimeout(checkTorchSupport, 500);
-  }).catch(err => {
-    document.getElementById('scannerStatus').textContent = 'Camera access failed';
+  getBackCameraId().then(deviceId => {
+    const cameraConfig = deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" };
+    html5QrCode.start(
+      cameraConfig,
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      onScanDecoded,
+      (errMsg) => { /* per-frame scan errors, ignore silently */ }
+    ).then(() => {
+      // Camera start hone ke baad thoda ruk kar torch check karo, aur agar pehli baar na mile to ek retry bhi karo
+      setTimeout(() => {
+        checkTorchSupport();
+        setTimeout(checkTorchSupport, 800); // retry — kuch devices pe pehli baar capability late aati hai
+      }, 400);
+    }).catch(err => {
+      document.getElementById('scannerStatus').textContent = 'Camera access failed';
+    });
   });
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
-   autoOcrTimer = setInterval(() => {
+  autoOcrTimer = setInterval(() => {
     const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
     if (!ocrInProgress && !listVisible) captureAndReadText();
-   }, 2000);
+  }, 1200);
 }
 
 function closeScanner() {
-  document.body.style.overflow = '';
-  document.documentElement.style.overflow = '';
   document.getElementById('scannerOverlay').classList.remove('open');
   if (html5QrCode) {
     const stopIt = () => html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
@@ -3095,7 +3019,7 @@ async function captureAndReadText() {
   const statusEl = document.getElementById('scannerStatus');
 
   try {
-    const MAX_DIM = 720;
+    const MAX_DIM = 900;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
     if (targetW > MAX_DIM) {
@@ -3103,8 +3027,7 @@ async function captureAndReadText() {
       targetW = MAX_DIM;
       targetH = Math.round(videoEl.videoHeight * scale);
     }
-    if (!ocrCanvas) ocrCanvas = document.createElement('canvas');
-    const canvas = ocrCanvas;
+    const canvas = document.createElement('canvas');
     canvas.width = targetW;
     canvas.height = targetH;
     canvas.getContext('2d').drawImage(videoEl, 0, 0, targetW, targetH);
