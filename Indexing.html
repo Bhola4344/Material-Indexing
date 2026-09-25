@@ -2240,11 +2240,10 @@ function saveNotifItem(sn) {
   btn.classList.add('saved');
 
   item.location = loc;
-  pendingUpdates[sn] = loc;
+  pendingUpdates[sn] = { location: loc, ts: Date.now() };
   renderStats();
 
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
-    .then(() => { delete pendingUpdates[sn]; })
     .catch(() => showToast("Server sync failed", "red"));
 
   setTimeout(() => {
@@ -2955,7 +2954,7 @@ if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
   btn.disabled = true;
   btn.textContent = '⏳ Saving...';
   currentItem.location = loc;
-  pendingUpdates[sn] = loc;
+  pendingUpdates[sn] = { location: loc, ts: Date.now() };
   renderStats();
 
   const pill = document.querySelector('.loc-pill');
@@ -2963,7 +2962,7 @@ if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
   showToast("Saved! Syncing…", "green");
 
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
-    .then(() => {delete pendingUpdates[sn]; showToast("Server sync done ✓", "green");})
+    .then(() => {showToast("Server sync done ✓", "green");})
     .catch(() => showToast("Server sync failed", "red"));
 
       setTimeout(() => {if (btn) {btn.disabled = false; btn.textContent = 'Updated ✓';} }, 600);
@@ -3530,9 +3529,21 @@ statsBody.classList.toggle('collapsed', !statsOpen);
       .then(r => {if (!cached) prog.textContent = 'Parsing data…'; return r.json();})
             .then(data => {
         itemMaster = data;
+                const now = Date.now();
         Object.keys(pendingUpdates).forEach(sn => {
           const it = itemMaster.find(i => String(i.sn) === String(sn));
-          if (it) it.location = pendingUpdates[sn];
+          const pend = pendingUpdates[sn];
+          if (!it || !pend) return;
+          const serverLoc = String(it.location || '').trim().toUpperCase();
+          const pendLoc = String(pend.location || '').trim().toUpperCase();
+          if (serverLoc === pendLoc) {
+            delete pendingUpdates[sn];
+          } else if (now - pend.ts > 120000) {
+            delete pendingUpdates[sn];
+            showToast("⚠️ Ek location update save nahi ho paya, dobara try karein", "amber");
+          } else {
+            it.location = pend.location;
+          }
         });
         Object.keys(pendingStockUpdates).forEach(sap => {
           const it = itemMaster.find(i => padSAP(String(i.sap || '').trim()) === sap);
@@ -3573,9 +3584,21 @@ statsBody.classList.toggle('collapsed', !statsOpen);
       fetch(API + '?action=getItems')
         .then(r => r.json())
         .then(data => {
+                    const now = Date.now();
           Object.keys(pendingUpdates).forEach(sn => {
             const it = data.find(i => String(i.sn) === String(sn));
-            if (it) it.location = pendingUpdates[sn];
+            const pend = pendingUpdates[sn];
+            if (!it || !pend) return;
+            const serverLoc = String(it.location || '').trim().toUpperCase();
+            const pendLoc = String(pend.location || '').trim().toUpperCase();
+            if (serverLoc === pendLoc) {
+              delete pendingUpdates[sn];
+            } else if (now - pend.ts > 120000) {
+              delete pendingUpdates[sn];
+              showToast("⚠️ Ek location update save nahi ho paya, dobara try karein", "amber");
+            } else {
+              it.location = pend.location;
+            }
           });
           Object.keys(pendingStockUpdates).forEach(sap => {
             const it = data.find(i => padSAP(String(i.sap || '').trim()) === sap);
