@@ -1724,9 +1724,31 @@
   width: 20px; height: 20px; align-items: center; justify-content: center;
   cursor: pointer; font-size: 10px; color: var(--muted); flex-shrink: 0; padding: 0;
 }
-.notif-live-badge {
-  font-size: 10.5px; font-weight: 700; color: var(--amber); background: rgba(180,83,9,0.1);
-  padding: 5px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
+
+.notif-scan-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, color 0.15s;
+}
+.notif-scan-btn:active {
+  transform: scale(0.9);
+  color: var(--accent2);
+}
+.notif-scan-btn svg {
+  width: 19px;
+  height: 19px;
+  display: block;
 }
   </style>
 </head>
@@ -1826,11 +1848,16 @@
                 <button class="notif-close" onclick="closeNotif()">✕</button>
       </div>
     </div>
-            <div class="notif-search-wrap">
+              <div class="notif-search-wrap">
         <span class="notif-search-icon">🔍</span>
         <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
         <button id="notifSearchClear" onclick="clearNotifSearch()" style="display:none;">✕</button>
-        <span class="notif-live-badge" id="notifLiveBadge">0 found</span>
+                        <button type="button" class="notif-scan-btn" onclick="openScanner('notifSearchBox')" aria-label="Scan item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+            <line x1="7" y1="12" x2="17" y2="12"/>
+          </svg>
+        </button>
       </div>
       <div class="notif-list" id="notifList"></div>
       <div class="notif-footer">Tap Save ✓ to assign — list updates live</div>
@@ -2178,8 +2205,7 @@ function renderNotifList() {
   document.getElementById('bellBadge').textContent = totalCount;
   document.getElementById('bellBadge').classList.toggle('hidden', totalCount === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', totalCount > 0);
-    document.getElementById('notifCountBadge').textContent = totalCount;
-  document.getElementById('notifLiveBadge').textContent = (notifSearchQuery ? items.length : totalCount) + ' found';
+      document.getElementById('notifCountBadge').textContent = totalCount;
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
     : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
@@ -2520,7 +2546,16 @@ function fillLocationField(targetId, loc) {
   showToast(`Location mila: ${inp.value}`, 'green');
 }
 
-
+function fillNotifSearchField(val) {
+  const inp = document.getElementById('notifSearchBox');
+  if (!inp) return;
+  inp.value = val;
+  notifSearchQuery = val.trim();
+  document.getElementById('notifSearchClear').style.display = notifSearchQuery ? 'flex' : 'none';
+  lastRenderedNotifQuery = notifSearchQuery;
+  renderNotifList();
+  showToast(`Search: ${val}`, 'green');
+}
 
 function showScanCandidates(candidates, type) {
   const list = document.getElementById('scanCandidatesList');
@@ -2538,11 +2573,14 @@ function showScanCandidates(candidates, type) {
       const c = candidates[+row.dataset.i];
       list.style.display = 'none';
       closeScanner();
-            if (type === 'sap') {
+                       if (type === 'sap') {
         searchBox.value = c.sap;
         document.getElementById('clearSearch').classList.add('visible');
         doSearch(c.sap, true);
         showToast(`SAP code select kiya: ${c.sap}`, 'green');
+      } else if (type === 'notifsap') {
+        scanTarget = null;
+        fillNotifSearchField(c.sap);
       } else {
         const target = scanTarget;
         scanTarget = null;
@@ -3015,6 +3053,12 @@ function checkTorchSupport() {
 function onScanDecoded(decodedText) {
   const target = scanTarget;
   closeScanner();
+  if (target === 'notifSearchBox') {
+    const result = extractSapOrDescription(decodedText);
+    scanTarget = null;
+    fillNotifSearchField(result.value);
+    return;
+  }
   if (target) {
     const loc = extractLocationFromText(decodedText);
     scanTarget = null;
@@ -3046,7 +3090,7 @@ function openScanner(targetId) {
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
 
-  const isLocationScan = !!scanTarget;
+  const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
     ? '📷 Scan Location'
     : '📷 Scan Item Code';
@@ -3144,6 +3188,20 @@ async function captureAndReadText() {
     ocrInProgress = false;
 
     if (!cleaned) return;
+
+        if (scanTarget === 'notifSearchBox') {
+      const saps = extractAllSapCandidates(cleaned);
+      if (saps.length === 0) return;
+      if (saps.length === 1) {
+        scanTarget = null;
+        closeScanner();
+        fillNotifSearchField(saps[0].sap);
+      } else {
+        statusEl.textContent = 'Multiple matches — pick one 👇';
+        showScanCandidates(saps, 'notifsap');
+      }
+      return;
+    }
 
     if (scanTarget) {
       const locs = extractStrictLocationCandidates(cleaned);
