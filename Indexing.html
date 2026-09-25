@@ -524,6 +524,93 @@
       font-size: 16px;
       cursor: pointer;
     }
+
+#scannerSettingsBtn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+#scannerSettingsBtn.active {
+  background: var(--accent);
+}
+
+#scannerSettingsPopover {
+  position: absolute;
+  top: 56px;
+  right: 16px;
+  width: 230px;
+  background: #161c28;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.4);
+  padding: 14px;
+  z-index: 10001;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+#scannerSettingsPopover.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.scan-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.scan-settings-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.scan-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.scan-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.scan-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.18);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.scan-slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.scan-switch input:checked + .scan-slider {
+  background: var(--green);
+}
+.scan-switch input:checked + .scan-slider::before {
+  transform: translateX(18px);
+}
     .scanner-stage {
   flex: 1;
   position: relative;
@@ -1771,9 +1858,21 @@
 
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
-<div class="scanner-header">
+<div class="scanner-header" style="position:relative;">
   <h3 id="scannerTitleText">📷 Scan Item Code</h3>
-  <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <button id="scannerSettingsBtn" onclick="toggleScannerSettings()" aria-label="Scanner settings">⚙️</button>
+    <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
+  </div>
+  <div id="scannerSettingsPopover">
+    <div class="scan-settings-row">
+      <span class="scan-settings-label">Auto-open on login</span>
+      <label class="scan-switch">
+        <input type="checkbox" id="autoOpenScannerToggle" onchange="onAutoOpenToggleChange(this.checked)">
+        <span class="scan-slider"></span>
+      </label>
+    </div>
+  </div>
 </div>
     <div class="scanner-stage">
   <div id="scannerReader"></div>
@@ -3150,6 +3249,24 @@ function closeScanner() {
   document.getElementById('scanCandidatesList').style.display = 'none';
 }
 
+const AUTO_OPEN_SCANNER_KEY = 'autoOpenScannerOnLogin';
+
+function getAutoOpenScannerPref() {
+  return localStorage.getItem(AUTO_OPEN_SCANNER_KEY) === 'true';
+}
+
+function onAutoOpenToggleChange(isOn) {
+  localStorage.setItem(AUTO_OPEN_SCANNER_KEY, isOn ? 'true' : 'false');
+}
+
+function toggleScannerSettings() {
+  const pop = document.getElementById('scannerSettingsPopover');
+  const btn = document.getElementById('scannerSettingsBtn');
+  const willOpen = !pop.classList.contains('open');
+  pop.classList.toggle('open', willOpen);
+  btn.classList.toggle('active', willOpen);
+}
+
 // ─── OCR (plain text) capture ───
 let ocrInProgress = false;
 
@@ -3565,7 +3682,8 @@ statsBody.classList.toggle('collapsed', !statsOpen);
       dlBody.classList.toggle('collapsed', !dlOpen);
       dlBtn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
 
-openScanner();
+document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPref();
+if (getAutoOpenScannerPref()) openScanner();
     });
 
     function logout() {
