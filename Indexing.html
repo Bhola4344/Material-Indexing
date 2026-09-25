@@ -1775,7 +1775,7 @@
   </button>
 </div>
         <div id="scanCandidatesList" style="display:none;"></div>
-    <div class="scanner-hint" id="scannerHint">📷 Camera ko SAP code ya location sticker ke paas le jaayein — apne aap detect ho jaayega</div>
+    <div class="scanner-hint" id="scannerHint">📷 Align the sticker in frame — auto-detects</div>
   </div>
 
   <div class="app-shell">
@@ -3052,12 +3052,11 @@ function openScanner(targetId) {
     ? '📷 Scan Location'
     : '📷 Scan Item Code';
   document.getElementById('scannerHint').textContent = isLocationScan
-    ? '📷 Camera ko location sticker ke paas le jaayein — apne aap detect ho jaayega'
-    : '📷 Camera ko SAP code sticker ke paas le jaayein — apne aap detect ho jaayega';
+  ? '📷 Align the location sticker in frame'
+  : '📷 Align the SAP code sticker in frame';
 
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerOverlay').classList.remove('cam-ready');
-  document.getElementById('scannerStatus').textContent = '🔎 Scanning...';
   ocrInProgress = false;
   html5QrCode = new Html5Qrcode("scannerReader");
 
@@ -3156,7 +3155,7 @@ async function captureAndReadText() {
         closeScanner();
         fillLocationField(target, locs[0].location);
       } else {
-        statusEl.textContent = 'Multiple match mile, ek chunein 👇';
+        statusEl.textContent = 'Multiple matches — pick one 👇';
         showScanCandidates(locs, 'loc');
       }
       return;
@@ -3171,7 +3170,7 @@ async function captureAndReadText() {
       doSearch(saps[0].sap, true);
       showToast(`SAP code mila: ${saps[0].sap}`, 'green');
     } else {
-      statusEl.textContent = 'Multiple match mile, ek chunein 👇';
+      statusEl.textContent = 'Multiple matches — pick one 👇';
       showScanCandidates(saps, 'sap');
     }
 
