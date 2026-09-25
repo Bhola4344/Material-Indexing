@@ -3021,6 +3021,7 @@ function viewPhotoFor(sn) {
 let html5QrCode = null;
 let ocrWorker = null;
 let ocrCanvas = null;
+let ocrCtx = null;
 let scanTarget = null; // null = search box; warna location input ki id
 let autoOcrTimer = null;
 let torchOn = false;
@@ -3089,6 +3090,7 @@ function openScanner(targetId) {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
+  if (!ocrWorker) preloadOcrWorker();
 
   const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
@@ -3106,7 +3108,7 @@ function openScanner(targetId) {
   // seedha environment camera se start — deviceId lookup ka wait nahi
   html5QrCode.start(
     { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 250, height: 150 } },
+    { fps: 8, qrbox: { width: 250, height: 150 } },
     onScanDecoded,
     (errMsg) => { /* per-frame scan errors, ignore silently */ }
   ).then(() => {
@@ -3169,20 +3171,15 @@ async function captureAndReadText() {
       targetW = MAX_DIM;
       targetH = Math.round(videoEl.videoHeight * scale);
     }
-    if (!ocrCanvas) ocrCanvas = document.createElement('canvas');
+        if (!ocrCanvas) {
+      ocrCanvas = document.createElement('canvas');
+      ocrCtx = ocrCanvas.getContext('2d', { willReadFrequently: true });
+    }
     const canvas = ocrCanvas;
     canvas.width = targetW;
     canvas.height = targetH;
-    canvas.getContext('2d').drawImage(videoEl, 0, 0, targetW, targetH);
-
-    if (!ocrWorker) {
-      ocrWorker = await Tesseract.createWorker('eng');
-            await ocrWorker.setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
-        tessedit_pageseg_mode: '6',
-        tessedit_ocr_engine_mode: '1'
-      });
-    }
+    ocrCtx.drawImage(videoEl, 0, 0, targetW, targetH);
+    if (!ocrWorker) { ocrInProgress = false; return; }
     const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
     ocrInProgress = false;
@@ -3235,6 +3232,16 @@ async function captureAndReadText() {
     console.error('OCR error:', err);
     ocrInProgress = false;
   }
+}
+
+async function preloadOcrWorker() {
+  if (ocrWorker) return;
+  ocrWorker = await Tesseract.createWorker('eng');
+  await ocrWorker.setParameters({
+    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
+    tessedit_pageseg_mode: '6',
+    tessedit_ocr_engine_mode: '1'
+  });
 }
 
     // ─── Tab Switch ───
