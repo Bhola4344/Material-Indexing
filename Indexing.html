@@ -3126,6 +3126,12 @@ let autoOcrTimer = null;
 let torchOn = false;
 let torchSupported = false;
 
+// ── Adaptive scan resolution ──
+let currentMaxDim = 480;      // OCR ke liye
+let failedAttempts = 0;       // OCR fail counter
+let qrFailStart = null;       // QR continuous-fail timer
+let qrCurrentRes = { width: 1280, height: 720 }; // QR resolution
+
 function toggleTorch() {
   if (!html5QrCode || !torchSupported) return;
   torchOn = !torchOn;
@@ -3152,6 +3158,7 @@ function checkTorchSupport() {
 
 function onScanDecoded(decodedText) {
   const target = scanTarget;
+  qrFailStart = null; // QR mil gaya, reset
   closeScanner();
   if (target === 'notifSearchBox') {
     const result = extractSapOrDescription(decodedText);
@@ -3202,14 +3209,23 @@ function openScanner(targetId) {
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerOverlay').classList.remove('cam-ready');
   ocrInProgress = false;
+  resetAdaptiveScan(); // fresh scan = fresh resolution
   html5QrCode = new Html5Qrcode("scannerReader");
 
   // seedha environment camera se start — deviceId lookup ka wait nahi
   html5QrCode.start(
     { facingMode: "environment" },
-    { fps: 8, qrbox: { width: 250, height: 150 } },
+    {
+      fps: 8,
+      qrbox: { width: 250, height: 150 },
+      videoConstraints: {
+        facingMode: "environment",
+        width: { ideal: qrCurrentRes.width },
+        height: { ideal: qrCurrentRes.height }
+      }
+    },
     onScanDecoded,
-    (errMsg) => { /* per-frame scan errors, ignore silently */ }
+    onQrScanError
   ).then(() => {
     setTimeout(() => {
       document.getElementById('scannerOverlay').classList.add('cam-ready');
@@ -3245,8 +3261,9 @@ function closeScanner() {
   const tb = document.getElementById('torchBtn');
   tb.style.visibility = 'hidden';
   tb.classList.remove('on');
-  if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
+   if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
   document.getElementById('scanCandidatesList').style.display = 'none';
+  resetAdaptiveScan();
 }
 
 const AUTO_OPEN_SCANNER_KEY = 'autoOpenScannerOnLogin';
@@ -3267,6 +3284,33 @@ function toggleScannerSettings() {
   btn.classList.toggle('active', willOpen);
 }
 
+function resetAdaptiveScan() {
+  currentMaxDim = 480;
+  failedAttempts = 0;
+  qrFailStart = null;
+  qrCurrentRes = { width: 1280, height: 720 };
+}
+
+function onQrScanError(errMsg) {
+  if (!html5QrCode) return;
+  if (!qrFailStart) qrFailStart = Date.now();
+  const elapsed = Date.now() - qrFailStart;
+
+  // 3 second continuous fail → resolution step-up (live, restart nahi chahiye)
+  if (elapsed > 3000 && qrCurrentRes.width < 1920) {
+    qrCurrentRes = { width: 1920, height: 1080 };
+    html5QrCode.applyVideoConstraints({
+      width: { ideal: 1920 }, height: { ideal: 1080 }
+    }).catch(() => {});
+    qrFailStart = Date.now(); // timer reset taaki dubara 3s baad hi 1920 se aage na jaye
+  }
+}
+
+function bumpMaxDimIfNeeded() {
+  if (failedAttempts === 4 && currentMaxDim < 600) currentMaxDim = 600;
+  else if (failedAttempts === 8 && currentMaxDim < 750) currentMaxDim = 750;
+}
+
 // ─── OCR (plain text) capture ───
 let ocrInProgress = false;
 
@@ -3279,8 +3323,8 @@ async function captureAndReadText() {
   ocrInProgress = true;
   const statusEl = document.getElementById('scannerStatus');
 
-  try {
-    const MAX_DIM = 480;
+    try {
+    const MAX_DIM = currentMaxDim;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
     if (targetW > MAX_DIM) {
@@ -3301,11 +3345,11 @@ async function captureAndReadText() {
     const cleaned = text.trim();
     ocrInProgress = false;
 
-    if (!cleaned) return;
+       if (!cleaned) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
 
         if (scanTarget === 'notifSearchBox') {
       const saps = extractAllSapCandidates(cleaned);
-      if (saps.length === 0) return;
+      if (saps.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
       if (saps.length === 1) {
         scanTarget = null;
         closeScanner();
@@ -3319,7 +3363,7 @@ async function captureAndReadText() {
 
     if (scanTarget) {
       const locs = extractStrictLocationCandidates(cleaned);
-      if (locs.length === 0) return;
+      if (locs.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
       if (locs.length === 1) {
         const target = scanTarget;
         scanTarget = null;
@@ -3333,7 +3377,7 @@ async function captureAndReadText() {
     }
 
     const saps = extractAllSapCandidates(cleaned);
-    if (saps.length === 0) return;
+    if (saps.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
     if (saps.length === 1) {
       closeScanner();
       searchBox.value = saps[0].sap;
