@@ -1506,6 +1506,27 @@
 .pstat.skipped .pstat-num { color: var(--amber); }
 .proc-result-msg { font-size: 12.5px; color: var(--muted); text-align: center; margin-bottom: 10px; line-height: 1.5; }
 
+/* ─── Quick Tools (footer links) ─── */
+.tools-section{border-top:1px solid var(--border);padding-top:12px;}
+.tools-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.tools-title{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px;}
+.tools-add-btn{width:24px;height:24px;border-radius:7px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.22);color:var(--accent);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.tools-add-btn:active{background:rgba(37,99,235,.16);transform:scale(.92);}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tool-link{position:relative;display:flex;flex-direction:column;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 12px;text-decoration:none;color:var(--text);cursor:pointer;transition:all .2s;}
+.tool-link:active{border-color:var(--accent);background:rgba(37,99,235,.05);}
+.tool-link-row{display:flex;align-items:center;gap:10px;width:100%;}
+.tool-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:rgba(8,145,178,.12);}
+.tool-name{font-size:12.5px;font-weight:700;line-height:1.25;word-break:break-word;}
+.tool-sub{font-size:10px;color:var(--muted);word-break:break-all;}
+.tool-del{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--red);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;-webkit-tap-highlight-color:transparent;}
+.tools-empty{font-size:12px;color:var(--muted);text-align:center;padding:14px 0;border:1px dashed var(--border);border-radius:10px;}
+.tool-add-card{display:none;background:var(--surface);border:1.5px solid rgba(37,99,235,.3);border-radius:12px;padding:12px;margin-bottom:10px;}
+.tool-add-card.open{display:block;}
+.icon-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.icon-choice{width:34px;height:34px;border-radius:8px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;}
+.icon-choice.sel{border-color:var(--accent);background:rgba(37,99,235,.08);}
+
     /* ─── Upload Zone ─── */
     .upload-hint {
       font-size: 12px;
@@ -2062,7 +2083,6 @@
             <div class="radio-group" style="flex-wrap:wrap; row-gap:8px;">
               <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Loc</label>
               <label class="radio-label"><input type="radio" name="dlType" value="without"> No Loc</label>
-              <label class="radio-label"><input type="radio" name="dlType" value="stock"> With Stock</label>
               <label class="radio-label"><input type="radio" name="dlType" value="full"> Backup</label>
             </div>
             <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
@@ -2130,9 +2150,33 @@
       </div>
       <div class="proc-result-msg" id="stockResultMsg"></div>
       <button class="btn btn-ghost" style="width:100%;" onclick="resetStockUpload()">↺ Upload Another File</button>
+        </div>
+  </div>
+</div>
+
+<div class="tools-section">
+  <div class="tools-title-row">
+    <span class="tools-title">🧰 Quick Tools</span>
+    <button class="tools-add-btn" onclick="toggleAddForm()">＋</button>
+  </div>
+
+  <div class="tool-add-card" id="addCard">
+    <label class="form-label">Link Name</label>
+    <input class="form-input-reg" id="newToolName" placeholder="e.g. Sticker Maker">
+    <label class="form-label">Page URL</label>
+    <input class="form-input-reg" id="newToolUrl" placeholder="e.g. sticker-maker.html">
+    <label class="form-label">Icon</label>
+    <div class="icon-row" id="iconRow"></div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-ghost" onclick="toggleAddForm(false)" style="flex:1; justify-content:center;">Cancel</button>
+      <button class="btn btn-success" onclick="addToolLink()" style="flex:2; justify-content:center;">💾 Save Link</button>
     </div>
   </div>
-</div>        </div>
+
+  <div class="tools-grid" id="toolsGrid"></div>
+  <div class="tools-empty" id="toolsEmpty" style="display:none;">Koi tool link add nahi hua abhi</div>
+</div>
+        </div>
       </div>
 
       <div class="dlbar-footer-v2">STORE INDEXING SYSTEM · POWERED BY AI</div>
@@ -3125,6 +3169,8 @@ let scanTarget = null; // null = search box; warna location input ki id
 let autoOcrTimer = null;
 let torchOn = false;
 let torchSupported = false;
+let scannerOpening = false;
+let scannerStartPromise = null;
 
 // ── Adaptive scan resolution ──
 let currentMaxDim = 480;      // OCR ke liye
@@ -3193,6 +3239,8 @@ async function getBackCameraId() {
 }
 
 function openScanner(targetId) {
+  if (scannerOpening || html5QrCode) return;
+  scannerOpening = true;
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
@@ -3213,7 +3261,7 @@ function openScanner(targetId) {
   html5QrCode = new Html5Qrcode("scannerReader");
 
   // seedha environment camera se start — deviceId lookup ka wait nahi
-  html5QrCode.start(
+  scannerStartPromise = html5QrCode.start(
     { facingMode: "environment" },
     {
       fps: 8,
@@ -3227,11 +3275,17 @@ function openScanner(targetId) {
     onScanDecoded,
     onQrScanError
   ).then(() => {
+    scannerOpening = false;
+    scannerStartPromise = null;
+    if (!html5QrCode) return; // beech mein close ho chuka tha
     setTimeout(() => {
       document.getElementById('scannerOverlay').classList.add('cam-ready');
     }, 250);
     setTimeout(checkTorchSupport, 500);
   }).catch(err => {
+    scannerOpening = false;
+    scannerStartPromise = null;
+    html5QrCode = null;
     document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
 
@@ -3246,14 +3300,24 @@ function closeScanner() {
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
   document.getElementById('scannerOverlay').classList.remove('open');
+  scannerOpening = false;
   if (html5QrCode) {
-    const stopIt = () => html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
-    if (torchOn && torchSupported) {
-      html5QrCode.applyVideoConstraints({ advanced: [{ torch: false }] })
-        .catch(() => {})
-        .finally(stopIt);
+    const scannerToStop = html5QrCode;
+    html5QrCode = null;
+    const stopIt = () => scannerToStop.stop().then(() => scannerToStop.clear()).catch(() => {});
+    const doClose = () => {
+      if (torchOn && torchSupported) {
+        scannerToStop.applyVideoConstraints({ advanced: [{ torch: false }] })
+          .catch(() => {})
+          .finally(stopIt);
+      } else {
+        stopIt();
+      }
+    };
+    if (scannerStartPromise) {
+      scannerStartPromise.finally(doClose);
     } else {
-      stopIt();
+      doClose();
     }
   }
   torchOn = false;
@@ -3414,6 +3478,78 @@ async function preloadOcrWorker() {
   document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
   document.getElementById('tabStock').classList.toggle('active', tab === 'stock');
 }
+
+// ─── Quick Tools (dynamic footer links) ───
+const TOOL_ICONS = ['🏷️','🗂️','📋','🖨️','📦','🔧','📊','🔗'];
+let selectedToolIcon = TOOL_ICONS[0];
+const TOOLS_STORAGE_KEY = 'quickToolLinks';
+
+function loadToolLinks() {
+  try { return JSON.parse(localStorage.getItem(TOOLS_STORAGE_KEY)) || defaultToolLinks(); }
+  catch (e) { return defaultToolLinks(); }
+}
+function defaultToolLinks() {
+  return [
+    { name: 'Sticker Maker', url: 'sticker-maker.html', icon: '🏷️' },
+    { name: 'Bin List Maker', url: 'bin-list-maker.html', icon: '🗂️' }
+  ];
+}
+function saveToolLinks(links) {
+  try { localStorage.setItem(TOOLS_STORAGE_KEY, JSON.stringify(links)); } catch (e) {}
+}
+function renderToolIconRow() {
+  document.getElementById('iconRow').innerHTML = TOOL_ICONS.map(ic =>
+    `<div class="icon-choice ${ic === selectedToolIcon ? 'sel' : ''}" onclick="pickToolIcon('${ic}')">${ic}</div>`
+  ).join('');
+}
+function pickToolIcon(ic) { selectedToolIcon = ic; renderToolIconRow(); }
+function renderToolLinks() {
+  const links = loadToolLinks();
+  const grid = document.getElementById('toolsGrid');
+  const empty = document.getElementById('toolsEmpty');
+  if (!links.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = links.map((l, i) => `
+    <a href="${l.url}" class="tool-link" target="_blank" rel="noopener noreferrer">
+      <button class="tool-del" onclick="event.preventDefault(); event.stopPropagation(); deleteToolLink(${i});">✕</button>
+      <div class="tool-link-row">
+        <div class="tool-icon">${l.icon}</div>
+        <div>
+          <div class="tool-name">${l.name}</div>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+function toggleAddForm(force) {
+  const card = document.getElementById('addCard');
+  const open = force === undefined ? !card.classList.contains('open') : force;
+  card.classList.toggle('open', open);
+  if (open) {
+    document.getElementById('newToolName').value = '';
+    document.getElementById('newToolUrl').value = '';
+    selectedToolIcon = TOOL_ICONS[0];
+    renderToolIconRow();
+  }
+}
+function addToolLink() {
+  const name = document.getElementById('newToolName').value.trim();
+  const url = document.getElementById('newToolUrl').value.trim();
+  if (!name || !url) { showToast('Name aur URL dono bharo', 'red'); return; }
+  const links = loadToolLinks();
+  links.push({ name, url, icon: selectedToolIcon });
+  saveToolLinks(links);
+  toggleAddForm(false);
+  renderToolLinks();
+  showToast('Link add ho gaya ✓', 'green');
+}
+function deleteToolLink(i) {
+  const links = loadToolLinks();
+  links.splice(i, 1);
+  saveToolLinks(links);
+  renderToolLinks();
+}
+
 
     // ─── Upload & Enrich ───
     function handleUpload(input) {
@@ -3728,6 +3864,8 @@ statsBody.classList.toggle('collapsed', !statsOpen);
 
 document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPref();
 if (getAutoOpenScannerPref()) openScanner();
+renderToolIconRow();
+renderToolLinks();
     });
 
     function logout() {
