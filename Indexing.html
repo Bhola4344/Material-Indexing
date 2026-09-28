@@ -1868,6 +1868,35 @@
   height: 19px;
   display: block;
 }
+
+/* ─── Location Modal ─── */
+.loc-pill.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s;}
+.loc-pill.tap:active{transform:scale(.96);background:rgba(5,150,105,.2);}
+.lm-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;opacity:0;pointer-events:none;transition:opacity .2s;}
+.lm-backdrop.open{opacity:1;pointer-events:auto;}
+.lm-modal{position:fixed;left:50%;bottom:0;width:100%;max-width:600px;max-height:82vh;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -12px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;transform:translate(-50%,100%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
+.lm-modal.open{transform:translate(-50%,0);}
+.lm-stripe{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));flex-shrink:0;}
+.lm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;}
+.lm-title{display:flex;align-items:center;gap:10px;}
+.lm-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(37,99,235,.28);}
+.lm-loc{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
+.lm-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.lm-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;}
+.lm-search{margin:0 12px 8px;width:calc(100% - 24px);background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:15px;color:var(--text);outline:none;}
+.lm-search:focus{border-color:var(--accent);background:var(--surface);}
+.lm-list{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 10px 10px;}
+.lm-row{border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:6px;background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.lm-row:active{border-color:var(--accent);background:rgba(37,99,235,.04);}
+.lm-row.cur{border-color:rgba(5,150,105,.45);background:rgba(5,150,105,.05);}
+.lm-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;}
+.lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
+.lm-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2);white-space:nowrap;}
+.lm-chip.none{background:var(--surface2);color:var(--muted);border-color:var(--border);}
+.lm-sap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);}
+.lm-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);padding:1px 6px;border-radius:20px;margin-left:6px;}
+.lm-empty{padding:20px;text-align:center;color:var(--muted);font-size:13px;}
+.lm-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);text-align:center;background:var(--surface2);}
   </style>
 </head>
 
@@ -1886,6 +1915,25 @@
 
    <!-- Floating dropdown -->
   <div id="dropdown"></div>
+
+<!-- Location Modal -->
+<div class="lm-backdrop" id="lmBackdrop" onclick="closeLocModal()"></div>
+<div class="lm-modal" id="lmModal">
+  <div class="lm-stripe"></div>
+  <div class="lm-head">
+    <div class="lm-title">
+      <div class="lm-icon">📍</div>
+      <div>
+        <div class="lm-loc" id="lmLoc"></div>
+        <div class="lm-sub" id="lmSub"></div>
+      </div>
+    </div>
+    <button class="lm-close" onclick="closeLocModal()">✕</button>
+  </div>
+  <input class="lm-search" id="lmSearch" placeholder="Is location me search..." oninput="renderLocModal()" autocomplete="off" autocorrect="off" spellcheck="false">
+  <div class="lm-list" id="lmList"></div>
+  <div class="lm-foot">Item par tap karo — uska card khul jayega</div>
+</div>
 
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
@@ -2196,7 +2244,7 @@
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbwM-wm71DJIMuHDjo27YtRxyFq8GWHRFmWcBhpRvILoz18Mn2j-Q9QVOLQCZPXCwAhP/exec";
+    const API = "https://script.google.com/macros/s/AKfycbwEcdBHyrMdVomdLPD7rbmYLM-f8sZQTtPEgayC2tFlliOB14FN6Knq1UiI2ffbTagB/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -2480,10 +2528,12 @@ function saveNotifItem(sn) {
         }).join('');
       }
 
-      // Always show "Add New Item" button at bottom of dropdown
-      html += `<div class="dd-add-btn" id="ddAddBtn">
-        ➕ Item nahi mila? Add New Item
-      </div>`;
+      // Add New Item button sirf tab dikhao jab koi result na mile
+      if (!items.length) {
+        html += `<div class="dd-add-btn" id="ddAddBtn">
+          ➕ Item nahi mila? Add New Item
+        </div>`;
+      }
 
       dropdownEl.innerHTML = html;
 
@@ -2936,8 +2986,8 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
   <div class="item-sap">${currentItem.sap}</div>
 </div>
         <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
-          <div class="loc-pill ${hasLoc ? 'has' : 'no'}" style="margin-bottom:0;">
-            ${hasLoc ? '📍 ' + currentItem.location : '❌ Not Assigned'}
+          <div class="loc-pill ${hasLoc ? 'has tap' : 'no'}" style="margin-bottom:0;" ${hasLoc ? 'onclick="openLocModal()"' : ''}>
+            ${hasLoc ? '📍 ' + currentItem.location + ' <span style="font-size:11px;opacity:.7;">▸</span>' : '❌ Not Assigned'}
           </div>
           <div class="loc-pill" style="margin-bottom:0; background:rgba(8,145,178,0.1); color:var(--accent2); border:1px solid rgba(8,145,178,0.2);">
             📊 ${hasStock ? currentItem.curr_stock : 'No Stock'}
@@ -3042,12 +3092,15 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
       fetch(`${API}?action=add&sap=${encodeURIComponent(sap)}&description=${encodeURIComponent(name)}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
         .then(r => r.json())
         .then(res => {
+          if (!res || res.sn === undefined || res.sn === null) {
+            throw new Error('No sn returned');
+          }
           // Add to local list so it's searchable immediately
           const newItem = {
             sap: sap,
             name: name,
             location: loc,
-            sn: Date.now(),
+            sn: res.sn,
             update_by: userName,
             updation_date: new Date().toLocaleDateString()
           };
@@ -3165,6 +3218,83 @@ if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
       }, 80);
     }
 
+
+// ─── Location Modal ───
+let locModalOpen = false;
+let lmLoc = '';
+let lmShowAll = false;
+
+function lmEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function lmHasStock(i) {
+  return i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "";
+}
+
+function openLocModal() {
+  if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
+  lmLoc = String(currentItem.location).trim().toUpperCase();
+  lmShowAll = false;
+  document.getElementById('lmSearch').value = '';
+  document.getElementById('lmList').scrollTop = 0;
+  renderLocModal();
+  locModalOpen = true;
+  document.getElementById('lmBackdrop').classList.add('open');
+  document.getElementById('lmModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLocModal() {
+  locModalOpen = false;
+  document.getElementById('lmBackdrop').classList.remove('open');
+  document.getElementById('lmModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderLocModal() {
+  const LIMIT = 50;
+  const all = itemMaster.filter(i => i.location && String(i.location).trim().toUpperCase() === lmLoc);
+  const q = document.getElementById('lmSearch').value.trim().toLowerCase();
+  const list = q
+    ? all.filter(i => String(i.name || '').toLowerCase().includes(q) || String(i.sap || '').includes(q))
+    : all.slice();
+
+  const isCur = i => currentItem && String(i.sn) === String(currentItem.sn);
+  list.sort((a, b) => (isCur(b) ? 1 : 0) - (isCur(a) ? 1 : 0) || String(a.name || '').localeCompare(String(b.name || '')));
+
+  const inStock = all.filter(lmHasStock).length;
+  document.getElementById('lmLoc').textContent = lmLoc;
+  document.getElementById('lmSub').textContent = `${all.length} items · ${inStock} in stock`;
+
+  const shown = (lmShowAll || q) ? list : list.slice(0, LIMIT);
+  let html = shown.map(i => `
+    <div class="lm-row ${isCur(i) ? 'cur' : ''}" onclick="lmPick('${lmEsc(i.sn)}')">
+      <div class="lm-row-top">
+        <div class="lm-name">${lmEsc(i.name)}${isCur(i) ? '<span class="lm-tag">Current</span>' : ''}</div>
+        <span class="lm-chip ${lmHasStock(i) ? '' : 'none'}">📦 ${lmHasStock(i) ? lmEsc(i.curr_stock) : 'No Stock'}</span>
+      </div>
+      <div class="lm-sap">${lmEsc(i.sap)}</div>
+    </div>`).join('');
+
+  if (!shown.length) html = `<div class="lm-empty">Koi item nahi mila</div>`;
+  if (shown.length < list.length) {
+    html += `<button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="lmShowAll=true;renderLocModal()">Show all (${list.length})</button>`;
+  }
+  const lmListEl = document.getElementById('lmList');
+  const prevScroll = lmListEl.scrollTop;
+  lmListEl.innerHTML = html;
+  lmListEl.scrollTop = prevScroll;
+}
+
+function lmPick(sn) {
+  const it = itemMaster.find(x => String(x.sn) === String(sn));
+  if (!it) return;
+  closeLocModal();
+  ddItems = [it];
+  pickItem(0);
+}
+
     // ─── Update Form ───
     function showUpdateForm() {
       const form = document.getElementById('updateForm');
@@ -3219,7 +3349,7 @@ if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
   renderStats();
 
   const pill = document.querySelector('.loc-pill');
-  if (pill) {pill.className = 'loc-pill has'; pill.textContent = '📍 ' + loc;}
+  if (pill) {pill.className = 'loc-pill has tap'; pill.setAttribute('onclick', 'openLocModal()'); pill.textContent = '📍 ' + loc + ' ▸';}
   showToast("Saved! Syncing…", "green");
 
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
@@ -3294,6 +3424,7 @@ function checkTorchSupport() {
 }
 
 function onScanDecoded(decodedText) {
+  if (!html5QrCode) return;   // scanner band ho chuka hai, late callback ignore
   const target = scanTarget;
   // Location scan: pehle location nikaalo, tabhi reject karo jab location mile hi nahi
   if (target && target !== 'notifSearchBox') {
@@ -3477,7 +3608,8 @@ function onQrScanError(errMsg) {
   if (elapsed > 3000 && qrCurrentRes.width < 1920) {
     qrCurrentRes = { width: 1920, height: 1080 };
     html5QrCode.applyVideoConstraints({
-      width: { ideal: 1920 }, height: { ideal: 1080 }
+      width: { ideal: 1920 }, height: { ideal: 1080 },
+      ...(torchOn ? { advanced: [{ torch: true }] } : {})
     }).catch(() => {});
     qrFailStart = Date.now(); // timer reset taaki dubara 3s baad hi 1920 se aage na jaye
   }
@@ -4102,7 +4234,7 @@ window.addEventListener('pageshow', e => {
 
           itemMaster = data;
 renderStats();
-
+if (locModalOpen && document.activeElement !== document.getElementById('lmSearch')) renderLocModal();
 // user notif list ke andar type kar raha hai ya nahi, check karo
 const activeEl = document.activeElement;
 const notifListEl = document.getElementById('notifList');
