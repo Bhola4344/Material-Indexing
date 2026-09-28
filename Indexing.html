@@ -3,6 +3,13 @@
 
 <head>
   <meta charset="UTF-8">
+<script>
+  if (!sessionStorage.getItem('loggedIn')) {
+    document.documentElement.style.display = 'none';
+    window.stop();
+    window.location.replace('index.html');
+  }
+</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Store Indexing</title>
   <link rel="manifest" href="manifest.json">
@@ -718,6 +725,9 @@
       color: rgba(255,255,255,0.6);
       margin-top: 2px;
     }
+#scanCandidatesList { max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
+@keyframes candIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.cand-new { animation: candIn .25s ease; }
 
     #dropdown {
       position: fixed;
@@ -2185,6 +2195,7 @@
   </div>
 
    <script>
+   if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
     const API = "https://script.google.com/macros/s/AKfycbwM-wm71DJIMuHDjo27YtRxyFq8GWHRFmWcBhpRvILoz18Mn2j-Q9QVOLQCZPXCwAhP/exec";
 
     if ('serviceWorker' in navigator) {
@@ -2557,8 +2568,10 @@ function extractAllSapCandidates(rawText) {
       const desc = line.replace(m, '').replace(/[-:\s]+/g, ' ').trim().slice(0, 60);
       results.push({ sap, context: desc });
     });
-  });
-  return results;
+    });
+  const known = new Set(itemMaster.map(i => String(i.sap).trim()));
+  const inMaster = results.filter(r => known.has(r.sap));
+  return inMaster.length ? inMaster : results;
 }
 
 // ─── Extract SAP code or Description from scanned sticker text ───
@@ -2616,14 +2629,14 @@ function extractLocationFromText(rawText) {
 
   // Step 3: LOC nahi mila, isolated line bhi nahi — poore text me mixed tokens me se sabse lamba
   const tokens = text.split(/\s+/).filter(Boolean);
-  const mixed = tokens.filter(t => /[A-Za-z]/.test(t) && /\d/.test(t));
+   const mixed = tokens.filter(t => /[A-Za-z]/.test(t) && /\d/.test(t) && !looksLikeSap(t));
   if (mixed.length) {
     mixed.sort((a, b) => b.length - a.length);
     return mixed[0].toUpperCase();
   }
 
-  // Step 4: kuch match nahi hua — poora cleaned text hi location maan lo
-  return text.toUpperCase();
+    // Step 4: kuch match nahi hua — khali return, taaki galat text location na bane
+  return '';
 }
 
 
@@ -2664,7 +2677,7 @@ function extractStrictLocationCandidates(rawText) {
     if (m && m[1]) {
       const codeMatch = m[1].match(codePattern);
       const loc = codeMatch ? codeMatch[0].toUpperCase() : m[1].trim().toUpperCase();
-      if (loc && !seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
+      if (loc && !looksLikeSap(loc) && !seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
     }
   });
 
@@ -2700,38 +2713,105 @@ function fillNotifSearchField(val) {
   showToast(`Search: ${val}`, 'green');
 }
 
-function showScanCandidates(candidates, type) {
-  const list = document.getElementById('scanCandidatesList');
-  list.style.display = 'block';
-  list.innerHTML = candidates.map((c, i) => `
-    <div class="cand-row" data-i="${i}">
-      <div style="flex:1;">
-        <div class="cand-sap">${c.sap || c.location}</div>
-        ${c.context ? `<div class="cand-ctx">${c.context}</div>` : ''}
-      </div>
-    </div>`).join('');
+// ─── Live scan list ───
+let scanSeen = new Set();
+let scanListItems = [];
+let scanListType = null;
+let noNewStreak = 0;
+let ocrPaused = false;
+let lastThumb = null;
+let thumbCanvas = null, thumbCtx = null;
 
-  list.querySelectorAll('.cand-row').forEach(row => {
-    row.addEventListener('click', () => {
-      const c = candidates[+row.dataset.i];
-      list.style.display = 'none';
-      closeScanner();
-                       if (type === 'sap') {
-        searchBox.value = c.sap;
-        document.getElementById('clearSearch').classList.add('visible');
-        doSearch(c.sap, true);
-        showToast(`SAP code select kiya: ${c.sap}`, 'green');
-      } else if (type === 'notifsap') {
-        scanTarget = null;
-        fillNotifSearchField(c.sap);
-      } else {
-        const target = scanTarget;
-        scanTarget = null;
-        fillLocationField(target, c.location);
-      }
-    });
-  });
+function resetScanList() {
+  scanSeen = new Set();
+  scanListItems = [];
+  scanListType = null;
+  noNewStreak = 0;
+  ocrPaused = false;
+  lastThumb = null;
+  const list = document.getElementById('scanCandidatesList');
+  list.innerHTML = '';
+  list.style.display = 'none';
 }
+
+function registerNoNew() {
+  noNewStreak++;
+  if (noNewStreak >= 3) {
+    ocrPaused = true;
+    document.getElementById('scannerStatus').textContent =
+      `${scanListItems.length} mile ✓ — naye items par camera le jao, dobara chalega`;
+  }
+}
+
+// 32x24 ki tiny image se check: camera hila ya nahi
+function sceneChanged() {
+  const v = document.querySelector('#scannerReader video');
+  if (!v || !v.videoWidth) return false;
+  if (!thumbCanvas) {
+    thumbCanvas = document.createElement('canvas');
+    thumbCanvas.width = 32; thumbCanvas.height = 24;
+    thumbCtx = thumbCanvas.getContext('2d', { willReadFrequently: true });
+  }
+  thumbCtx.drawImage(v, 0, 0, 32, 24);
+  const d = thumbCtx.getImageData(0, 0, 32, 24).data;
+  const prev = lastThumb;
+  lastThumb = d;
+  if (!prev) return false;
+  let diff = 0;
+  for (let i = 0; i < d.length; i += 4) diff += Math.abs(d[i] - prev[i]);
+  return (diff / (d.length / 4)) > 12;
+}
+
+function appendScanCandidates(cands, type) {
+  const list = document.getElementById('scanCandidatesList');
+  const fresh = cands.filter(c => !scanSeen.has(c.sap || c.location));
+  if (!fresh.length) { registerNoNew(); return; }
+  noNewStreak = 0;
+
+  if (!scanListItems.length) {
+    scanListType = type;
+    list.innerHTML = '';
+    list.style.display = 'block';
+  }
+
+  fresh.forEach(c => {
+    scanSeen.add(c.sap || c.location);
+    const idx = scanListItems.push(c) - 1;
+    const row = document.createElement('div');
+    row.className = 'cand-row cand-new';
+    row.dataset.i = idx;
+    row.innerHTML = `<div style="flex:1;">
+      <div class="cand-sap">${c.sap || c.location}</div>
+      ${c.context ? `<div class="cand-ctx">${c.context}</div>` : ''}
+    </div>`;
+    list.appendChild(row);
+  });
+
+  list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  document.getElementById('scannerStatus').textContent =
+    `${scanListItems.length} mile — scan jaari hai, select kar sakte ho 👇`;
+}
+
+document.getElementById('scanCandidatesList').addEventListener('click', e => {
+  const row = e.target.closest('.cand-row');
+  if (!row) return;
+  const c = scanListItems[+row.dataset.i];
+  const type = scanListType;
+  const target = scanTarget;
+  scanTarget = null;
+  closeScanner();
+
+  if (type === 'sap') {
+    searchBox.value = c.sap;
+    document.getElementById('clearSearch').classList.add('visible');
+    doSearch(c.sap, true);
+    showToast(`SAP code select kiya: ${c.sap}`, 'green');
+  } else if (type === 'notifsap') {
+    fillNotifSearchField(c.sap);
+  } else {
+    fillLocationField(target, c.location);
+  }
+});
 
 
     // ─── Flexible SAP match (handles under/over-padded numeric input) ───
@@ -3171,6 +3251,17 @@ let torchOn = false;
 let torchSupported = false;
 let scannerOpening = false;
 let scannerStartPromise = null;
+let scanSession = 0;
+let lastSapRejectTs = 0;
+
+// Ye text SAP code jaisa dikhta hai? ("sap-10000000012", "SAP CODE: 1000001234", pure 9-10 digit)
+function looksLikeSap(text) {
+  const t = String(text || '').trim();
+  const compact = t.replace(/[\s\-_:.]/g, '');
+  if (/\bSAP(?![A-Za-z])/i.test(t)) return true;
+  if (/^\d{9,10}$/.test(compact)) return true;
+  return false;
+}
 
 // ── Adaptive scan resolution ──
 let currentMaxDim = 480;      // OCR ke liye
@@ -3204,7 +3295,22 @@ function checkTorchSupport() {
 
 function onScanDecoded(decodedText) {
   const target = scanTarget;
+  // Location scan me SAP wala QR/barcode aaye to ignore karo, scanner chalta rahe
+  if (target && target !== 'notifSearchBox' && looksLikeSap(decodedText)) {
+    if (Date.now() - lastSapRejectTs > 1500) {
+      lastSapRejectTs = Date.now();
+      showToast('Ye SAP code hai, location sticker scan karein', 'amber');
+    }
+    return;
+  }
   qrFailStart = null; // QR mil gaya, reset
+  if (target && target !== 'notifSearchBox' && !extractLocationFromText(decodedText)) {
+    if (Date.now() - lastSapRejectTs > 1500) {
+      lastSapRejectTs = Date.now();
+      showToast('Location samajh nahi aaya, dobara scan karein', 'amber');
+    }
+    return; // scanner chalta rahe
+  }
   closeScanner();
   if (target === 'notifSearchBox') {
     const result = extractSapOrDescription(decodedText);
@@ -3212,8 +3318,12 @@ function onScanDecoded(decodedText) {
     fillNotifSearchField(result.value);
     return;
   }
-  if (target) {
+    if (target) {
     const loc = extractLocationFromText(decodedText);
+    if (!loc) {
+      showToast('Location samajh nahi aaya, dobara scan karein', 'amber');
+      return;
+    }
     scanTarget = null;
     fillLocationField(target, loc);
     return;
@@ -3241,6 +3351,7 @@ async function getBackCameraId() {
 function openScanner(targetId) {
   if (scannerOpening || html5QrCode) return;
   scannerOpening = true;
+  scanSession++;
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
@@ -3256,8 +3367,10 @@ function openScanner(targetId) {
 
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerOverlay').classList.remove('cam-ready');
-  ocrInProgress = false;
+    ocrInProgress = false;
+  document.getElementById('scannerStatus').textContent = '';
   resetAdaptiveScan(); // fresh scan = fresh resolution
+  resetScanList();
   html5QrCode = new Html5Qrcode("scannerReader");
 
   // seedha environment camera se start — deviceId lookup ka wait nahi
@@ -3290,10 +3403,17 @@ function openScanner(targetId) {
   });
 
   if (autoOcrTimer) clearInterval(autoOcrTimer);
-   autoOcrTimer = setInterval(() => {
-    const listVisible = document.getElementById('scanCandidatesList').style.display !== 'none';
-    if (!ocrInProgress && !listVisible) captureAndReadText();
-   }, 800);
+  autoOcrTimer = setInterval(() => {
+    if (ocrInProgress) return;
+    if (ocrPaused) {
+      if (!sceneChanged()) return;   // camera sthir hai to OCR nahi chalega
+      ocrPaused = false;
+      noNewStreak = 0;
+      document.getElementById('scannerStatus').textContent =
+        `${scanListItems.length} mile — scan jaari hai 👇`;
+    }
+    captureAndReadText();
+  }, 800);
 }
 
 function closeScanner() {
@@ -3326,7 +3446,7 @@ function closeScanner() {
   tb.style.visibility = 'hidden';
   tb.classList.remove('on');
    if (autoOcrTimer) { clearInterval(autoOcrTimer); autoOcrTimer = null; }
-  document.getElementById('scanCandidatesList').style.display = 'none';
+  resetScanList();
   resetAdaptiveScan();
 }
 
@@ -3385,6 +3505,7 @@ async function captureAndReadText() {
   if (!videoEl || !videoEl.videoWidth) return;
 
   ocrInProgress = true;
+  const mySession = scanSession;
   const statusEl = document.getElementById('scannerStatus');
 
     try {
@@ -3408,65 +3529,73 @@ async function captureAndReadText() {
     const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
     ocrInProgress = false;
+    if (mySession !== scanSession || !html5QrCode) return; // scanner band ho chuka hai
 
-       if (!cleaned) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
+           const listStarted = scanListItems.length > 0;
+    const noResult = () => {
+      if (listStarted) registerNoNew();
+      else { failedAttempts++; bumpMaxDimIfNeeded(); }
+    };
 
-        if (scanTarget === 'notifSearchBox') {
+    if (!cleaned) { noResult(); return; }
+
+    if (scanTarget === 'notifSearchBox') {
       const saps = extractAllSapCandidates(cleaned);
-      if (saps.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
-      if (saps.length === 1) {
+      if (saps.length === 0) { noResult(); return; }
+      if (!listStarted && saps.length === 1) {
         scanTarget = null;
         closeScanner();
         fillNotifSearchField(saps[0].sap);
       } else {
-        statusEl.textContent = 'Multiple matches — pick one 👇';
-        showScanCandidates(saps, 'notifsap');
+        appendScanCandidates(saps, 'notifsap');
       }
       return;
     }
 
     if (scanTarget) {
       const locs = extractStrictLocationCandidates(cleaned);
-      if (locs.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
-      if (locs.length === 1) {
+      if (locs.length === 0) { noResult(); return; }
+      if (!listStarted && locs.length === 1) {
         const target = scanTarget;
         scanTarget = null;
         closeScanner();
         fillLocationField(target, locs[0].location);
       } else {
-        statusEl.textContent = 'Multiple matches — pick one 👇';
-        showScanCandidates(locs, 'loc');
+        appendScanCandidates(locs, 'loc');
       }
       return;
     }
 
     const saps = extractAllSapCandidates(cleaned);
-    if (saps.length === 0) { failedAttempts++; bumpMaxDimIfNeeded(); return; }
-    if (saps.length === 1) {
+    if (saps.length === 0) { noResult(); return; }
+    if (!listStarted && saps.length === 1) {
       closeScanner();
       searchBox.value = saps[0].sap;
       document.getElementById('clearSearch').classList.add('visible');
       doSearch(saps[0].sap, true);
       showToast(`SAP code mila: ${saps[0].sap}`, 'green');
     } else {
-      statusEl.textContent = 'Multiple matches — pick one 👇';
-      showScanCandidates(saps, 'sap');
+      appendScanCandidates(saps, 'sap');
     }
 
   } catch (err) {
-    console.error('OCR error:', err);
-    ocrInProgress = false;
+   console.error('OCR error:', err);
+   ocrInProgress = false;
   }
 }
 
-async function preloadOcrWorker() {
-  if (ocrWorker) return;
-  ocrWorker = await Tesseract.createWorker('eng');
-  await ocrWorker.setParameters({
-    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
-    tessedit_pageseg_mode: '6',
-    tessedit_ocr_engine_mode: '1'
-  });
+let ocrWorkerPromise = null;
+function preloadOcrWorker() {
+  if (ocrWorkerPromise) return ocrWorkerPromise;
+  ocrWorkerPromise = (async () => {
+    const w = await Tesseract.createWorker('eng', 1);
+    await w.setParameters({
+      tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
+      tessedit_pageseg_mode: '6'
+    });
+    ocrWorker = w; // ready hone ke baad hi set
+  })().catch(() => { ocrWorkerPromise = null; });
+  return ocrWorkerPromise;
 }
 
     // ─── Tab Switch ───
@@ -3848,7 +3977,7 @@ itemMaster.forEach(i =>
 
     // ─── Auth ───
     document.addEventListener('DOMContentLoaded', () => {
-      if (!sessionStorage.getItem('loggedIn')) {window.location.href = 'index.html'; return;}
+      if (!sessionStorage.getItem('loggedIn')) return;
             userName = sessionStorage.getItem('userName') || 'Guest';
 
       const firstName = userName.trim().split(/\s+/)[0];
@@ -3869,9 +3998,15 @@ renderToolLinks();
     });
 
     function logout() {
-      sessionStorage.removeItem('loggedIn');
-      window.location.href = 'index.html';
-    }
+  sessionStorage.removeItem('loggedIn');
+  window.location.replace('index.html');
+}
+
+window.addEventListener('pageshow', e => {
+  if (e.persisted && !sessionStorage.getItem('loggedIn')) {
+    window.location.replace('index.html');
+  }
+});
 
     // ─── Load Data (cache-first for instant load) ───
     const CACHE_KEY = 'itemMasterCache';
