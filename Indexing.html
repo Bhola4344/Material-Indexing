@@ -2622,7 +2622,7 @@ function extractLocationFromText(rawText) {
   // Step 2: koi line jisme SIRF ek hi mixed alphanumeric token ho (isolated) — high confidence
   for (const line of lines) {
     const lineTokens = line.split(/\s+/).filter(Boolean);
-    if (lineTokens.length === 1 && /[A-Za-z]/.test(lineTokens[0]) && /\d/.test(lineTokens[0])) {
+        if (lineTokens.length === 1 && /[A-Za-z]/.test(lineTokens[0]) && /\d/.test(lineTokens[0]) && !looksLikeSap(lineTokens[0])) {
       return lineTokens[0].toUpperCase();
     }
   }
@@ -3295,22 +3295,20 @@ function checkTorchSupport() {
 
 function onScanDecoded(decodedText) {
   const target = scanTarget;
-  // Location scan me SAP wala QR/barcode aaye to ignore karo, scanner chalta rahe
-  if (target && target !== 'notifSearchBox' && looksLikeSap(decodedText)) {
-    if (Date.now() - lastSapRejectTs > 1500) {
-      lastSapRejectTs = Date.now();
-      showToast('Ye SAP code hai, location sticker scan karein', 'amber');
+  // Location scan: pehle location nikaalo, tabhi reject karo jab location mile hi nahi
+  if (target && target !== 'notifSearchBox') {
+    const foundLoc = extractLocationFromText(decodedText);
+    if (!foundLoc || looksLikeSap(foundLoc)) {
+      if (Date.now() - lastSapRejectTs > 1500) {
+        lastSapRejectTs = Date.now();
+        showToast(looksLikeSap(decodedText)
+          ? 'Ye SAP code hai, location sticker scan karein'
+          : 'Location samajh nahi aaya, dobara scan karein', 'amber');
+      }
+      return; // scanner chalta rahe
     }
-    return;
   }
   qrFailStart = null; // QR mil gaya, reset
-  if (target && target !== 'notifSearchBox' && !extractLocationFromText(decodedText)) {
-    if (Date.now() - lastSapRejectTs > 1500) {
-      lastSapRejectTs = Date.now();
-      showToast('Location samajh nahi aaya, dobara scan karein', 'amber');
-    }
-    return; // scanner chalta rahe
-  }
   closeScanner();
   if (target === 'notifSearchBox') {
     const result = extractSapOrDescription(decodedText);
@@ -3318,14 +3316,9 @@ function onScanDecoded(decodedText) {
     fillNotifSearchField(result.value);
     return;
   }
-    if (target) {
-    const loc = extractLocationFromText(decodedText);
-    if (!loc) {
-      showToast('Location samajh nahi aaya, dobara scan karein', 'amber');
-      return;
-    }
+      if (target) {
     scanTarget = null;
-    fillLocationField(target, loc);
+    fillLocationField(target, extractLocationFromText(decodedText));
     return;
   }
   const result = extractSapOrDescription(decodedText);
