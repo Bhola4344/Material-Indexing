@@ -3909,12 +3909,22 @@ function checkTorchSupport() {
   }
 }
 
+// Sirf QR location scan ke liye: QR me jo likha hai wahi location (SAP jaisa ho to '' = reject)
+function extractLocationFromQR(rawText) {
+  const text = String(rawText || '').replace(/\s*\r?\n\s*/g, ' ').trim();
+  if (!text) return '';
+  if (/^\d{9,}$/.test(text.replace(/[\s\-_.:]/g, ''))) return '';   // plain digits = SAP
+  const m = text.match(/\bLOC(?:ATION)?\b\.?\s*[-:]?\s*(.+)/i);
+  if (m && m[1] && m[1].trim()) return m[1].trim().toUpperCase();   // "LOC-xxxx" ka prefix hata do
+  return text.toUpperCase();
+}
+
 function onScanDecoded(decodedText) {
   if (!html5QrCode) return;   // scanner band ho chuka hai, late callback ignore
   const target = scanTarget;
   // Location scan: pehle location nikaalo, tabhi reject karo jab location mile hi nahi
   if (target && target !== 'notifSearchBox') {
-    const foundLoc = extractLocationFromText(decodedText);
+    const foundLoc = extractLocationFromQR(decodedText);
     if (!foundLoc || looksLikeSap(foundLoc)) {
       if (Date.now() - lastSapRejectTs > 1500) {
         lastSapRejectTs = Date.now();
@@ -3935,7 +3945,7 @@ function onScanDecoded(decodedText) {
   }
       if (target) {
     scanTarget = null;
-    fillLocationField(target, extractLocationFromText(decodedText));
+    fillLocationField(target, extractLocationFromQR(decodedText));
     return;
   }
   const result = extractSapOrDescription(decodedText);
