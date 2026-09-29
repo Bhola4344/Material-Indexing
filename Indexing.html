@@ -20,6 +20,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *,
     *::before,
@@ -1870,9 +1871,8 @@
 }
 /* ─── Notif Tabs & Bin List ─── */
 .notif-tabs{display:flex;gap:6px;margin:0 12px 10px;}
-.notif-tab{flex:1;padding:9px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
-.notif-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-.notif-tab .tab-badge{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 3px;border-radius:20px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;border:2px solid var(--surface2);}
+.notif-tab{display:flex;align-items:center;gap:4px;height:28px;padding:0 11px;border-radius:8px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
+.notif-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}.notif-tab .tab-badge{position:absolute;top:-5px;right:-5px;min-width:14px;height:14px;padding:0 3px;border-radius:20px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;border:2px solid var(--surface2);}
 .notif-tab.active .tab-badge{border-color:var(--accent);}
 .notif-tab .tab-badge.hidden{display:none;}
 
@@ -1916,7 +1916,72 @@
 .lm-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);padding:1px 6px;border-radius:20px;margin-left:6px;}
 .lm-empty{padding:20px;text-align:center;color:var(--muted);font-size:13px;}
 .lm-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);text-align:center;background:var(--surface2);}
-  </style>
+
+/* ─── Bin Print Modal ─── */
+.bp-back{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;z-index:950;align-items:flex-end;justify-content:center}
+.bp-back.open{display:flex}
+.bp-modal{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.bp-stripe{height:5px;background:linear-gradient(90deg,var(--amber),#f59e0b);flex-shrink:0}
+.bp-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 12px 10px}
+.bp-title{display:flex;align-items:center;gap:10px;min-width:0}
+.bp-ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--amber),#f59e0b);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(180,83,9,.28);flex-shrink:0}
+.bp-ic svg{width:15px;height:15px}
+.bp-ttl{font-size:13px;font-weight:700;letter-spacing:-.2px}
+.bp-locpill{display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:3px 10px;border-radius:40px;background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.25);font:700 12px 'JetBrains Mono',monospace;white-space:nowrap}
+.bp-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.bp-mini{display:flex;align-items:center;gap:5px;height:28px;padding:0 7px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);font-size:11px;font-weight:700;color:var(--text);cursor:pointer;user-select:none;white-space:nowrap;font-family:'Inter',sans-serif}
+.bp-mini.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.bp-sw{position:relative;width:28px;height:16px;flex-shrink:0}
+.bp-sw input{opacity:0;width:0;height:0;position:absolute}
+.bp-sw i{position:absolute;inset:0;background:#cbd5e1;border-radius:20px;transition:.2s}
+.bp-sw i::before{content:"";position:absolute;width:12px;height:12px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s}
+.bp-sw input:checked+i{background:var(--green)}
+.bp-sw input:checked+i::before{transform:translateX(12px)}
+.bp-x{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:12px}
+.bp-body{padding:12px 10px;overflow:auto;background:#cbd5e1;flex:1;min-height:0}
+.bp-paper{margin:0 auto;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.25);overflow:hidden}
+.bp-zoom{transform-origin:top left;width:283mm}
+.bp-zoom .bp-sheet{margin-bottom:8mm}
+.bp-foot{padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:6px;background:var(--surface)}
+.bp-btn{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:8px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif}
+.bp-btn.p{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bp-btn.g{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ─── Real A4 sheet (A4 landscape minus 6mm margin) ─── */
+.bp-sheet{width:283mm;height:196mm;padding:1mm;background:#fff;font-family:Arial,sans-serif;color:#000;overflow:hidden}
+.bp-ctitle{border:2px solid #000;border-bottom:0;text-align:center;font:bold 22px "Times New Roman",serif;height:11mm;line-height:11mm}
+.bp-sheet table{width:100%;border-collapse:collapse;table-layout:fixed}
+.bp-sheet th,.bp-sheet td{border:1px solid #000;padding:0 8px;font-size:15px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bp-sheet th{height:9mm;background:#dcdcdc;font:bold 16px "Times New Roman",serif}
+.bp-sheet tbody tr{height:9.2mm}
+.bp-c{text-align:center}
+.bp-sheet td.bp-bin{text-align:center;vertical-align:middle;font-size:26px;font-weight:bold;white-space:normal;background:#f3f6fa}
+.bp-binin{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.bp-qr{width:85px;height:85px;margin-bottom:14px}
+.bp-qr img,.bp-qr canvas{width:85px!important;height:85px!important}
+
+/* edit-only (sirf screen par) */
+.bp-edit td.bp-sr{cursor:grab;touch-action:none;user-select:none;background:#eef6ff;font-weight:bold}
+.bp-edit td.bp-sr::before{content:"⠿ ";color:#2563eb}
+.bp-edit tr.bp-drag td{background:#fde68a!important}
+.bp-edit tr.bp-drag td.bp-bin{background:#f3f6fa!important}
+
+/* ─── Print ─── */
+#bpPrintRoot{display:none}
+@page{size:A4 landscape;margin:6mm}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff!important;padding:0!important;margin:0!important;overflow:visible!important}
+  body>*:not(#bpPrintRoot){display:none!important}
+  #bpPrintRoot{display:block}
+  #bpPrintRoot .bp-sheet{break-after:page;page-break-after:always;margin:0 auto}
+  #bpPrintRoot .bp-sheet:last-child{break-after:auto;page-break-after:auto}
+  #bpPrintRoot .bp-ctitle{font-size:25px}
+  #bpPrintRoot .bp-sheet th{font-size:19px}
+  #bpPrintRoot .bp-sheet td{font-size:17px}
+  #bpPrintRoot .bp-sheet td.bp-bin{font-size:27px}
+}  
+</style>
 </head>
 
 <body>
@@ -1952,6 +2017,34 @@
   <div class="lm-list" id="lmList"></div>
   <div class="lm-foot">Item par tap karo — uska card khul jayega</div>
 </div>
+
+<!-- Bin Print Modal -->
+<div class="bp-back" id="bpBack">
+  <div class="bp-modal">
+    <div class="bp-stripe"></div>
+    <div class="bp-head">
+      <div class="bp-title">
+        <div class="bp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></div>
+        <div style="min-width:0">
+          <div class="bp-ttl">BIN LOCATION</div>
+          <span class="bp-locpill">📍 <span id="bpLoc"></span></span>
+        </div>
+      </div>
+      <div class="bp-right">
+        <label class="bp-mini"><span>QR</span><span class="bp-sw"><input type="checkbox" id="bpQrT" onchange="bpToggleQR()"><i></i></span></label>
+        <button class="bp-mini" id="bpZoomBtn" onclick="bpSetZoom(!bpZoomed)">🔍 Zoom</button>
+        <button class="bp-x" onclick="closeBinPrint()">✕</button>
+      </div>
+    </div>
+    <div class="bp-body" id="bpBody"><div class="bp-paper" id="bpPaper"><div class="bp-zoom" id="bpZoom"></div></div></div>
+    <div class="bp-foot">
+      <button class="bp-btn g" id="bpDone" style="display:none;margin-right:auto" onclick="bpMarkDone()">✓ Printed ho gaya</button>
+      <button class="bp-btn" onclick="closeBinPrint()">Cancel</button>
+      <button class="bp-btn p" onclick="bpDoPrint()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+<div id="bpPrintRoot"></div>
 
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
@@ -2046,7 +2139,7 @@
     </div>
     <div class="notif-tabs">
       <button class="notif-tab active" id="notifTabStock" onclick="switchNotifTab('stock')">
-        📊 Stock Pending
+        📍 Location
         <span class="tab-badge hidden" id="notifTabStockBadge">0</span>
       </button>
       <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')">
@@ -2065,10 +2158,7 @@
           </svg>
         </button>
       </div>
-      <div class="bin-clear-row" id="binClearRow" style="display:none;">
-        <button class="bin-clear-btn" onclick="clearAllBinList()">🗑️ Clear all</button>
-      </div>
-      <div class="notif-list" id="notifList"></div>
+       <div class="notif-list" id="notifList"></div>
       <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
     </div>
   </div>
@@ -2369,7 +2459,7 @@ function addBinPending(loc, reason) {
   loc = String(loc || '').trim().toUpperCase();
   if (!loc) return;
   const existing = binPending.find(p => p.loc === loc);
-  if (existing) { existing.reason = reason; existing.ts = Date.now(); }
+  if (existing) { existing.reason = reason; existing.ts = Date.now(); existing.printed = false; }
   else binPending.push({ loc, reason, ts: Date.now() });
   saveBinPendingStorage();
   renderStats();
@@ -2433,7 +2523,6 @@ function renderTabBadges() {
 
 function renderActiveNotifTab() {
   const searchWrap = document.getElementById('notifSearchWrap');
-  const clearRow = document.getElementById('binClearRow');
   const stripe = document.getElementById('notifStripe');
   const iconBadge = document.getElementById('notifIconBadge');
   const titleText = document.getElementById('notifTitleText');
@@ -2448,7 +2537,6 @@ function renderActiveNotifTab() {
     countChip.classList.remove('bin');
     dlBtn.classList.remove('bin');
     searchWrap.style.display = '';
-    clearRow.style.display = 'none';
     footer.textContent = 'Tap Save ✓ to assign — list updates live';
     renderNotifList();
   } else {
@@ -2458,7 +2546,7 @@ function renderActiveNotifTab() {
     countChip.classList.add('bin');
     dlBtn.classList.add('bin');
     searchWrap.style.display = 'none';
-    clearRow.style.display = binPending.length ? 'flex' : 'none';
+
     footer.textContent = "Locations get added here automatically when an item's location changes";
     renderBinList();
   }
@@ -2482,7 +2570,10 @@ function renderBinList() {
           <div class="bin-loc">${p.loc}</div>
           <div class="bin-reason">${p.reason}</div>
         </div>
-        <button class="bin-done-btn" onclick="markBinDone('${p.loc}')">✓ Printed</button>
+                <div style="display:flex;gap:6px;">
+          <button class="bin-done-btn" onclick="openBinPrint('${p.loc}')">🖨️ Print</button>
+          ${p.printed ? `<button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="markBinDone('${p.loc}')">✓ Clear</button>` : ''}
+        </div>
       </div>
     </div>
   `).join('');
@@ -2508,6 +2599,151 @@ function clearAllBinList() {
   renderTabBadges();
   renderActiveNotifTab();
 }
+
+// ─── Bin Print Modal ───
+const BP_ROWS = 18;
+const BP_COMPANY = 'Balaji Action Buildwell Private Limited (REV-00)';
+const BP_ORDER_KEY = 'binCardLocationOrder';   // Bin Card page wali hi key
+let bpLoc = '', bpItems = [], bpZoomed = false, bpDragI = null;
+let bpShowQR = localStorage.getItem('bpShowQR') !== '0';
+const bpEl = id => document.getElementById(id);
+
+function bpCollect(loc) {
+  const all = itemMaster.filter(i => i.location && String(i.location).trim().toUpperCase() === loc);
+  let saved = [];
+  try { saved = (JSON.parse(localStorage.getItem(BP_ORDER_KEY)) || {})[loc] || []; } catch (e) {}
+  const pos = s => { const k = saved.indexOf(String(s)); return k < 0 ? 1e9 : k; };
+  return all.slice().sort((a, b) => pos(a.sap) - pos(b.sap));
+}
+function bpSaveOrder() {
+  try {
+    const m = JSON.parse(localStorage.getItem(BP_ORDER_KEY)) || {};
+    m[bpLoc] = bpItems.map(i => String(i.sap));
+    localStorage.setItem(BP_ORDER_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
+
+function bpSheets(edit) {
+  const pages = Math.max(1, Math.ceil(bpItems.length / BP_ROWS));
+  let out = '';
+  for (let p = 0; p < pages; p++) {
+    let rows = '';
+    for (let i = 0; i < BP_ROWS; i++) {
+      const gi = p * BP_ROWS + i, it = bpItems[gi];
+      rows += `<tr${it ? ` data-i="${gi}"` : ''}>
+        <td class="bp-c${it ? ' bp-sr' : ''}">${it ? gi + 1 : ''}</td>
+        <td class="bp-c">${it ? lmEsc(it.sap) : ''}</td>
+        <td>${it ? lmEsc(it.name) : ''}</td>
+        <td class="bp-c">${it ? lmEsc(it.uom || 'EA') : ''}</td>
+        ${i === 0 ? `<td class="bp-bin" rowspan="${BP_ROWS}"><div class="bp-binin">${bpShowQR ? `<div class="bp-qr" data-q="${lmEsc(bpLoc)}"></div>` : ''}<div>${lmEsc(bpLoc)}</div></div></td>` : ''}
+      </tr>`;
+    }
+    out += `<div class="bp-sheet${edit ? ' bp-edit' : ''}">
+      <div class="bp-ctitle">${lmEsc(BP_COMPANY)}</div>
+      <table>
+        <colgroup><col style="width:7%"><col style="width:14%"><col style="width:46%"><col style="width:10%"><col style="width:23%"></colgroup>
+        <thead><tr><th>Sr.No</th><th>SAP Code</th><th>Material Description</th><th>UOM</th><th>Bin Location</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+  return out;
+}
+function bpQR(root) {
+  if (typeof QRCode === 'undefined') return;
+  root.querySelectorAll('.bp-qr[data-q]').forEach(el => {
+    el.innerHTML = '';
+    new QRCode(el, { text: el.dataset.q, width: 85, height: 85, correctLevel: QRCode.CorrectLevel.M });
+  });
+}
+function bpDraw() {
+  const z = bpEl('bpZoom');
+  z.innerHTML = bpSheets(true);
+  bpQR(z);
+  bpFit();
+}
+function bpFit() {
+  const body = bpEl('bpBody'), z = bpEl('bpZoom'), paper = bpEl('bpPaper'), first = z.firstElementChild;
+  if (!first) return;
+  z.style.transform = 'none';
+  const w = first.offsetWidth, h = z.offsetHeight;
+  const k = bpZoomed ? 0.9 : Math.min(1, (body.clientWidth - 20) / w);
+  z.style.transform = `scale(${k})`;
+  paper.style.width = (w * k) + 'px';
+  paper.style.height = (h * k) + 'px';
+}
+function bpSetZoom(v) {
+  bpZoomed = v;
+  const b = bpEl('bpZoomBtn');
+  b.classList.toggle('on', v);
+  b.textContent = v ? '🔍 Fit' : '🔍 Zoom';
+  bpFit();
+}
+function bpToggleQR() {
+  bpShowQR = bpEl('bpQrT').checked;
+  localStorage.setItem('bpShowQR', bpShowQR ? '1' : '0');
+  bpDraw();
+}
+
+function openBinPrint(loc) {
+  bpLoc = String(loc).trim().toUpperCase();
+  bpItems = bpCollect(bpLoc);
+  bpEl('bpLoc').textContent = bpLoc;
+  bpEl('bpDone').style.display = 'none';
+  bpEl('bpQrT').checked = bpShowQR;
+  bpZoomed = false;
+  bpEl('bpZoomBtn').classList.remove('on');
+  bpEl('bpZoomBtn').textContent = '🔍 Zoom';
+  bpEl('bpBack').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bpDraw();
+}
+function closeBinPrint() {
+  bpEl('bpBack').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function bpDoPrint() {
+  const r = bpEl('bpPrintRoot');
+  r.innerHTML = bpSheets(false);
+  bpQR(r);
+  bpEl('bpDone').style.display = '';
+  const bp = binPending.find(x => x.loc === bpLoc);
+  if (bp) { bp.printed = true; saveBinPendingStorage(); if (notifOpen && activeNotifTab === 'bin') renderBinList(); }
+  setTimeout(() => window.print(), 200);
+}
+function bpMarkDone() {
+  const loc = bpLoc;
+  closeBinPrint();
+  markBinDone(loc);          // pehle se maujood function
+}
+
+// drag reorder (mouse + touch)
+const bpZoomEl = bpEl('bpZoom');
+bpZoomEl.addEventListener('pointerdown', e => {
+  const td = e.target.closest('td.bp-sr');
+  if (!td) return;
+  bpDragI = +td.parentElement.dataset.i;
+  bpZoomEl.setPointerCapture(e.pointerId);
+  td.parentElement.classList.add('bp-drag');
+  e.preventDefault();
+});
+bpZoomEl.addEventListener('pointermove', e => {
+  if (bpDragI === null) return;
+  const t = document.elementFromPoint(e.clientX, e.clientY);
+  const tr = t && t.closest('tr[data-i]');
+  if (!tr) return;
+  const j = +tr.dataset.i;
+  if (j === bpDragI) return;
+  const [m] = bpItems.splice(bpDragI, 1);
+  bpItems.splice(j, 0, m);
+  bpDragI = j;
+  bpDraw();
+  const row = bpZoomEl.querySelector(`tr[data-i="${j}"]`);
+  if (row) row.classList.add('bp-drag');
+});
+const bpEndDrag = () => { if (bpDragI === null) return; bpDragI = null; bpSaveOrder(); bpDraw(); };
+bpZoomEl.addEventListener('pointerup', bpEndDrag);
+bpZoomEl.addEventListener('pointercancel', bpEndDrag);
+window.addEventListener('resize', () => { if (bpEl('bpBack').classList.contains('open')) bpFit(); });
 
 function toggleNotif() {
   notifOpen = !notifOpen;
