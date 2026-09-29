@@ -2366,7 +2366,7 @@
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbwEcdBHyrMdVomdLPD7rbmYLM-f8sZQTtPEgayC2tFlliOB14FN6Knq1UiI2ffbTagB/exec";
+    const API = "https://script.google.com/macros/s/AKfycbwPKsdduuC2LxTxgy1Uu6irSQ1DL5dZBZ1OyDpMx43eNt2TsF7Rn32LpcJTcmSD_nLK/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -2455,14 +2455,88 @@ function loadBinPending() {
 function saveBinPendingStorage() {
   try { localStorage.setItem(BIN_PENDING_KEY, JSON.stringify(binPending)); } catch (e) {}
 }
+// ─── Bin sync (Google Sheet) ───
+let binOps = {};              // loc -> {type:'add'|'remove'|'print', ts, item?}
+let binQueue = Promise.resolve();
+let binSyncing = false;
+
+// Server calls ek ke baad ek (order sahi rehta hai), 1 retry ke saath
+function binSend(params) {
+  const url = `${API}?${new URLSearchParams(params)}`;
+  const attempt = () => fetch(url).then(r => r.json());
+  binQueue = binQueue.then(() => attempt().catch(() => attempt())).catch(() => {});
+  return binQueue;
+}
+
+// Server list ke upar local pending changes lagao (120 sec tak)
+function mergeBin(serverRows) {
+  const now = Date.now();
+  let list = serverRows.map(r => ({ loc: r.loc, reason: r.reason, ts: r.ts, printed: !!r.printed }));
+
+  Object.keys(binOps).forEach(loc => {
+    const op = binOps[loc];
+    const s = list.find(x => x.loc === loc);
+    const expired = now - op.ts > 120000;
+
+    if (op.type === 'remove') {
+      if (!s || expired) delete binOps[loc];
+      else list = list.filter(x => x.loc !== loc);
+    } else if (op.type === 'add') {
+      if ((s && s.ts >= op.ts) || expired) delete binOps[loc];
+      else { list = list.filter(x => x.loc !== loc); list.push(op.item); }
+    } else if (op.type === 'print') {
+      if ((s && s.printed) || expired) delete binOps[loc];
+      else if (s) s.printed = true;
+      else {
+        const l = binPending.find(x => x.loc === loc);
+        if (l) list.push({ loc: l.loc, reason: l.reason, ts: l.ts, printed: true });
+      }
+    }
+  });
+  return list;
+}
+
+function syncBin() {
+  if (binSyncing) return Promise.resolve();
+  binSyncing = true;
+
+  // Sirf ek baar: purani local list ko Sheet par bhej do
+  if (!localStorage.getItem('binMigrated')) {
+    binPending.forEach(p => {
+      binOps[p.loc] = { type: 'add', ts: p.ts, item: p };
+      binSend({ action: 'addBin', loc: p.loc, reason: p.reason, ts: p.ts, by: userName });
+    });
+    localStorage.setItem('binMigrated', '1');
+  }
+
+  return fetch(`${API}?action=getBin`)
+    .then(r => r.json())
+    .then(rows => {
+      if (!Array.isArray(rows)) return;
+      binPending = mergeBin(rows);
+      saveBinPendingStorage();
+      renderStats();
+      if (notifOpen) {
+        renderTabBadges();
+        if (activeNotifTab === 'bin') renderBinList();
+      }
+    })
+    .catch(() => {})
+    .finally(() => { binSyncing = false; });
+}
+
 function addBinPending(loc, reason) {
   loc = String(loc || '').trim().toUpperCase();
   if (!loc) return;
-  const existing = binPending.find(p => p.loc === loc);
-  if (existing) { existing.reason = reason; existing.ts = Date.now(); existing.printed = false; }
-  else binPending.push({ loc, reason, ts: Date.now() });
+  const ts = Date.now();
+  const item = { loc, reason, ts, printed: false };
+  const i = binPending.findIndex(p => p.loc === loc);
+  if (i >= 0) binPending[i] = item; else binPending.push(item);
+
+  binOps[loc] = { type: 'add', ts, item };
   saveBinPendingStorage();
   renderStats();
+  binSend({ action: 'addBin', loc, reason, ts, by: userName });
 }
 loadBinPending();
 
@@ -2555,7 +2629,7 @@ function renderActiveNotifTab() {
 function renderBinList() {
   document.getElementById('notifCountBadge').textContent = binPending.length;
   document.getElementById('notifSub').textContent = binPending.length === 0
-    ? 'Sab bin lists up to date 🎉'
+    ? 'Sab bin lists up to date'
     : 'Print/update the hardcopy';
 
   const list = document.getElementById('notifList');
@@ -2582,6 +2656,8 @@ function renderBinList() {
 function markBinDone(loc) {
   const row = document.getElementById('brow-' + loc);
   if (row) row.classList.add('done');
+  binOps[loc] = { type: 'remove', ts: Date.now() };
+  binSend({ action: 'removeBin', loc });
   setTimeout(() => {
     binPending = binPending.filter(p => p.loc !== loc);
     saveBinPendingStorage();
@@ -2593,8 +2669,10 @@ function markBinDone(loc) {
 
 function clearAllBinList() {
   if (!binPending.length) return;
+  binPending.forEach(p => { binOps[p.loc] = { type: 'remove', ts: Date.now() }; });
   binPending = [];
   saveBinPendingStorage();
+  binSend({ action: 'clearBin' });
   renderStats();
   renderTabBadges();
   renderActiveNotifTab();
@@ -2707,7 +2785,13 @@ function bpDoPrint() {
   bpQR(r);
   bpEl('bpDone').style.display = '';
   const bp = binPending.find(x => x.loc === bpLoc);
-  if (bp) { bp.printed = true; saveBinPendingStorage(); if (notifOpen && activeNotifTab === 'bin') renderBinList(); }
+  if (bp) {
+    bp.printed = true;
+    binOps[bpLoc] = { type: 'print', ts: Date.now() };
+    binSend({ action: 'printBin', loc: bpLoc });
+    saveBinPendingStorage();
+    if (notifOpen && activeNotifTab === 'bin') renderBinList();
+  }
   setTimeout(() => window.print(), 200);
 }
 function bpMarkDone() {
@@ -2750,7 +2834,7 @@ function toggleNotif() {
   if (notifOpen) positionNotifPanel();
   document.getElementById('notifPanel').classList.toggle('open', notifOpen);
   document.getElementById('notifBackdrop').classList.toggle('open', notifOpen);
-  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
+  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); syncBin(); }
 }
 function closeNotif() {
   notifOpen = false;
@@ -4522,6 +4606,7 @@ document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPre
 if (getAutoOpenScannerPref()) openScanner();
 renderToolIconRow();
 renderToolLinks();
+syncBin();
     });
 
     function logout() {
@@ -4607,6 +4692,7 @@ window.addEventListener('pageshow', e => {
        function silentRefresh() {
       if (silentRefreshInFlight) return;
       silentRefreshInFlight = true;
+      syncBin();
 
       const prevPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
 
