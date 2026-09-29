@@ -1868,6 +1868,27 @@
   height: 19px;
   display: block;
 }
+/* ─── Notif Tabs & Bin List ─── */
+.notif-tabs{display:flex;gap:6px;margin:0 12px 10px;}
+.notif-tab{flex:1;padding:9px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
+.notif-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.notif-tab .tab-badge{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 3px;border-radius:20px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;border:2px solid var(--surface2);}
+.notif-tab.active .tab-badge{border-color:var(--accent);}
+.notif-tab .tab-badge.hidden{display:none;}
+
+.notif-stripe.bin{background:linear-gradient(90deg,var(--amber),#f59e0b);}
+.notif-icon-badge.bin{background:linear-gradient(135deg,var(--amber),#f59e0b);box-shadow:0 4px 10px rgba(180,83,9,0.28);}
+.notif-count-chip.bin{border-color:rgba(180,83,9,0.25);}
+.notif-count-chip.bin .num{color:var(--amber);}
+.notif-dl-btn.bin{background:var(--amber);}
+
+.bin-clear-row{display:flex;justify-content:flex-end;margin:0 6px 6px;}
+.bin-clear-btn{background:transparent;border:none;color:var(--red);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 6px;-webkit-tap-highlight-color:transparent;}
+.bin-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.bin-loc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
+.bin-reason{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.bin-done-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.bin-done-btn:active{border-color:var(--green);color:var(--green);}
 
 /* ─── Location Modal ─── */
 .loc-pill.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s;}
@@ -1883,8 +1904,6 @@
 .lm-loc{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
 .lm-sub{font-size:11px;color:var(--muted);margin-top:1px;}
 .lm-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;}
-.lm-search{margin:0 12px 8px;width:calc(100% - 24px);background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:15px;color:var(--text);outline:none;}
-.lm-search:focus{border-color:var(--accent);background:var(--surface);}
 .lm-list{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 10px 10px;}
 .lm-row{border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:6px;background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;}
 .lm-row:active{border-color:var(--accent);background:rgba(37,99,235,.04);}
@@ -1930,7 +1949,6 @@
     </div>
     <button class="lm-close" onclick="closeLocModal()">✕</button>
   </div>
-  <input class="lm-search" id="lmSearch" placeholder="Is location me search..." oninput="renderLocModal()" autocomplete="off" autocorrect="off" spellcheck="false">
   <div class="lm-list" id="lmList"></div>
   <div class="lm-foot">Item par tap karo — uska card khul jayega</div>
 </div>
@@ -1999,23 +2017,23 @@
       </svg>
       <span class="bell-badge hidden" id="bellBadge">0</span>
     </button>
-    <div id="notifPanel">
-    <div class="notif-stripe"></div>
+        <div id="notifPanel">
+    <div class="notif-stripe" id="notifStripe"></div>
     <div class="notif-header-v3">
       <div class="notif-title-block">
-        <div class="notif-icon-badge">📊</div>
+        <div class="notif-icon-badge" id="notifIconBadge">📊</div>
         <div>
-          <div class="notif-title-text-v3">IN STOCK, NO LOCATION</div>
+          <div class="notif-title-text-v3" id="notifTitleText">IN STOCK, NO LOCATION</div>
           <div class="notif-sub-v3" id="notifSub">Assign a location to clear the list</div>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-                <div class="notif-count-chip">
+                <div class="notif-count-chip" id="notifCountChip">
           <div style="display:flex; flex-direction:column;">
             <span class="num" id="notifCountBadge">0</span>
             <span class="lbl">Pending</span>
           </div>
-          <button class="notif-dl-btn" onclick="downloadPendingFromNotif()" aria-label="Download pending list">
+          <button class="notif-dl-btn" id="notifDlBtn" onclick="downloadActiveNotifTab()" aria-label="Download pending list">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -2026,7 +2044,17 @@
                 <button class="notif-close" onclick="closeNotif()">✕</button>
       </div>
     </div>
-              <div class="notif-search-wrap">
+    <div class="notif-tabs">
+      <button class="notif-tab active" id="notifTabStock" onclick="switchNotifTab('stock')">
+        📊 Stock Pending
+        <span class="tab-badge hidden" id="notifTabStockBadge">0</span>
+      </button>
+      <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')">
+        🖨️ Bin Lists
+        <span class="tab-badge hidden" id="notifTabBinBadge">0</span>
+      </button>
+    </div>
+              <div class="notif-search-wrap" id="notifSearchWrap">
         <span class="notif-search-icon">🔍</span>
         <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
         <button id="notifSearchClear" onclick="clearNotifSearch()" style="display:none;">✕</button>
@@ -2037,10 +2065,14 @@
           </svg>
         </button>
       </div>
+      <div class="bin-clear-row" id="binClearRow" style="display:none;">
+        <button class="bin-clear-btn" onclick="clearAllBinList()">🗑️ Clear all</button>
+      </div>
       <div class="notif-list" id="notifList"></div>
-      <div class="notif-footer">Tap Save ✓ to assign — list updates live</div>
+      <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
     </div>
   </div>
+
   <div id="welcomeUser">Guest</div>
   <button id="logoutBtn" onclick="logout()">Logout</button>
 </div>
@@ -2314,7 +2346,7 @@ window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); }
   if (stockEl) stockEl.textContent = inStock.toLocaleString();
 
 if (document.getElementById('bellBadge')) {
-  const c = getStockNoLocationItems().length;
+  const c = getStockNoLocationItems().length + binPending.length;
   document.getElementById('bellBadge').textContent = c;
   document.getElementById('bellBadge').classList.toggle('hidden', c === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', c > 0);
@@ -2322,6 +2354,27 @@ if (document.getElementById('bellBadge')) {
 }
 
 let notifOpen = false;
+let activeNotifTab = 'stock';
+let binPending = [];
+
+const BIN_PENDING_KEY = 'binPendingList';
+function loadBinPending() {
+  try { binPending = JSON.parse(localStorage.getItem(BIN_PENDING_KEY)) || []; }
+  catch (e) { binPending = []; }
+}
+function saveBinPendingStorage() {
+  try { localStorage.setItem(BIN_PENDING_KEY, JSON.stringify(binPending)); } catch (e) {}
+}
+function addBinPending(loc, reason) {
+  loc = String(loc || '').trim().toUpperCase();
+  if (!loc) return;
+  const existing = binPending.find(p => p.loc === loc);
+  if (existing) { existing.reason = reason; existing.ts = Date.now(); }
+  else binPending.push({ loc, reason, ts: Date.now() });
+  saveBinPendingStorage();
+  renderStats();
+}
+loadBinPending();
 
 function getStockNoLocationItems() {
   return itemMaster.filter(i => {
@@ -2344,12 +2397,124 @@ function downloadPendingFromNotif() {
   showToast('Downloaded: in_stock_no_location.csv', "blue");
 }
 
+function downloadBinList() {
+  if (!binPending.length) { showToast("Koi pending bin list nahi hai 🎉", "green"); return; }
+  const rows = [["Location", "Reason"]];
+  binPending.forEach(p => rows.push([p.loc, p.reason]));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
+  a.download = 'bin_lists_pending.csv';
+  a.click();
+  showToast('Downloaded: bin_lists_pending.csv', "blue");
+}
+
+function downloadActiveNotifTab() {
+  if (activeNotifTab === 'stock') downloadPendingFromNotif();
+  else downloadBinList();
+}
+
+function switchNotifTab(tab) {
+  activeNotifTab = tab;
+  document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
+  document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
+  renderActiveNotifTab();
+}
+
+function renderTabBadges() {
+  const sB = document.getElementById('notifTabStockBadge');
+  const bB = document.getElementById('notifTabBinBadge');
+  const stockCount = getStockNoLocationItems().length;
+  sB.textContent = stockCount;
+  sB.classList.toggle('hidden', stockCount === 0);
+  bB.textContent = binPending.length;
+  bB.classList.toggle('hidden', binPending.length === 0);
+}
+
+function renderActiveNotifTab() {
+  const searchWrap = document.getElementById('notifSearchWrap');
+  const clearRow = document.getElementById('binClearRow');
+  const stripe = document.getElementById('notifStripe');
+  const iconBadge = document.getElementById('notifIconBadge');
+  const titleText = document.getElementById('notifTitleText');
+  const countChip = document.getElementById('notifCountChip');
+  const dlBtn = document.getElementById('notifDlBtn');
+  const footer = document.getElementById('notifFooter');
+
+  if (activeNotifTab === 'stock') {
+    stripe.classList.remove('bin');
+    iconBadge.classList.remove('bin'); iconBadge.textContent = '📊';
+    titleText.textContent = 'IN STOCK, NO LOCATION';
+    countChip.classList.remove('bin');
+    dlBtn.classList.remove('bin');
+    searchWrap.style.display = '';
+    clearRow.style.display = 'none';
+    footer.textContent = 'Tap Save ✓ to assign — list updates live';
+    renderNotifList();
+  } else {
+    stripe.classList.add('bin');
+    iconBadge.classList.add('bin'); iconBadge.textContent = '🖨️';
+    titleText.textContent = 'BIN LISTS TO UPDATE';
+    countChip.classList.add('bin');
+    dlBtn.classList.add('bin');
+    searchWrap.style.display = 'none';
+    clearRow.style.display = binPending.length ? 'flex' : 'none';
+    footer.textContent = "Locations get added here automatically when an item's location changes";
+    renderBinList();
+  }
+}
+
+function renderBinList() {
+  document.getElementById('notifCountBadge').textContent = binPending.length;
+  document.getElementById('notifSub').textContent = binPending.length === 0
+    ? 'Sab bin lists up to date 🎉'
+    : 'Print/update the hardcopy';
+
+  const list = document.getElementById('notifList');
+  if (!binPending.length) {
+    list.innerHTML = `<div class="notif-empty">✅ Koi pending bin list nahi hai</div>`;
+    return;
+  }
+  list.innerHTML = binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
+    <div class="notif-row" id="brow-${p.loc}">
+      <div class="bin-row-top">
+        <div>
+          <div class="bin-loc">${p.loc}</div>
+          <div class="bin-reason">${p.reason}</div>
+        </div>
+        <button class="bin-done-btn" onclick="markBinDone('${p.loc}')">✓ Printed</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function markBinDone(loc) {
+  const row = document.getElementById('brow-' + loc);
+  if (row) row.classList.add('done');
+  setTimeout(() => {
+    binPending = binPending.filter(p => p.loc !== loc);
+    saveBinPendingStorage();
+    renderStats();
+    renderTabBadges();
+    renderActiveNotifTab();
+  }, 350);
+}
+
+function clearAllBinList() {
+  if (!binPending.length) return;
+  binPending = [];
+  saveBinPendingStorage();
+  renderStats();
+  renderTabBadges();
+  renderActiveNotifTab();
+}
+
 function toggleNotif() {
   notifOpen = !notifOpen;
   if (notifOpen) positionNotifPanel();
   document.getElementById('notifPanel').classList.toggle('open', notifOpen);
   document.getElementById('notifBackdrop').classList.toggle('open', notifOpen);
-  if (notifOpen) renderNotifList();
+  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
 }
 function closeNotif() {
   notifOpen = false;
@@ -2404,9 +2569,8 @@ function renderNotifList() {
     items = allItems.filter(i => matchesNotifSearch(i, notifSearchQuery));
   }
 
-  document.getElementById('bellBadge').textContent = totalCount;
-  document.getElementById('bellBadge').classList.toggle('hidden', totalCount === 0);
-  document.getElementById('bellBtn').classList.toggle('has-alert', totalCount > 0);
+  renderStats();
+  renderTabBadges();
       document.getElementById('notifCountBadge').textContent = totalCount;
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
@@ -2469,6 +2633,7 @@ function saveNotifItem(sn) {
 
   item.location = loc;
   pendingUpdates[sn] = { location: loc, ts: Date.now() };
+  addBinPending(loc, 'Item added here');
   renderStats();
 
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
@@ -2476,7 +2641,7 @@ function saveNotifItem(sn) {
 
   setTimeout(() => {
     row.classList.add('done');
-    setTimeout(renderNotifList, 380);
+    setTimeout(() => { renderTabBadges(); renderActiveNotifTab(); }, 380);
   }, 380);
 }
 
@@ -3105,6 +3270,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
             updation_date: new Date().toLocaleDateString()
           };
           itemMaster.push(newItem);
+          if (loc) addBinPending(loc, 'Item added here');
           renderStats();
 
           showToast("Item add ho gaya ✓", "green");
@@ -3236,7 +3402,6 @@ function openLocModal() {
   if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
   lmLoc = String(currentItem.location).trim().toUpperCase();
   lmShowAll = false;
-  document.getElementById('lmSearch').value = '';
   document.getElementById('lmList').scrollTop = 0;
   renderLocModal();
   locModalOpen = true;
@@ -3255,19 +3420,15 @@ function closeLocModal() {
 function renderLocModal() {
   const LIMIT = 50;
   const all = itemMaster.filter(i => i.location && String(i.location).trim().toUpperCase() === lmLoc);
-  const q = document.getElementById('lmSearch').value.trim().toLowerCase();
-  const list = q
-    ? all.filter(i => String(i.name || '').toLowerCase().includes(q) || String(i.sap || '').includes(q))
-    : all.slice();
 
   const isCur = i => currentItem && String(i.sn) === String(currentItem.sn);
-  list.sort((a, b) => (isCur(b) ? 1 : 0) - (isCur(a) ? 1 : 0) || String(a.name || '').localeCompare(String(b.name || '')));
+  const list = all.slice().sort((a, b) => (isCur(b) ? 1 : 0) - (isCur(a) ? 1 : 0) || String(a.name || '').localeCompare(String(b.name || '')));
 
   const inStock = all.filter(lmHasStock).length;
   document.getElementById('lmLoc').textContent = lmLoc;
   document.getElementById('lmSub').textContent = `${all.length} items · ${inStock} in stock`;
 
-  const shown = (lmShowAll || q) ? list : list.slice(0, LIMIT);
+  const shown = lmShowAll ? list : list.slice(0, LIMIT);
   let html = shown.map(i => `
     <div class="lm-row ${isCur(i) ? 'cur' : ''}" onclick="lmPick('${lmEsc(i.sn)}')">
       <div class="lm-row-top">
@@ -3341,11 +3502,16 @@ function lmPick(sn) {
   if (!loc) {showToast("Enter a location first", "red"); return;}
 
   const sn = currentItem.sn;
+  const oldLoc = currentItem.location;
   localStorage.setItem("lastLocationText", loc);
   btn.disabled = true;
   btn.textContent = '⏳ Saving...';
   currentItem.location = loc;
   pendingUpdates[sn] = { location: loc, ts: Date.now() };
+  addBinPending(loc, 'Item added here');
+  if (oldLoc && oldLoc.trim() && oldLoc.trim().toUpperCase() !== loc) {
+    addBinPending(oldLoc.trim().toUpperCase(), 'Item removed from here');
+  }
   renderStats();
 
   const pill = document.querySelector('.loc-pill');
@@ -4234,7 +4400,7 @@ window.addEventListener('pageshow', e => {
 
           itemMaster = data;
 renderStats();
-if (locModalOpen && document.activeElement !== document.getElementById('lmSearch')) renderLocModal();
+if (locModalOpen) renderLocModal();
 // user notif list ke andar type kar raha hai ya nahi, check karo
 const activeEl = document.activeElement;
 const notifListEl = document.getElementById('notifList');
@@ -4242,7 +4408,10 @@ const typingInNotif = notifListEl && activeEl && notifListEl.contains(activeEl);
 
 if (notifOpen && !typingInNotif) {
   const newPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
-  if (newPendingKey !== prevPendingKey) renderNotifList();
+  if (newPendingKey !== prevPendingKey) {
+    renderTabBadges();
+    if (activeNotifTab === 'stock') renderNotifList();
+  }
 }
 
 const formOpen = document.getElementById('updateLocation');
