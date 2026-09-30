@@ -456,7 +456,7 @@
       </div>
       <div class="opts-row">
         <label><input type="checkbox" id="rememberMe"> Remember me</label>
-        <button type="button" class="forgot-lnk" onclick="openForgot()">Forgot Password?</button>
+        <button type="button" class="forgot-lnk" onclick="openForgot()">Change Password</button>
       </div>
       <div class="bio-opt" id="bioOpt">
         <label><input type="checkbox" id="enableBio"> Enable fingerprint login on this device</label>
@@ -477,10 +477,14 @@
   <div class="overlay" id="forgotOverlay" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
     <div class="modal-card">
       <h5 id="fpTitle"><i class="fa fa-key" style="color:var(--primary)" aria-hidden="true"></i> Reset Password</h5>
-      <p class="modal-sub">Enter your employee ID and a new password</p>
+      <p class="modal-sub">Enter your employee ID, current and new password</p>
       <div class="field-group">
         <span class="icon"><i class="fa fa-id-badge" aria-hidden="true"></i></span>
         <input id="fpUser" placeholder="6 Digit Employee ID" maxlength="6">
+      </div>
+            <div class="field-group">
+        <span class="icon"><i class="fa fa-lock" aria-hidden="true"></i></span>
+        <input type="password" id="fpCurrent" placeholder="Current Password">
       </div>
       <div class="field-group">
         <span class="icon"><i class="fa fa-lock" aria-hidden="true"></i></span>
@@ -492,13 +496,13 @@
       </div>
       <div class="mbtns">
         <button class="mbtn-cancel" onclick="closeForgot()">Cancel</button>
-        <button class="mbtn-submit" onclick="resetPassword()">Submit</button>
+        <button class="mbtn-submit" id="fpSubmit" onclick="resetPassword()">Submit</button>
       </div>
     </div>
   </div>
 
     <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbziXUUMTSJzxYOB0ZHEzn2JJp4yvKMzgcbfAtCclw0wx1uZZWLVkUHiSEcqW4jT-fhdcw/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyiUxB0SgPFV1c0C0y5B1Rf4HfQbkIDUd6ozqlOQci2wJSLKYrlP5kScbgBTlx8y4li7Q/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -729,24 +733,28 @@
     function openForgot() {document.getElementById('forgotOverlay').classList.add('open'); document.getElementById('fpUser').focus();}
     function closeForgot() {
       document.getElementById('forgotOverlay').classList.remove('open');
-      ['fpUser', 'fpNew', 'fpConfirm'].forEach(id => document.getElementById(id).value = '');
+      ['fpUser', 'fpCurrent', 'fpNew', 'fpConfirm'].forEach(id => document.getElementById(id).value = '');
     }
     document.getElementById('forgotOverlay').addEventListener('click', (e) => {if (e.target.id === 'forgotOverlay') closeForgot();});
     async function resetPassword() {
       const u = document.getElementById('fpUser').value.trim();
+      const cur = document.getElementById('fpCurrent').value;
       const n = document.getElementById('fpNew').value;
       const c = document.getElementById('fpConfirm').value;
       if (!u) {toast('Fill employee id', true); return;}
+      if (!cur) {toast('Fill current password', true); return;}
       if (n.length < 4) {toast('Password should be 4+ characters', true); return;}
       if (n !== c) {toast('Passwords do not match', true); return;}
+      const sb = document.getElementById('fpSubmit'); sb.disabled = true; sb.textContent = 'Please wait...';
       try {
-        const res = await fetch(`${WEB_APP_URL}?action=resetPassword&Username=${encodeURIComponent(u)}&NewPassword=${encodeURIComponent(n)}`);
+        const res = await fetch(`${WEB_APP_URL}?action=resetPassword&Username=${encodeURIComponent(u)}&CurrentPassword=${encodeURIComponent(cur)}&NewPassword=${encodeURIComponent(n)}`);
         const data = await res.json();
         if (data.status === 'success') {
           toast('Password updated successfully!');
           closeForgot();
-        } else {toast('Failed — Check Employee ID', true);}
+        } else {toast('Failed — Check Employee ID / current password', true);}
       } catch (e) {toast('Network error', true);}
+      sb.disabled = false; sb.textContent = 'Submit';
     }
   </script>
 </body>
