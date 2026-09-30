@@ -385,54 +385,46 @@
 
     @media (prefers-reduced-motion:reduce) { * { animation: none !important; transition: none !important } }
 
-.bio-btn{
-  width:100%;margin-top:10px;padding:11px;background:#fff;color:var(--primary);
-  border:1.5px solid var(--primary);border-radius:8px;font-size:14px;font-weight:700;
-  cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px;
-  transition:background .2s;
-}
-.bio-btn:hover{background:#eef1f8}
-.bio-btn.show{display:flex}
+
 .bio-opt{display:none;margin:-4px 0 14px;font-size:12px}
 .bio-opt.show{display:block}
 .bio-opt label{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer}
 .bio-opt input{accent-color:var(--primary);width:12px;height:12px}
 .bio-off{display:none;margin:12px auto 0;background:none;border:none;color:var(--danger);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:4px}
 .bio-off.show{display:block}
-.bio-screen{display:none;width:330px;max-width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 22px rgba(28,35,51,.1);overflow:hidden;text-align:center;padding-bottom:22px}
+.bio-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:5;align-items:center;justify-content:center}
 .bio-mode .login-card{display:none}
-.bio-mode .bio-screen{display:block}
-.bio-circle{width:84px;height:84px;border-radius:50%;background:#eef1f8;color:var(--primary);display:flex;align-items:center;justify-content:center;margin:8px auto 10px;font-size:40px;cursor:pointer;border:2px solid transparent;transition:border-color .2s}
-.bio-circle.scanning{border-color:var(--primary)}
-.bio-msg{font-size:14px;font-weight:700;color:var(--text)}
-.bio-sub{font-size:12px;color:var(--muted);margin:2px 0 6px}
-.bio-actions{padding:0 26px}
-.bio-pw{background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline;margin-top:12px;padding:4px}
+.bio-mode .bio-screen{display:flex}
+.fp-btn{position:relative;width:110px;height:110px;padding:0;border:none;background:none;border-radius:50%;cursor:pointer;outline:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.fp-btn svg{position:absolute;inset:0}
+.fp-icon,.fp-tick{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.fp-icon{color:var(--primary);font-size:56px}
+.fp-tick{color:var(--success);font-size:58px;display:none}
+.fp-tick.show{display:flex;animation:popIn .35s ease}
+.fp-hold{display:none;stroke-dasharray:314;stroke-dashoffset:314}
+.fp-hold.run{display:block;animation:holdFill .6s linear forwards}
+@keyframes holdFill{from{stroke-dashoffset:314}to{stroke-dashoffset:0}}
+.fp-spin{display:none;transform-origin:55px 55px}
+.fp-spin.run{display:block;animation:spin .9s linear infinite}
+.fp-ok{display:none}
+.fp-ok.show{display:block}
 </style>
 
 </head>
 
 <body>
   <div id="toastBox" role="status" aria-live="polite"></div>
-  <div class="bio-screen" id="bioScreen">
-    <div class="banner"></div>
-    <div class="logo-wrap">
-      <div class="logo-badge">
-        <svg viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.6" />
-          <path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" />
-        </svg>
-      </div>
-      <div class="logo-title">Store Index</div>
-      <div class="logo-sub">Material Location Access Portal</div>
-    </div>
-    <div class="bio-circle" id="bioCircle" onclick="bioLogin(false)"><i class="fa fa-fingerprint" aria-hidden="true"></i></div>
-    <div class="bio-msg" id="bioMsg">Fingerprint lagao</div>
-    <div class="bio-sub">App locked hai</div>
-    <div class="bio-actions">
-      <button type="button" class="bio-btn show" onclick="bioLogin(false)"><i class="fa fa-fingerprint" aria-hidden="true"></i> Use fingerprint</button>
-      <button type="button" class="bio-pw" onclick="showPassword()">Use password instead</button>
-    </div>
+    <div class="bio-screen" id="bioScreen">
+    <button type="button" class="fp-btn" id="fpBtn" aria-label="Unlock with fingerprint">
+      <svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true">
+        <circle cx="55" cy="55" r="50" fill="none" stroke="#dbe1ee" stroke-width="3" />
+        <circle id="fpHold" class="fp-hold" cx="55" cy="55" r="50" fill="none" stroke="#9aa5bd" stroke-width="3" transform="rotate(-90 55 55)" />
+        <g id="fpSpin" class="fp-spin"><circle cx="55" cy="55" r="50" fill="none" stroke="#2454e0" stroke-width="3" stroke-linecap="round" stroke-dasharray="80 234" /></g>
+        <circle id="fpOk" class="fp-ok" cx="55" cy="55" r="50" fill="none" stroke="#16a34a" stroke-width="3" />
+      </svg>
+      <span class="fp-icon" id="fpIcon"><i class="fa fa-fingerprint" aria-hidden="true"></i></span>
+      <span class="fp-tick" id="fpTick"><i class="fa fa-check" aria-hidden="true"></i></span>
+    </button>
   </div>
   <div class="login-card">
     <div class="banner"></div>
@@ -607,11 +599,18 @@
       ['si_credId', 'si_bioUser', 'si_bioPass'].forEach(k => localStorage.removeItem(k));
     }
 
-        async function bioLogin(auto) {
-      const circle = document.getElementById('bioCircle');
-      const msg = document.getElementById('bioMsg');
-      circle.classList.add('scanning');
-      msg.textContent = 'Scanning...';
+      let bioBusy = false;
+
+    function bioSetState(s) {
+      document.getElementById('fpSpin').classList.toggle('run', s === 'spin');
+      document.getElementById('fpOk').classList.toggle('show', s === 'ok');
+      document.getElementById('fpTick').classList.toggle('show', s === 'ok');
+      document.getElementById('fpIcon').style.display = s === 'ok' ? 'none' : 'flex';
+    }
+
+    async function bioLogin(auto) {
+      if (bioBusy) return;
+      bioBusy = true;
       try {
         await navigator.credentials.get({
           publicKey: {
@@ -622,16 +621,34 @@
           }
         });
       } catch (err) {
-        circle.classList.remove('scanning');
-        msg.textContent = 'Fingerprint lagao';
+        bioBusy = false;
         if (!auto) toast('Fingerprint cancelled or failed', true);
         return;
       }
-      msg.textContent = 'Verified';
+      bioSetState('spin');
       const u = localStorage.getItem('si_bioUser');
       const p = decodeURIComponent(escape(atob(localStorage.getItem('si_bioPass'))));
       await doLogin(u, p, null, true, false);
     }
+
+    (function fpGestures() {
+      const btn = document.getElementById('fpBtn');
+      const hold = document.getElementById('fpHold');
+      let t = null, longDone = false;
+      function stop() { clearTimeout(t); t = null; hold.classList.remove('run'); }
+      btn.addEventListener('pointerdown', () => {
+        if (bioBusy) return;
+        longDone = false;
+        hold.classList.remove('run'); void hold.getBoundingClientRect(); hold.classList.add('run');
+        t = setTimeout(() => { longDone = true; stop(); showPassword(); }, 600);
+      });
+      btn.addEventListener('pointerup', () => {
+        if (t) { stop(); if (!longDone) bioLogin(false); }
+      });
+      btn.addEventListener('pointerleave', stop);
+      btn.addEventListener('pointercancel', stop);
+      btn.addEventListener('contextmenu', e => e.preventDefault());
+    })();
     function showPassword() {
       document.documentElement.classList.remove('bio-mode');
     }
@@ -682,16 +699,17 @@
           sessionStorage.setItem('loggedIn', 'true');
           sessionStorage.setItem('userName', data.name);
           setSuccess();
+          if (viaBio) bioSetState('ok');
           setTimeout(() => location.href = 'Indexing.html', 1200);
         } else {
-          if (viaBio) { clearBio(); document.documentElement.classList.remove('bio-mode'); document.getElementById('bioOff').classList.remove('show'); document.getElementById('bioOpt').classList.add('show'); toast('Password changed? Login once with password', true); }
+          if (viaBio) { clearBio(); bioSetState('idle'); bioBusy = false; document.documentElement.classList.remove('bio-mode'); document.getElementById('bioOff').classList.remove('show'); document.getElementById('bioOpt').classList.add('show'); toast('Password changed? Login once with password', true); }
           setError();
         }
       } catch (err) {
         setError();
         toast('Network error — Try again later', true);
-        document.getElementById('bioMsg').textContent = 'Fingerprint lagao';
-        document.getElementById('bioCircle').classList.remove('scanning');
+        bioSetState('idle');
+        bioBusy = false;
       }
     }
 
