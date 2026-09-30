@@ -381,6 +381,19 @@
     }
 
     @media (prefers-reduced-motion:reduce) { * { animation: none !important; transition: none !important } }
+
+.bio-btn{
+  width:100%;margin-top:10px;padding:11px;background:#fff;color:var(--primary);
+  border:1.5px solid var(--primary);border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px;
+  transition:background .2s;
+}
+.bio-btn:hover{background:#eef1f8}
+.bio-btn.show{display:flex}
+.bio-opt{display:none;margin:-4px 0 14px;font-size:12px}
+.bio-opt.show{display:block}
+.bio-opt label{display:flex;align-items:center;gap:7px;color:var(--muted);cursor:pointer}
+.bio-opt input{accent-color:var(--primary);width:12px;height:12px}
 </style>
 
 </head>
@@ -419,11 +432,17 @@
         <label><input type="checkbox" id="rememberMe"> Remember me</label>
         <button type="button" class="forgot-lnk" onclick="openForgot()">Forgot Password?</button>
       </div>
+      <div class="bio-opt" id="bioOpt">
+        <label><input type="checkbox" id="enableBio"> Enable fingerprint login on this device</label>
+      </div>
       <button type="submit" class="login-btn" id="loginBtn">
         <div class="btn-inner" id="btnInner">
           <div class="btn-spinner" id="btnSpinner"></div>
           <span id="btnText"><i class="fa fa-sign-in-alt" style="margin-right:7px" aria-hidden="true"></i>Login</span>
         </div>
+            </button>
+      <button type="button" class="bio-btn" id="bioBtn" onclick="bioLogin()">
+        <i class="fa fa-fingerprint" aria-hidden="true"></i> Login with Fingerprint
       </button>
     </form>
     <div class="card-footer">
@@ -517,7 +536,68 @@
         document.getElementById('btnText').innerHTML = '<i class="fa fa-sign-in-alt" style="margin-right:7px" aria-hidden="true"></i>Login';
       }, 2200);
     }
+        /* ---------- FINGERPRINT (WebAuthn) ---------- */
+    const BIO_SUPPORTED = !!(window.PublicKeyCredential && navigator.credentials && window.isSecureContext);
+
+    function b64e(buf) {
+      return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+    function b64d(s) {
+      s = s.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    }
+    async function bioAvailable() {
+      if (!BIO_SUPPORTED) return false;
+      try { return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); }
+      catch (e) { return false; }
+    }
+    function bioEnabled() { return !!localStorage.getItem('si_credId'); }
+
+    async function createBioCred(u) {
+      const cred = await navigator.credentials.create({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          rp: { name: 'Store Index' },
+          user: { id: new TextEncoder().encode(u), name: u, displayName: u },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+          timeout: 60000
+        }
+      });
+      return b64e(cred.rawId);
+    }
+    function saveBio(credId, u, p) {
+      localStorage.setItem('si_credId', credId);
+      localStorage.setItem('si_bioUser', u);
+      localStorage.setItem('si_bioPass', btoa(unescape(encodeURIComponent(p))));
+    }
+    function clearBio() {
+      ['si_credId', 'si_bioUser', 'si_bioPass'].forEach(k => localStorage.removeItem(k));
+    }
+
+    async function bioLogin() {
+      try {
+        await navigator.credentials.get({
+          publicKey: {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            allowCredentials: [{ type: 'public-key', id: b64d(localStorage.getItem('si_credId')), transports: ['internal'] }],
+            userVerification: 'required',
+            timeout: 60000
+          }
+        });
+      } catch (err) {
+        toast('Fingerprint cancelled or failed', true);
+        return;
+      }
+      const u = localStorage.getItem('si_bioUser');
+      const p = decodeURIComponent(escape(atob(localStorage.getItem('si_bioPass'))));
+      await doLogin(u, p, null, true, false);
+    }
+
+    /* ---------- LOGIN ---------- */
     document.getElementById('loginForm').addEventListener('submit', login);
+
     async function login(e) {
       e.preventDefault();
       const btn = document.getElementById('loginBtn');
@@ -525,24 +605,38 @@
       const u = document.getElementById('loginUsername').value.trim();
       const p = document.getElementById('loginPassword').value;
       const rem = document.getElementById('rememberMe').checked;
+      const wantBio = document.getElementById('enableBio').checked;
       if (!u || !p) {
         btn.classList.add('shake');
         setTimeout(() => btn.classList.remove('shake'), 500);
         toast('Fill id and password', true);
         return;
       }
+      await doLogin(u, p, rem, false, wantBio);
+    }
+
+    async function doLogin(u, p, rem, viaBio, wantBio) {
+      let pendingCred = null;
+      if (wantBio && !viaBio) {
+        try { pendingCred = await createBioCred(u); }
+        catch (err) { toast('Fingerprint setup cancelled', true); }
+      }
       setLoading(true);
       try {
         const res = await fetch(`${WEB_APP_URL}?action=login&Username=${encodeURIComponent(u)}&Password=${encodeURIComponent(p)}`);
         const data = await res.json();
         if (data.status === 'success') {
-          if (rem) {localStorage.setItem('si_savedUser', u); localStorage.setItem('si_savedPass', p);}
-          else {localStorage.removeItem('si_savedUser'); localStorage.removeItem('si_savedPass');}
+          if (rem !== null) {
+            if (rem) { localStorage.setItem('si_savedUser', u); localStorage.setItem('si_savedPass', p); }
+            else { localStorage.removeItem('si_savedUser'); localStorage.removeItem('si_savedPass'); }
+          }
+          if (pendingCred) saveBio(pendingCred, u, p);
           sessionStorage.setItem('loggedIn', 'true');
           sessionStorage.setItem('userName', data.name);
           setSuccess();
           setTimeout(() => location.href = 'Indexing.html', 1200);
         } else {
+          if (viaBio) { clearBio(); document.getElementById('bioBtn').classList.remove('show'); toast('Password changed? Login once with password', true); }
           setError();
         }
       } catch (err) {
@@ -550,6 +644,13 @@
         toast('Network error — Try again later', true);
       }
     }
+
+    /* page load par fingerprint button/checkbox dikhao */
+    (async function initBio() {
+      if (!(await bioAvailable())) return;
+      if (bioEnabled()) document.getElementById('bioBtn').classList.add('show');
+      else document.getElementById('bioOpt').classList.add('show');
+    })();
     function openForgot() {document.getElementById('forgotOverlay').classList.add('open'); document.getElementById('fpUser').focus();}
     function closeForgot() {
       document.getElementById('forgotOverlay').classList.remove('open');
