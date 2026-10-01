@@ -730,7 +730,7 @@
 @keyframes candIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 #scanBulkBar{display:none;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 6px;min-height:44px;flex-shrink:0;color:#fff}
 .bulk-sum{display:flex;gap:6px;flex-wrap:wrap}
-.bulk-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.bulk-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
 .bulk-pill.y{background:rgba(5,150,105,.25);color:#6ee7b7}
 .bulk-pill.n{background:rgba(220,38,38,.25);color:#fca5a5}
 .bulk-tg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 4px 8px 8px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -746,8 +746,8 @@
 #scanCandidatesList.bulk .cand-ctx{display:none}
 .cand-nm{font-size:14px;font-weight:600;line-height:1.35;margin-top:3px;word-break:break-word;color:#fff}
 .cand-loc{display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
-.cand-loc.y{background:rgba(96,165,250,.2);color:#93c5fd}
-.cand-loc.n{background:rgba(248,113,113,.18);color:#fca5a5}
+.cand-loc.y{background:#2563eb;color:#fff;box-shadow:0 0 0 1px #60a5fa inset}
+.cand-loc.n{background:#dc2626;color:#fff;box-shadow:0 0 0 1px #f87171 inset}
 .cand-stk{display:none;flex-direction:column;align-items:center;justify-content:center;min-width:62px;border-radius:10px;padding:6px 8px;flex-shrink:0}
 #scanCandidatesList.bulk .cand-stk{display:flex}
 .cand-stk b{font-size:20px;font-weight:700;line-height:1.1}
