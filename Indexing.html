@@ -14,13 +14,13 @@
     <title>Store Indexing</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
-    rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *,
     *::before,
@@ -1981,7 +1981,7 @@
 
 /* ─── Real A4 sheet (A4 landscape minus 6mm margin) ─── */
 .bp-sheet{width:283mm;height:196mm;padding:1mm;background:#fff;font-family:Arial,sans-serif;color:#000;overflow:hidden}
-.bp-ctitle{border:2px solid #000;border-bottom:0;text-align:center;font:bold 22px "Times New Roman",serif;height:11mm;line-height:11mm}
+.bp-ctitle{border:1px solid #000;border-bottom:0;text-align:center;font:bold 22px "Times New Roman",serif;height:11mm;line-height:11mm}
 .bp-sheet table{width:100%;border-collapse:collapse;table-layout:fixed}
 .bp-sheet th,.bp-sheet td{border:1px solid #000;padding:0 8px;font-size:15px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .bp-sheet th{height:9mm;background:#dcdcdc;font:bold 16px "Times New Roman",serif}
@@ -4113,7 +4113,7 @@ function openScanner(targetId) {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
-  if (!ocrWorker) preloadOcrWorker();
+  if (!ocrWorker) setTimeout(preloadOcrWorker, 1500);
 
   const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
@@ -4754,7 +4754,6 @@ document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPre
 if (getAutoOpenScannerPref()) openScanner();
 renderToolIconRow();
 renderToolLinks();
-syncBin();
     });
 
     function logout() {
@@ -4818,6 +4817,7 @@ window.addEventListener('pageshow', e => {
         }
         document.getElementById('spinnerOverlay').style.display = 'none';
                 showToast(`${data.length.toLocaleString()} items synced`, 'green');
+        syncBin();
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
         if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
       })
