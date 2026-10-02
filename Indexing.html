@@ -736,8 +736,6 @@
 .bulk-tg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 4px 8px 8px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 .cand-row{min-height:48px;-webkit-tap-highlight-color:transparent}
 .cand-row:active{background:rgba(255,255,255,.16)}
-.cand-row.cand-ok{border-left:4px solid #34d399}
-.cand-row.cand-no{border-left:4px solid #f87171}
 .cand-main{flex:1;min-width:0}
 .cand-meta{display:none}
 #scanCandidatesList.bulk .cand-meta{display:block}
@@ -2413,6 +2411,14 @@
     let addItemMode = false; // track if we're showing add-item form
 let pendingUpdates = {};
 let pendingStockUpdates = {};
+
+function applyPendingStock(list) {
+  if (!Object.keys(pendingStockUpdates).length) return;
+  for (const it of list) {
+    const k = padSAP(String(it.sap || '').trim());
+    if (k in pendingStockUpdates) it.curr_stock = pendingStockUpdates[k];
+  }
+}
 
 function itemsEqual(a, b) {
   if (!a || !b) return a === b;
@@ -4743,10 +4749,7 @@ window.addEventListener('pageshow', e => {
             it.location = pend.location;
           }
         });
-        Object.keys(pendingStockUpdates).forEach(sap => {
-          const it = itemMaster.find(i => padSAP(String(i.sap || '').trim()) === sap);
-          if (it) it.curr_stock = pendingStockUpdates[sap];
-        });
+        applyPendingStock(itemMaster);
         pendingStockUpdates = {};
         renderStats();
         if (notifOpen) renderNotifList();
@@ -4799,10 +4802,7 @@ window.addEventListener('pageshow', e => {
               it.location = pend.location;
             }
           });
-          Object.keys(pendingStockUpdates).forEach(sap => {
-            const it = data.find(i => padSAP(String(i.sap || '').trim()) === sap);
-            if (it) it.curr_stock = pendingStockUpdates[sap];
-          });
+          applyPendingStock(data);
 
           itemMaster = data;
 renderStats();
