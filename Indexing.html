@@ -3528,7 +3528,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
         const padded = padSAP(raw);
         if (/^\d{10}$/.test(padded) && padded !== raw) {
           searchBox.value = padded;
-          doSearch(padded);
+          if (!(currentItem && String(currentItem.sap).trim() === padded)) doSearch(padded);
         }
       }
       setTimeout(closeDropdown, 200);
