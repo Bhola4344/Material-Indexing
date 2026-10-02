@@ -730,7 +730,7 @@
 @keyframes candIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 #scanBulkBar{display:none;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 6px;min-height:44px;flex-shrink:0;color:#fff}
 .bulk-sum{display:flex;gap:6px;flex-wrap:wrap}
-.bulk-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.bulk-pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
 .bulk-pill.y{background:rgba(5,150,105,.25);color:#6ee7b7}
 .bulk-pill.n{background:rgba(220,38,38,.25);color:#fca5a5}
 .bulk-tg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 4px 8px 8px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -743,7 +743,7 @@
 #scanCandidatesList.bulk .cand-sap{font-size:12px;font-weight:500;color:rgba(255,255,255,.55)}
 #scanCandidatesList.bulk .cand-ctx{display:none}
 .cand-nm{font-size:14px;font-weight:600;line-height:1.35;margin-top:3px;word-break:break-word;color:#fff}
-.cand-loc{display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.cand-loc{display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px; white-space:nowrap}
 .cand-loc.y{background:#2563eb;color:#fff;box-shadow:0 0 0 1px #60a5fa inset}
 .cand-loc.n{background:#dc2626;color:#fff;box-shadow:0 0 0 1px #f87171 inset}
 .cand-stk{display:none;flex-direction:column;align-items:center;justify-content:center;min-width:62px;border-radius:10px;padding:6px 8px;flex-shrink:0}
@@ -830,7 +830,7 @@
     .dd-loc-badge {
       font-size: 10px;
       padding: 2px 8px;
-      border-radius: 20px;
+      border-radius: 6px;
       white-space: nowrap;
       font-weight: 700;
       flex-shrink: 0;
@@ -974,7 +974,7 @@
       align-items: center;
       gap: 6px;
       padding: 8px 14px;
-      border-radius: 40px;
+      border-radius: 8px;
       font-size: 13px;
       font-weight: 700;
       margin-bottom: 14px;
@@ -1726,7 +1726,7 @@
 @keyframes rowClear { to { opacity: 0; transform: scale(0.9) translateX(30px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
 .notif-row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .notif-name { font-size: 12.5px; font-weight: 600; line-height: 1.35; flex: 1; }
-.notif-stock-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(8,145,178,0.1); color: var(--accent2); white-space: nowrap; border: 1px solid rgba(8,145,178,0.2); }
+.notif-stock-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgba(8,145,178,0.1); color: var(--accent2); white-space: nowrap; border: 1px solid rgba(8,145,178,0.2); }
 .notif-row-body { display: flex; gap: 6px; align-items: center; justify-content: flex-start; }
 .notif-inline-input { flex: 3 1 0; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text); outline: none; transition: border-color 0.2s; min-width: 0; }
 .notif-inline-input:focus { border-color: var(--accent); background: var(--surface); }
@@ -1913,6 +1913,14 @@
 .bin-reason{font-size:10.5px;color:var(--muted);margin-top:2px;}
 .bin-done-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
 .bin-done-btn:active{border-color:var(--green);color:var(--green);}
+.pa-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;padding:8px 10px;border-radius:10px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);}
+.pa-txt{font-size:12px;font-weight:600;color:var(--text);}
+.pa-txt span{font-weight:500;color:var(--muted);}
+.pa-grp{display:flex;gap:6px;}
+.pa-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif;}
+.pa-btn:active{background:#1d4ed8;}
+.pa-clr{background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif;}
+.pa-clr:active{background:#047857;}
 
 /* ─── Location Modal ─── */
 .loc-pill.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s;}
@@ -1934,7 +1942,7 @@
 .lm-row.cur{border-color:rgba(5,150,105,.45);background:rgba(5,150,105,.05);}
 .lm-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;}
 .lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
-.lm-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2);white-space:nowrap;}
+.lm-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2);white-space:nowrap;}
 .lm-chip.none{background:var(--surface2);color:var(--muted);border-color:var(--border);}
 .lm-sap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);}
 .lm-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);padding:1px 6px;border-radius:20px;margin-left:6px;}
@@ -1951,7 +1959,7 @@
 .bp-ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--amber),#f59e0b);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(180,83,9,.28);flex-shrink:0}
 .bp-ic svg{width:15px;height:15px}
 .bp-ttl{font-size:13px;font-weight:700;letter-spacing:-.2px}
-.bp-locpill{display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:3px 10px;border-radius:40px;background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.25);font:700 12px 'JetBrains Mono',monospace;white-space:nowrap}
+.bp-locpill{display:inline-flex;align-items:center;gap:3px;margin-top:3px;padding:2px 8px;border-radius:6px;background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.25);font:700 10px 'JetBrains Mono',monospace;white-space:nowrap}
 .bp-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .bp-mini{display:flex;align-items:center;gap:5px;height:28px;padding:0 7px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);font-size:11px;font-weight:700;color:var(--text);cursor:pointer;user-select:none;white-space:nowrap;font-family:'Inter',sans-serif}
 .bp-mini.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -2050,7 +2058,7 @@
       <div class="bp-title">
         <div class="bp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></div>
         <div style="min-width:0">
-          <div class="bp-ttl">BIN LOCATION</div>
+          <div class="bp-ttl" id="bpTtl">BIN LOCATION</div>
           <span class="bp-locpill">📍 <span id="bpLoc"></span></span>
         </div>
       </div>
@@ -2664,6 +2672,28 @@ function renderActiveNotifTab() {
   }
 }
 
+function clearPrintedBins() {
+  const done = binPending.filter(p => p.printed).map(p => p.loc);
+  if (!done.length) return;
+  done.forEach(l => {
+    binOps[l] = { type: 'remove', ts: Date.now() };
+    binSend({ action: 'removeBin', loc: l });
+  });
+  binPending = binPending.filter(p => !p.printed);
+  saveBinPendingStorage();
+  renderStats();
+  renderTabBadges();
+  renderActiveNotifTab();
+}
+
+function binPrintAllBar() {
+  if (binPending.length < 2) return '';
+  const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil(bpCollect(String(p.loc).trim().toUpperCase()).length / BP_ROWS)), 0);
+  const printedN = binPending.filter(p => p.printed).length;
+  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear Printed (${printedN})`;
+  return `<div class="pa-bar"><div class="pa-txt">${binPending.length} bins <span>· ${pages} pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
+}
+
 function renderBinList() {
   document.getElementById('notifCountBadge').textContent = binPending.length;
   document.getElementById('notifSub').textContent = binPending.length === 0
@@ -2675,7 +2705,7 @@ function renderBinList() {
     list.innerHTML = `<div class="notif-empty">✅ Koi pending bin list nahi hai</div>`;
     return;
   }
-  list.innerHTML = binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
+  list.innerHTML = binPrintAllBar() + binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
     <div class="notif-row" id="brow-${p.loc}">
       <div class="bin-row-top">
         <div>
@@ -2721,6 +2751,7 @@ const BP_ROWS = 18;
 const BP_COMPANY = 'Balaji Action Buildwell Private Limited (REV-00)';
 const BP_ORDER_KEY = 'binCardLocationOrder';   // Bin Card page wali hi key
 let bpLoc = '', bpItems = [], bpZoomed = false, bpDragI = null;
+let bpAllMode = false, bpAllLocs = [];
 let bpShowQR = localStorage.getItem('bpShowQR') !== '0';
 const bpEl = id => document.getElementById(id);
 
@@ -2740,6 +2771,10 @@ function bpSaveOrder() {
 }
 
 function bpSheets(edit) {
+  if (bpAllMode) return bpAllLocs.map(l => bpSheetsFor(l, bpCollect(l), false)).join('');
+  return bpSheetsFor(bpLoc, bpItems, edit);
+}
+function bpSheetsFor(bpLoc, bpItems, edit) {
   const pages = Math.max(1, Math.ceil(bpItems.length / BP_ROWS));
   let out = '';
   for (let p = 0; p < pages; p++) {
@@ -2801,9 +2836,29 @@ function bpToggleQR() {
 }
 
 function openBinPrint(loc) {
+  bpAllMode = false;
+  bpEl('bpTtl').textContent = 'BIN LOCATION';
+  bpEl('bpDone').textContent = '✓ Printed ho gaya';
   bpLoc = String(loc).trim().toUpperCase();
   bpItems = bpCollect(bpLoc);
   bpEl('bpLoc').textContent = bpLoc;
+  bpEl('bpDone').style.display = 'none';
+  bpEl('bpQrT').checked = bpShowQR;
+  bpZoomed = false;
+  bpEl('bpZoomBtn').classList.remove('on');
+  bpEl('bpZoomBtn').textContent = '🔍 Zoom';
+  bpEl('bpBack').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  bpDraw();
+}
+function openBinPrintAll() {
+  if (!binPending.length) { showToast("Koi pending bin list nahi hai", "amber"); return; }
+  bpAllMode = true;
+  bpAllLocs = binPending.slice().sort((a, b) => b.ts - a.ts).map(p => String(p.loc).trim().toUpperCase());
+  const pages = bpAllLocs.reduce((s, l) => s + Math.max(1, Math.ceil(bpCollect(l).length / BP_ROWS)), 0);
+  bpEl('bpTtl').textContent = 'ALL BIN LOCATIONS';
+  bpEl('bpLoc').textContent = `${bpAllLocs.length} bins · ${pages} pages`;
+  bpEl('bpDone').textContent = `✓ Printed ho gaya (${bpAllLocs.length} bins clear)`;
   bpEl('bpDone').style.display = 'none';
   bpEl('bpQrT').checked = bpShowQR;
   bpZoomed = false;
@@ -2822,25 +2877,28 @@ function bpDoPrint() {
   r.innerHTML = bpSheets(false);
   bpQR(r);
   bpEl('bpDone').style.display = '';
-  const bp = binPending.find(x => x.loc === bpLoc);
-  if (bp) {
+  const locs = bpAllMode ? bpAllLocs : [bpLoc];
+  locs.forEach(l => {
+    const bp = binPending.find(x => x.loc === l);
+    if (!bp) return;
     bp.printed = true;
-    binOps[bpLoc] = { type: 'print', ts: Date.now() };
-    binSend({ action: 'printBin', loc: bpLoc });
-    saveBinPendingStorage();
-    if (notifOpen && activeNotifTab === 'bin') renderBinList();
-  }
+    binOps[l] = { type: 'print', ts: Date.now() };
+    binSend({ action: 'printBin', loc: l });
+  });
+  saveBinPendingStorage();
+  if (notifOpen && activeNotifTab === 'bin') renderBinList();
   setTimeout(() => window.print(), 200);
 }
 function bpMarkDone() {
-  const loc = bpLoc;
+  const locs = bpAllMode ? bpAllLocs.slice() : [bpLoc];
   closeBinPrint();
-  markBinDone(loc);          // pehle se maujood function
+  locs.forEach(l => markBinDone(l));
 }
 
 // drag reorder (mouse + touch)
 const bpZoomEl = bpEl('bpZoom');
 bpZoomEl.addEventListener('pointerdown', e => {
+  if (bpAllMode) return;
   const td = e.target.closest('td.bp-sr');
   if (!td) return;
   bpDragI = +td.parentElement.dataset.i;
