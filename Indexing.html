@@ -4817,9 +4817,20 @@ window.addEventListener('pageshow', e => {
         }
         document.getElementById('spinnerOverlay').style.display = 'none';
                 showToast(`${data.length.toLocaleString()} items synced`, 'green');
-        syncBin();
+                syncBin();
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
-        if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
+        if (addItemMode) {
+          // Add Item form khula hai, kuch mat chhedo
+        } else if (currentItem) {
+          const fresh = itemMaster.find(i => i.sn === currentItem.sn);
+          if (fresh) {
+            const changed = !itemsEqual(fresh, currentItem);
+            currentItem = fresh;
+            if (changed && !document.getElementById('updateLocation')) { renderItem(); renderAI(); }
+          }
+        } else if (lastTerm && !searchBox.value.trim()) {
+          searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm);
+        }
       })
             .catch((err) => {
         console.error('Load error:', err);
