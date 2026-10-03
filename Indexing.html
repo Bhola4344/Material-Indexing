@@ -1562,6 +1562,58 @@
 .icon-choice{width:34px;height:34px;border-radius:8px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;}
 .icon-choice.sel{border-color:var(--accent);background:rgba(37,99,235,.08);}
 
+/* ─── ZCAP toggle ─── */
+.zcap-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 6px 4px 12px;
+  margin: -8px 0 8px 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.zcap-text {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.zcap-sw {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.zcap-sw input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.zcap-sl {
+  position: absolute;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 20px;
+  transition: background 0.2s;
+}
+.zcap-sl::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.zcap-sw input:checked + .zcap-sl { background: var(--green); }
+.zcap-sw input:checked + .zcap-sl::before { transform: translateX(14px); }
+
     /* ─── Upload Zone ─── */
     .upload-hint {
       font-size: 12px;
@@ -2315,8 +2367,17 @@
           </div>
 
           <!-- Upload & Enrich panel -->
-          <div id="panelUpload" style="display:none;">
-            <label class="upload-zone" id="uploadZone">
+<div id="panelUpload" style="display:none;">
+  <div style="display:flex;">
+    <label class="zcap-pill">
+      <span class="zcap-text">With Stock</span>
+      <span class="zcap-sw">
+        <input type="checkbox" id="enrichWithStock">
+        <span class="zcap-sl"></span>
+      </span>
+    </label>
+  </div>
+  <label class="upload-zone" id="uploadZone">
               <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
                 onchange="handleUpload(this)">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -2333,6 +2394,15 @@
           </div>
 
 <div id="panelStock" style="display:none;">
+  <div style="display:flex;">
+    <label class="zcap-pill">
+      <span class="zcap-text">Include ZCAP Items</span>
+      <span class="zcap-sw">
+        <input type="checkbox" id="stockIncludeZcap">
+        <span class="zcap-sl"></span>
+      </span>
+    </label>
+  </div>
   <label class="upload-zone" id="stockUploadZone">
     <input type="file" id="stockUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleStockUpload(this)">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -4443,6 +4513,7 @@ function deleteToolLink(i) {
     function handleUpload(input) {
       const file = input.files[0];
       if (!file) return;
+  const withStock = document.getElementById('enrichWithStock').checked;
 
       const reader = new FileReader();
 
@@ -4457,27 +4528,36 @@ function deleteToolLink(i) {
           if (!i.location) return;
           locMap[String(i.sap).trim()] = i.location.trim();
         });
+        const stockMap = {};
+        itemMaster.forEach(i => {
+          if (i.curr_stock === undefined || i.curr_stock === null || String(i.curr_stock).trim() === '') return;
+          stockMap[String(i.sap).trim()] = i.curr_stock;
+        });
 
         if (!data || data.length === 0) {
           alert("File me data nahi mila");
           return;
         }
 
-        data[0].push("Location");
+         data[0].push("Location");
+        if (withStock) data[0].push("Stock");
 
         for (let r = 1; r < data.length; r++) {
           let row = data[r];
-          let foundLocation = "";
+                    let foundLocation = "";
+          let foundStock = "";
           for (let cell of row) {
             let digits = String(cell).replace(/\.0$/, "").replace(/\D/g, "");
             if (!digits) continue;
             digits = padSAP(digits);
+            if (foundStock === "" && stockMap[digits] !== undefined) foundStock = stockMap[digits];
             if (locMap[digits]) {
               foundLocation = locMap[digits];
               break;
             }
           }
           row.push(foundLocation);
+          if (withStock) row.push(foundStock);
         }
 
         const newSheet = XLSX.utils.aoa_to_sheet(data);
@@ -4600,6 +4680,7 @@ function resetStockUpload() {
 function handleStockUpload(input) {
   const file = input.files[0];
   if (!file) return;
+  const includeZcap = document.getElementById('stockIncludeZcap').checked;
 
   stockZone.style.display = 'none';
   stockPanel.classList.add('active');
@@ -4645,6 +4726,7 @@ function handleStockUpload(input) {
           if (!rawSap) return;
           total++;
           const sap = padSAP(rawSap);
+          if (!includeZcap && sap.startsWith('5')) { skipped++; return; }
           const rawStock = String(row[stockCol]).trim();
           if (!/^\d+(\.\d+)?$/.test(rawStock)) { skipped++; return; }
           const stockVal = parseFloat(rawStock);
