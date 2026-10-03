@@ -60,10 +60,10 @@
     }
 
     /* ─── Spinner ─── */
-    #spinnerOverlay {
+      #spinnerOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(244, 246, 249, 0.96);
+      background: transparent;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -233,21 +233,6 @@
   position: relative;
 }
 
-    #statsToggleBtn {
-      position: absolute;
-      top: -9px;
-      left: 14px;
-      background: var(--surface);
-      border: none;
-      padding: 0 6px;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
 
     #statsBody {
       display: grid;
@@ -969,28 +954,59 @@
       flex-shrink: 0;
     }
 
-    .loc-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
+   
 
-    .loc-pill.has {
-      background: rgba(5, 150, 105, 0.1);
-      color: var(--green);
-      border: 1px solid rgba(5, 150, 105, 0.2);
-    }
-
-    .loc-pill.no {
-      background: rgba(220, 38, 38, 0.1);
-      color: var(--red);
-      border: 1px solid rgba(220, 38, 38, 0.18);
-    }
+/* ─── Loc / Stock outlined boxes ─── */
+.info-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.info-box {
+  position: relative;
+  border: 1.5px solid var(--bc);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  background: transparent;
+}
+.info-box.green { --c: var(--green); --bc: #C5EBD9; }
+.info-box.red { --c: var(--red); --bc: #F5C6C6; }
+.info-box .cap {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background: var(--surface);
+  padding: 0 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--c);
+}
+.info-box .v {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.info-box .v.sm { font-size: 13px; }
+.info-box .ar { font-size: 14px; line-height: 1.4; font-weight: 700; opacity: 0.8; }
+.info-box.tap {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s;
+}
+.info-box.tap:active { transform: scale(0.97); }
 
     .actions-row {
       display: flex;
@@ -1051,16 +1067,6 @@
 
     .btn-success:active {
       background: #047857;
-    }
-
-    .btn-info {
-      background: rgba(37, 99, 235, 0.08);
-      color: var(--accent);
-      border: 1px solid rgba(37, 99, 235, 0.22);
-    }
-
-    .btn-info:active {
-      background: rgba(37, 99, 235, 0.16);
     }
 
     .btn:disabled {
@@ -1151,13 +1157,6 @@
     }
 
     /* ─── Add Item Card ─── */
-    .add-item-card {
-      background: var(--surface);
-      border: 1.5px solid rgba(37, 99, 235, 0.3);
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: var(--card-shadow);
-    }
 
     .add-item-header {
       display: flex;
@@ -1197,13 +1196,6 @@
       font-weight: 700;
     }
 
-    .ai-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--amber);
-      box-shadow: 0 0 6px rgba(180, 83, 9, 0.4);
-    }
 
     #aiToggleBtn {
       margin-left: auto;
@@ -1553,7 +1545,6 @@
 .tool-link-row{display:flex;align-items:center;gap:10px;width:100%;}
 .tool-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:rgba(8,145,178,.12);}
 .tool-name{font-size:12.5px;font-weight:700;line-height:1.25;word-break:break-word;}
-.tool-sub{font-size:10px;color:var(--muted);word-break:break-all;}
 .tool-del{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--red);font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;-webkit-tap-highlight-color:transparent;}
 .tools-empty{font-size:12px;color:var(--muted);text-align:center;padding:14px 0;border:1px dashed var(--border);border-radius:10px;}
 .tool-add-card{display:none;background:var(--surface);border:1.5px solid rgba(37,99,235,.3);border-radius:12px;padding:12px;margin-bottom:10px;}
@@ -1615,17 +1606,6 @@
 .zcap-sw input:checked + .zcap-sl::before { transform: translateX(14px); }
 
     /* ─── Upload Zone ─── */
-    .upload-hint {
-      font-size: 12px;
-      color: var(--muted);
-      background: rgba(37, 99, 235, 0.05);
-      border: 1px solid rgba(37, 99, 235, 0.15);
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      line-height: 1.5;
-    }
-
     .upload-zone {
       display: flex;
       flex-direction: column;
@@ -1763,16 +1743,14 @@
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
-.notif-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(220,38,38,0.04), transparent); }
-.notif-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
-.notif-title-icon { width: 22px; height: 22px; border-radius: 7px; background: rgba(220,38,38,0.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
-.notif-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
 .notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 13px; flex-shrink: 0; }
 .notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px; }
 .notif-list::-webkit-scrollbar { width: 4px; }
 .notif-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .notif-row { border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; margin-bottom: 6px; background: var(--surface); transition: border-color 0.2s; }
 .notif-row:last-child { margin-bottom: 0; }
+.notif-row { content-visibility: auto; contain-intrinsic-size: auto 110px; }
 .notif-row.updating { border-color: rgba(37,99,235,0.35); }
 .notif-row.done { animation: rowClear 0.4s ease forwards; }
 @keyframes rowClear { to { opacity: 0; transform: scale(0.9) translateX(30px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
@@ -1786,7 +1764,7 @@
 .notif-save-btn.saved { background: var(--green); }
 .notif-empty { padding: 34px 16px; text-align: center; color: var(--muted); font-size: 12.5px; }
 .notif-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); text-align: center; background: var(--surface2); }
-#notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.15); z-index: 490; }
+#notifBackdrop { display: none; position: fixed; inset: 0; background: transparent; z-index: 490; }
 #notifBackdrop.open { display: block; }
 
 .notif-photo-btn {
@@ -1958,8 +1936,6 @@
 .notif-count-chip.bin .num{color:var(--amber);}
 .notif-dl-btn.bin{background:var(--amber);}
 
-.bin-clear-row{display:flex;justify-content:flex-end;margin:0 6px 6px;}
-.bin-clear-btn{background:transparent;border:none;color:var(--red);font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 6px;-webkit-tap-highlight-color:transparent;}
 .bin-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .bin-loc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
 .bin-reason{font-size:10.5px;color:var(--muted);margin-top:2px;}
@@ -1975,8 +1951,7 @@
 .pa-clr:active{background:#047857;}
 
 /* ─── Location Modal ─── */
-.loc-pill.tap{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s;}
-.loc-pill.tap:active{transform:scale(.96);background:rgba(5,150,105,.2);}
+
 .lm-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;opacity:0;pointer-events:none;transition:opacity .2s;}
 .lm-backdrop.open{opacity:1;pointer-events:auto;}
 .lm-modal{position:fixed;left:50%;bottom:0;width:100%;max-width:600px;max-height:82vh;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -12px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;transform:translate(-50%,100%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
@@ -2474,7 +2449,7 @@
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbwPKsdduuC2LxTxgy1Uu6irSQ1DL5dZBZ1OyDpMx43eNt2TsF7Rn32LpcJTcmSD_nLK/exec";
+    const API = "https://script.google.com/macros/s/AKfycbw6v7HuJf9ObHTGQB9Ol-ffes_8gUcnhvLC1137ZK1HeYaW56ZVML83FCF08bp8iBse/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -2748,7 +2723,8 @@ function clearPrintedBins() {
   done.forEach(l => {
     binOps[l] = { type: 'remove', ts: Date.now() };
     binSend({ action: 'removeBin', loc: l });
-  });
+  });  
+
   binPending = binPending.filter(p => !p.printed);
   saveBinPendingStorage();
   renderStats();
@@ -2758,7 +2734,12 @@ function clearPrintedBins() {
 
 function binPrintAllBar() {
   if (binPending.length < 2) return '';
-  const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil(bpCollect(String(p.loc).trim().toUpperCase()).length / BP_ROWS)), 0);
+    const cnt = {};
+  itemMaster.forEach(i => {
+    const l = i.location && String(i.location).trim().toUpperCase();
+    if (l) cnt[l] = (cnt[l] || 0) + 1;
+  });
+  const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil((cnt[String(p.loc).trim().toUpperCase()] || 0) / BP_ROWS)), 0);
   const printedN = binPending.filter(p => p.printed).length;
   const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear Printed (${printedN})`;
   return `<div class="pa-bar"><div class="pa-txt">${binPending.length} bins <span>· ${pages} pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
@@ -2805,16 +2786,6 @@ function markBinDone(loc) {
   }, 350);
 }
 
-function clearAllBinList() {
-  if (!binPending.length) return;
-  binPending.forEach(p => { binOps[p.loc] = { type: 'remove', ts: Date.now() }; });
-  binPending = [];
-  saveBinPendingStorage();
-  binSend({ action: 'clearBin' });
-  renderStats();
-  renderTabBadges();
-  renderActiveNotifTab();
-}
 
 // ─── Bin Print Modal ───
 const BP_ROWS = 18;
@@ -3000,7 +2971,14 @@ function toggleNotif() {
   if (notifOpen) positionNotifPanel();
   document.getElementById('notifPanel').classList.toggle('open', notifOpen);
   document.getElementById('notifBackdrop').classList.toggle('open', notifOpen);
-  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); syncBin(); }
+  if (notifOpen) {
+    renderTabBadges();
+    requestAnimationFrame(() => setTimeout(() => {
+      if (!notifOpen) return;
+      renderActiveNotifTab();
+      syncBin();
+    }, 0));
+  }
 }
 function closeNotif() {
   notifOpen = false;
@@ -3033,6 +3011,7 @@ function clearNotifSearch() {
 }
 
 let _notifHighlightRe = null;
+let notifRenderToken = 0;
 
 function buildNotifHighlightRe(q) {
   if (!q) { _notifHighlightRe = null; return; }
@@ -3046,6 +3025,7 @@ function highlightNotif(text, q) {
 }
 
 function renderNotifList() {
+  const myToken = ++notifRenderToken;
   buildNotifHighlightRe(notifSearchQuery);
   const allItems = getStockNoLocationItems();
   const totalCount = allItems.length;
@@ -3055,9 +3035,7 @@ function renderNotifList() {
     items = allItems.filter(i => matchesNotifSearch(i, notifSearchQuery));
   }
 
-  renderStats();
-  renderTabBadges();
-      document.getElementById('notifCountBadge').textContent = totalCount;
+  document.getElementById('notifCountBadge').textContent = totalCount;
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
     : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
@@ -3072,7 +3050,7 @@ function renderNotifList() {
     return;
   }
 
-  list.innerHTML = items.map(item => `
+  const rowHTML = item => `
     <div class="notif-row" id="nrow-${item.sn}">
       <div class="notif-row-top">
         <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
@@ -3102,7 +3080,18 @@ function renderNotifList() {
 </button>
       </div>
     </div>
-  `).join('');
+  `;
+
+  const FIRST = 12, CHUNK = 25;
+  list.innerHTML = items.slice(0, FIRST).map(rowHTML).join('');
+  let idx = FIRST;
+  const addMore = () => {
+    if (myToken !== notifRenderToken || idx >= items.length) return;
+    list.insertAdjacentHTML('beforeend', items.slice(idx, idx + CHUNK).map(rowHTML).join(''));
+    idx += CHUNK;
+    requestAnimationFrame(addMore);
+  };
+  requestAnimationFrame(addMore);
 }
 
 function saveNotifItem(sn) {
@@ -3306,64 +3295,6 @@ function extractSapOrDescription(rawText) {
 
   // Step 4: kuch bhi nahi mila — poora text ko description maan lo
   return { type: 'desc', value: text };
-}
-// ─── Extract Location from scanned sticker text ───
-function extractLocationFromText(rawText) {
-  const text = String(rawText || '').trim();
-  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-
-  // Step 1: "LOC" keyword priority — usi line me uske baad jo bhi likha ho, wahi location
-  for (const line of lines) {
-        const m = line.match(/\bLOC(?:ATION)?\b\.?\s*[-:]?\s*(.+)/i);
-    if (m && m[1] && m[1].trim()) {
-      return m[1].trim().toUpperCase();
-    }
-  }
-
-  // Step 2: koi line jisme SIRF ek hi mixed alphanumeric token ho (isolated) — high confidence
-  for (const line of lines) {
-    const lineTokens = line.split(/\s+/).filter(Boolean);
-        if (lineTokens.length === 1 && /[A-Za-z]/.test(lineTokens[0]) && /\d/.test(lineTokens[0]) && !looksLikeSap(lineTokens[0])) {
-      return lineTokens[0].toUpperCase();
-    }
-  }
-
-  // Step 3: LOC nahi mila, isolated line bhi nahi — poore text me mixed tokens me se sabse lamba
-  const tokens = text.split(/\s+/).filter(Boolean);
-   const mixed = tokens.filter(t => /[A-Za-z]/.test(t) && /\d/.test(t) && !looksLikeSap(t));
-  if (mixed.length) {
-    mixed.sort((a, b) => b.length - a.length);
-    return mixed[0].toUpperCase();
-  }
-
-    // Step 4: kuch match nahi hua — khali return, taaki galat text location na bane
-  return '';
-}
-
-
-function extractAllLocationCandidates(rawText) {
-  const text = String(rawText || '').trim();
-  const seen = new Set();
-  const results = [];
-
-  const lines = text.split(/\r?\n/);
-  lines.forEach(line => {
-        const m = line.match(/\bLOC(?:ATION)?\b\.?\s*[-:]?\s*(.+)/i);
-    if (m && m[1] && m[1].trim()) {
-      const loc = m[1].trim().toUpperCase();
-      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
-    }
-  });
-
-  const tokens = text.split(/\s+/).filter(Boolean);
-  tokens.forEach(t => {
-    if (/[A-Za-z]/.test(t) && /\d/.test(t)) {
-      const loc = t.toUpperCase();
-      if (!seen.has(loc)) { seen.add(loc); results.push({ location: loc }); }
-    }
-  });
-
-  return results;
 }
 
 function extractStrictLocationCandidates(rawText) {
@@ -3671,6 +3602,8 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
       if (!currentItem) return;
       const hasLoc = currentItem.location && currentItem.location.trim();
       const hasStock = currentItem.curr_stock !== undefined && currentItem.curr_stock !== null && String(currentItem.curr_stock).trim() !== "";
+      const stockNum = parseFloat(currentItem.curr_stock);
+      const stockOk = hasStock && !isNaN(stockNum) && stockNum > 0;
       document.getElementById('itemCard').innerHTML = `
         <div class="item-header">
   <span style="position:absolute; top:-9px; left:12px; background:var(--surface); padding:0 6px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); font-weight:700;">Description and SAP Code</span>
@@ -3678,13 +3611,11 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
   <div style="width:1px; align-self:stretch; background:#C5EBD9; flex-shrink:0;"></div>
   <div class="item-sap">${currentItem.sap}</div>
 </div>
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
-          <div class="loc-pill ${hasLoc ? 'has tap' : 'no'}" style="margin-bottom:0;" ${hasLoc ? 'onclick="openLocModal()"' : ''}>
-            ${hasLoc ? '📍 ' + currentItem.location + ' <span style="font-size:11px;opacity:.7;">▸</span>' : '❌ Not Assigned'}
-          </div>
-          <div class="loc-pill" style="margin-bottom:0; background:rgba(8,145,178,0.1); color:var(--accent2); border:1px solid rgba(8,145,178,0.2);">
-            📊 ${hasStock ? currentItem.curr_stock : 'No Stock'}
-          </div>
+        <div class="info-boxes">
+          ${hasLoc
+            ? `<div class="info-box green tap" id="locBox" onclick="openLocModal()"><span class="cap">Location</span><span class="v ${String(currentItem.location).length > 12 ? 'sm' : ''}">📍 ${currentItem.location}</span><span class="ar">›</span></div>`
+            : `<div class="info-box red" id="locBox"><span class="cap">Location</span><span class="v sm">❌ Not Assigned</span></div>`}
+          <div class="info-box ${stockOk ? 'green' : 'red'}"><span class="cap">Stock</span><span class="v ${stockOk ? '' : 'sm'}">${hasStock ? '📊 ' + currentItem.curr_stock : 'No Stock'}</span></div>
         </div>
         <div class="actions-row">
           <button class="btn btn-primary" onclick="showUpdateForm()">✏️ <span class="btn-full-text">Update Location</span><span class="btn-short-text">Update</span></button>
@@ -4042,8 +3973,12 @@ function lmPick(sn) {
   }
   renderStats();
 
-  const pill = document.querySelector('.loc-pill');
-  if (pill) {pill.className = 'loc-pill has tap'; pill.setAttribute('onclick', 'openLocModal()'); pill.textContent = '📍 ' + loc + ' ▸';}
+    const lb = document.getElementById('locBox');
+  if (lb) {
+    lb.className = 'info-box green tap';
+    lb.setAttribute('onclick', 'openLocModal()');
+    lb.innerHTML = `<span class="cap">Location</span><span class="v ${loc.length > 12 ? 'sm' : ''}">📍 ${loc}</span><span class="ar">›</span>`;
+  }
   showToast("Saved! Syncing…", "green");
 
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
@@ -4161,19 +4096,6 @@ function onScanDecoded(decodedText) {
   document.getElementById('clearSearch').classList.add('visible');
   doSearch(result.value, true);
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
-}
-
-async function getBackCameraId() {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoInputs = devices.filter(d => d.kind === 'videoinput');
-    // "back" ya "rear" label wala camera dhoondo, warna last wala (mostly main camera hota hai)
-    const backCam = videoInputs.find(d => /back|rear/i.test(d.label))
-      || videoInputs[videoInputs.length - 1];
-    return backCam ? backCam.deviceId : null;
-  } catch (e) {
-    return null;
-  }
 }
 
 function openScanner(targetId) {
@@ -4753,8 +4675,8 @@ function handleStockUpload(input) {
               i.curr_stock = stockMap[sapKey];
             }
           });
-          renderStats();
-          if (notifOpen) renderNotifList();
+                    renderStats();
+          if (notifOpen) { renderTabBadges(); renderNotifList(); }
           try {
             localStorage.setItem(CACHE_KEY, JSON.stringify({ data: itemMaster, ts: Date.now() }));
           } catch (e) { /* ignore */ }
@@ -4781,9 +4703,9 @@ function handleStockUpload(input) {
       const type = document.querySelector('input[name="dlType"]:checked').value;
       let rows, filename;
       if (type === 'with') {
-        rows = [["SAP", "Description", "Location", "Updated Date", "Update By"]];
+        rows = [["SAP", "Description", "Location"]];
 itemMaster.filter(i => i.location && i.location.trim()).forEach(i =>
-  rows.push([i.sap || '', i.name || '', i.location || '', i.updation_date || '', i.update_by || '']));
+  rows.push([i.sap || '', i.name || '', i.location || '']));
         filename = 'material_with_location.csv';
       } else if (type === 'without') {
         rows = [["SAP", "Description"]];
@@ -4791,9 +4713,9 @@ itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
   rows.push([i.sap || '', i.name || '']));
         filename = 'material_without_location.csv';
       } else {
-        rows = [["SAP", "Description", "Location", "Updated Date", "Update By"]];
+        rows = [["SAP", "Description", "Location"]];
 itemMaster.forEach(i =>
-  rows.push([i.sap || '', i.name || '', i.location || '(Not Assigned)', i.updation_date || '', i.update_by || '']));
+  rows.push([i.sap || '', i.name || '', i.location || '(Not Assigned)']));
         filename = 'material_full_backup.csv';
       }
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -4891,7 +4813,7 @@ window.addEventListener('pageshow', e => {
         applyPendingStock(itemMaster);
         pendingStockUpdates = {};
         renderStats();
-        if (notifOpen) renderNotifList();
+        if (notifOpen) { renderTabBadges(); renderNotifList(); }
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify({data, ts: Date.now()}));
         } catch (e) {
