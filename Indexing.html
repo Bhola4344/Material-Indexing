@@ -994,10 +994,11 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   font-weight: 700;
-  line-height: 1.4;
+   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: normal;
 }
 .info-box .v.sm { font-size: 13px; }
 .info-box .ar { font-size: 14px; line-height: 1.4; font-weight: 700; opacity: 0.8; }
@@ -1698,7 +1699,11 @@
   }
   .radio-label {
     font-size: 12px;
-  }
+  }  
+.info-boxes { grid-template-columns: 1.6fr 1fr; gap: 8px; }
+  .info-box { padding: 10px 6px; gap: 4px; min-width: min-content; }
+  .info-box .v { font-size: 12.5px; overflow: visible; text-overflow: clip; }
+  .info-box .ar { display: none; }
 }
 
 .bell-wrap { position: relative; }
