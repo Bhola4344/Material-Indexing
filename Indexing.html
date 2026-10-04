@@ -940,7 +940,7 @@
 
     .item-name {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       line-height: 1.4;
       flex: 1;
     }
@@ -948,7 +948,7 @@
     .item-sap {
       font-family: 'JetBrains Mono', monospace;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 500;
       color: var(--accent2);
       white-space: nowrap;
       flex-shrink: 0;
@@ -987,13 +987,13 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--c);
 }
 .info-box .v {
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
    line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -1001,7 +1001,8 @@
   word-break: normal;
 }
 .info-box .v.sm { font-size: 13px; }
-.info-box .ar { font-size: 14px; line-height: 1.4; font-weight: 700; opacity: 0.8; }
+.info-box .ar { font-size: 14px; line-height: 1; font-weight: 700; opacity: 0.8; margin-left: 4px; }
+.info-box .v { display: inline-flex; align-items: center; justify-content: center; }
 .info-box.tap {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -1371,25 +1372,74 @@
 
     .radio-group {
       display: flex;
-      gap: 20px;
+      gap: 6px;
+      margin-bottom: 12px;
     }
 
-              .radio-label {
-      display: flex;
+        .radio-label {
+      display: inline-flex;
       align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      cursor: pointer;
-      min-height: 36px;
+      gap: 6px;
+      position: relative;
+      padding: 4px 5px 4px 10px;
+      border-radius: 20px;
+      background: rgba(37, 99, 235, 0.06);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      font-size: 11px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      color: #1d4ed8;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
 
     .radio-label input {
-      accent-color: var(--accent);
-      cursor: pointer;
-      width: 18px;
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* toggle track */
+    .radio-label::after {
+      content: '';
+      width: 32px;
       height: 18px;
+      flex-shrink: 0;
+      border-radius: 20px;
+      background: rgba(37, 99, 235, 0.3);
+      transition: background 0.2s;
+    }
+
+    /* toggle knob */
+    .radio-label::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 22px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      transform: translateY(-50%);
+      z-index: 1;
+      transition: right 0.2s;
+    }
+
+    .radio-label:has(input:checked) {
+      background: rgba(5, 150, 105, 0.1);
+      border-color: rgba(5, 150, 105, 0.25);
+      color: #047857;
+    }
+    .radio-label:has(input:checked)::after {
+      background: var(--green);
+    }
+    .radio-label:has(input:checked)::before {
+      right: 8px;
     }
 
     .btn-dl {
@@ -1559,19 +1609,24 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  transition: background 0.2s, border-color 0.2s;
   border-radius: 20px;
   padding: 4px 6px 4px 12px;
-  margin: -8px 0 8px 0;
+  margin: 0 0 8px 0;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 .zcap-text {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
   white-space: nowrap;
+  color: #1d4ed8;
+  transition: color 0.2s;
 }
 .zcap-sw {
   position: relative;
@@ -1588,7 +1643,7 @@
 .zcap-sl {
   position: absolute;
   inset: 0;
-  background: #cbd5e1;
+  background: rgba(37, 99, 235, 0.3);
   border-radius: 20px;
   transition: background 0.2s;
 }
@@ -1605,6 +1660,13 @@
 }
 .zcap-sw input:checked + .zcap-sl { background: var(--green); }
 .zcap-sw input:checked + .zcap-sl::before { transform: translateX(14px); }
+.zcap-pill:has(input:checked) {
+  background: rgba(5, 150, 105, 0.1);
+  border-color: rgba(5, 150, 105, 0.25);
+}
+.zcap-pill:has(input:checked) .zcap-text {
+  color: #047857;
+}
 
     /* ─── Upload Zone ─── */
     .upload-zone {
@@ -1696,14 +1758,12 @@
   }
   .btn-full-text {
     display: none;
-  }
-  .radio-label {
-    font-size: 12px;
-  }  
+  } 
 .info-boxes { grid-template-columns: 1.6fr 1fr; gap: 8px; }
   .info-box { padding: 10px 6px; gap: 4px; min-width: min-content; }
   .info-box .v { font-size: 12.5px; overflow: visible; text-overflow: clip; }
-  .info-box .ar { display: none; }
+.info-box .ar { font-size: 13px; margin-left: 3px; }
+  
 }
 
 .bell-wrap { position: relative; }
@@ -3611,14 +3671,14 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
       const stockOk = hasStock && !isNaN(stockNum) && stockNum > 0;
       document.getElementById('itemCard').innerHTML = `
         <div class="item-header">
-  <span style="position:absolute; top:-9px; left:12px; background:var(--surface); padding:0 6px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); font-weight:700;">Description and SAP Code</span>
+  <span style="position:absolute; top:-9px; left:12px; background:var(--surface); padding:0 6px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--green); font-weight:600;">Description and SAP Code</span>
   <div class="item-name">${currentItem.name}</div>
   <div style="width:1px; align-self:stretch; background:#C5EBD9; flex-shrink:0;"></div>
   <div class="item-sap">${currentItem.sap}</div>
 </div>
         <div class="info-boxes">
           ${hasLoc
-            ? `<div class="info-box green tap" id="locBox" onclick="openLocModal()"><span class="cap">Location</span><span class="v ${String(currentItem.location).length > 12 ? 'sm' : ''}">📍 ${currentItem.location}</span><span class="ar">›</span></div>`
+            ? `<div class="info-box green tap" id="locBox" onclick="openLocModal()"><span class="cap">Location</span><span class="v ${String(currentItem.location).length > 12 ? 'sm' : ''}">📍 ${lmEsc(currentItem.location)}<span class="ar">›</span></span></div>`
             : `<div class="info-box red" id="locBox"><span class="cap">Location</span><span class="v sm">❌ Not Assigned</span></div>`}
           <div class="info-box ${stockOk ? 'green' : 'red'}"><span class="cap">Stock</span><span class="v ${stockOk ? '' : 'sm'}">${hasStock ? '📊 ' + currentItem.curr_stock : 'No Stock'}</span></div>
         </div>
@@ -3982,7 +4042,7 @@ function lmPick(sn) {
   if (lb) {
     lb.className = 'info-box green tap';
     lb.setAttribute('onclick', 'openLocModal()');
-    lb.innerHTML = `<span class="cap">Location</span><span class="v ${loc.length > 12 ? 'sm' : ''}">📍 ${loc}</span><span class="ar">›</span>`;
+    lb.innerHTML = `<span class="cap">Location</span><span class="v ${loc.length > 12 ? 'sm' : ''}">📍 ${lmEsc(loc)}<span class="ar">›</span></span>`;
   }
   showToast("Saved! Syncing…", "green");
 
