@@ -112,10 +112,36 @@
       }
     }
 
-    #loadProgress {
-      color: var(--muted);
-      font-size: 13px;
-    }
+#loadProgress {
+  color: #047857;
+  background: #d1fae5;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+}
+#loadProgress.fail {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+#retryBtn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#retryBtn:active { opacity: 0.85; }
+#retryBtn.show { display: inline-flex; }
 
     /* ─── Layout ─── */
     .app-shell {
@@ -2105,6 +2131,15 @@
   #bpPrintRoot .bp-sheet td{font-size:17px}
   #bpPrintRoot .bp-sheet td.bp-bin{font-size:27px}
 }  
+
+#adminBtn {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--accent);
+  -webkit-tap-highlight-color: transparent;
+}
+#adminBtn:active { border-color: var(--accent); background: rgba(37,99,235,.06); }
 </style>
 </head>
 
@@ -2113,6 +2148,7 @@
 <div id="spinnerOverlay">
   <div class="spin-ring"></div>
   <div id="loadProgress">Loading items...</div>
+  <button id="retryBtn" onclick="location.reload()">↻ Retry</button>
 </div>
 
   <!-- Toast -->
@@ -2417,7 +2453,7 @@
       </span>
     </label>
   </div>
-  <label class="upload-zone" id="uploadZone">
+  <label class="upload-zone" id="uploadZone" onclick="if(!guard('enrich')){event.preventDefault();}">
               <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
                 onchange="handleUpload(this)">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -2443,7 +2479,7 @@
       </span>
     </label>
   </div>
-  <label class="upload-zone" id="stockUploadZone">
+  <label class="upload-zone" id="stockUploadZone" onclick="if(!guard('stock')){event.preventDefault();}">
     <input type="file" id="stockUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleStockUpload(this)">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
       stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
@@ -3279,7 +3315,7 @@ function saveNotifItem(sn) {
       closeDropdown();
       showNormalCard();
       renderItem();
-if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
+if (can('loc') && (!currentItem.location || !currentItem.location.trim())) showUpdateForm();
       document.getElementById('aiPanelWrapper').style.display = '';
       if (!aiPanelOpen) toggleAI();
       renderAI();
@@ -3650,7 +3686,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
         document.getElementById('clearSearch').classList.add('visible');
         showNormalCard();
         renderItem();
-        if (fromScan && (!currentItem.location || !currentItem.location.trim())) showUpdateForm();
+        if (fromScan && can('loc') && (!currentItem.location || !currentItem.location.trim())) showUpdateForm();
         document.getElementById('aiPanelWrapper').style.display = '';
         renderAI();
         closeDropdown();
@@ -3804,7 +3840,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
           addItemMode = false;
           showNormalCard();
           renderItem();
-if (!currentItem.location || !currentItem.location.trim()) showUpdateForm();
+if (can('loc') && (!currentItem.location || !currentItem.location.trim())) showUpdateForm();
           document.getElementById('aiPanelWrapper').style.display = '';
           if (!aiPanelOpen) {toggleAI();}
           renderAI();
@@ -4826,8 +4862,16 @@ renderToolIconRow();
 renderToolLinks();
     });
 
-    function logout() {
-  sessionStorage.removeItem('loggedIn');
+window.addEventListener('storage', e => {
+  if (e.key === 'si_logoutSignal') {
+    sessionStorage.clear();
+    window.location.replace('index.html');
+  }
+});
+
+function logout() {
+  localStorage.setItem('si_logoutSignal', String(Date.now()));
+  sessionStorage.clear();
   window.location.replace('index.html');
 }
 
@@ -4905,7 +4949,10 @@ window.addEventListener('pageshow', e => {
             .catch((err) => {
         console.error('Load error:', err);
         if (!cached) {
-          prog.textContent = 'Load failed — check connection';
+prog.textContent = 'Load failed — check connection';
+prog.classList.add('fail');
+document.querySelector('.spin-ring').style.display = 'none';
+document.getElementById('retryBtn').classList.add('show');
           showToast('Failed to load items', 'red');
         } else {
           showToast('Sync failed — using cached data', 'amber');
@@ -5006,6 +5053,52 @@ const formOpen = document.getElementById('updateLocation');
       btn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
       localStorage.setItem('dlBarCollapsed', (!dlOpen).toString());
     }
+
+// ───────── RIGHTS (add at very end of <script>) ─────────
+const PERMS = new Set(JSON.parse(sessionStorage.getItem('userPerms') || '[]'));
+const can = p => PERMS.has(p);
+
+function guard(p) {
+  if (can(p)) return true;
+  showToast('You are not authorized', 'red');
+  return false;
+}
+
+// purane logged-in session me userPerms nahi hota -> dobara login karwao
+if (!sessionStorage.getItem('userPerms')) {
+  sessionStorage.clear();
+  location.replace('index.html');
+}
+
+// existing functions ko wrap karo, andar ka code touch nahi hota
+const WRAP = {
+  showUpdateForm:'loc', updateLocation:'loc', saveNotifItem:'loc',
+  showAddItemForm:'add', submitNewItem:'add',
+  handleDownload:'dl', handleUpload:'enrich', handleStockUpload:'stock',
+  openBinPrint:'binprint', openBinPrintAll:'binprint',
+  markBinDone:'binprint', clearPrintedBins:'binprint',
+  addToolLink:'tools', deleteToolLink:'tools', toggleAddForm:'tools'
+};
+Object.entries(WRAP).forEach(([fn, perm]) => {
+  const orig = window[fn];
+  window[fn] = function (...a) {
+    if (!guard(perm)) {
+      if (a[0] && a[0].tagName === 'INPUT') a[0].value = '';
+      return;
+    }
+    return orig.apply(this, a);
+  };
+});
+
+// ───────── ADMIN GEAR ─────────
+if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
+  const gear = document.createElement('button');
+  gear.id = 'adminBtn';
+  gear.setAttribute('aria-label', 'Admin control');
+  gear.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+  gear.onclick = () => window.open('admin.html', '_blank');
+  document.querySelector('.user-area').prepend(gear);
+}
   </script>
 </body>
 
