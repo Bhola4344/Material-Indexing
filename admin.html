@@ -294,28 +294,43 @@ async function call(action,extra){
   let d;
   try{const r=await fetch(API,{method:'POST',body:JSON.stringify(Object.assign({action,u:AUTH.u,p:AUTH.p},extra||{}))});d=await r.json()}
   catch(e){toast('Network error',true);throw e}
-  if(d.status==='denied'){AUTH=null;S.lockErr='Wrong ID or password, or not an Admin.';loader(false);closeSheet();render();throw new Error('denied')}
+  if(d.status==='denied'){AUTH=null;try{localStorage.removeItem(ACACHE)}catch(e){}S.lockErr='Wrong ID or password, or not an Admin.';loader(false);closeSheet();render();throw new Error('denied')}
   return d;
 }
 async function load(){
   const d=await call('adminData');
   if(d.status!=='success')throw new Error(d.msg||'load failed');
-  S.users=d.users;S.roles=d.roles;S.log=d.log;S.me=d.me;
+   S.users=d.users;S.roles=d.roles;S.log=d.log;S.me=d.me;
+  try{localStorage.setItem(ACACHE,JSON.stringify({u:myId(),users:S.users,roles:S.roles,log:S.log,me:S.me}))}catch(e){}
 }
+const ACACHE='adminCache';
 async function loadReports(){
   const j=u=>fetch(u).then(r=>r.json());
   const [it,bn]=await Promise.all([j(ITEMS_API+'?action=getItems').catch(()=>null),j(ITEMS_API+'?action=getBin').catch(()=>null)]);
-  S.items=Array.isArray(it)?it:null;S.bins=Array.isArray(bn)?bn:null;
+  if(Array.isArray(it))S.items=it;if(Array.isArray(bn))S.bins=bn;
 }
 async function start(){
-  loader(true,'Connecting to server…');
+  let hasCache=false;
+  try{
+    const c=JSON.parse(localStorage.getItem(ACACHE)||'null');
+    if(c&&c.u===myId()&&Array.isArray(c.users)){S.users=c.users;S.roles=c.roles;S.log=c.log;S.me=c.me;hasCache=true}
+    const ic=JSON.parse(localStorage.getItem('itemMasterCache')||'null');
+    if(ic&&Array.isArray(ic.data))S.items=ic.data;
+  }catch(e){}
+  if(hasCache){loader(false);render()}else loader(true,'Connecting to server…');
   try{
     await load();
-    $('#ldTxt').textContent='Preparing reports…';
-    await loadReports();
-    loader(false);render();
-  }catch(e){if(AUTH)loader(true,'Load failed — check connection',true)}
+    loader(false);
+    const typing=document.activeElement&&document.activeElement.id==='q';
+    if(!typing)render();
+    loadReports().then(()=>{if(S.tab==='rep')render()}).catch(()=>{});
+  }catch(e){
+    if(!AUTH)return;
+    if(hasCache)toast('Sync failed — cached data dikha raha hoon',true);
+    else loader(true,'Load failed — check connection',true);
+  }
 }
+
 async function refreshReports(){
   const b=$('[data-act="rfr"]');if(b){b.disabled=true;b.textContent='Refreshing…'}
   await loadReports();render();toast(S.items?'Reports updated':'Could not load items',!S.items);
@@ -431,7 +446,7 @@ async function saveSheet(){
     await load();S.busy=false;closeSheet();render();toast(add?'User created':'Changes saved');
   }catch(e){S.busy=false;if(S.sheet)fail('Could not save. Try again.')}
 }
-function logout(){localStorage.setItem('si_logoutSignal',String(Date.now()));sessionStorage.clear();location.replace('index.html')}
+function logout(){try{localStorage.removeItem(ACACHE)}catch(e){}localStorage.setItem('si_logoutSignal',String(Date.now()));sessionStorage.clear();location.replace('index.html')}
 
 /* events */
 document.addEventListener('submit',async e=>{
