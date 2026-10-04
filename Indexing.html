@@ -2140,6 +2140,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 #adminBtn:active { border-color: var(--accent); background: rgba(37,99,235,.06); }
+
+.user-area > * { flex-shrink: 0; }
+@media (max-width: 480px) {
+  .user-area { gap: 6px; }
+  #welcomeUser { max-width: 64px; }
+}
 </style>
 </head>
 
@@ -2265,7 +2271,7 @@
   <div class="logo-badge">
             <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>
           </div>
-          <div class="logo-text"><span class="logo-full">INDEXING</span><span class="logo-short">INDEXING</span></div>
+          <div class="logo-text"><span class="logo-full">INDEXING</span><span class="logo-short">INDEX</span></div>
         </div>
         <div class="user-area">
   <div class="bell-wrap">
