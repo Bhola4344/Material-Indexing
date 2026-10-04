@@ -502,7 +502,7 @@
   </div>
 
     <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyiUxB0SgPFV1c0C0y5B1Rf4HfQbkIDUd6ozqlOQci2wJSLKYrlP5kScbgBTlx8y4li7Q/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbynnO30UlaYwxcP10UCOxrizD20cYAdB_gxVJC7EQPeHHXPEuBFqiN-mSMFM0zalGQuNQ/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -700,8 +700,11 @@
             else { localStorage.removeItem('si_savedUser'); localStorage.removeItem('si_savedPass'); }
           }
           if (pendingCred) saveBio(pendingCred, u, p);
-          sessionStorage.setItem('loggedIn', 'true');
-          sessionStorage.setItem('userName', data.name);
+sessionStorage.setItem('loggedIn', 'true');
+sessionStorage.setItem('userName', data.name);
+sessionStorage.setItem('userRole', String(data.role || '').toLowerCase());
+sessionStorage.setItem('userPerms', JSON.stringify(data.perms || ['view','scan']));
+if (String(data.role || '').toLowerCase() === 'admin') sessionStorage.setItem('adminAuth', JSON.stringify({u: u, p: p}));
           setSuccess();
           if (viaBio) bioSetState('ok');
           setTimeout(() => location.href = 'Indexing.html', 1200);
