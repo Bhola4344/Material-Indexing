@@ -1,178 +1,486 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin - User Rights</title>
-    <!-- Browser Tab Icon -->
-    <link rel="icon" type="image/png" href="logo.jpg">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="style-admin.css">
+<meta charset="UTF-8">
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') {
+  document.documentElement.style.display = 'none';
+  location.replace('index.html');
+}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin Control</title>
+<meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6f9;--surface:#ffffff;--surface2:#f1f4f8;--border:#e2e8f0;
+  --accent:#2563eb;--accent2:#0891b2;--green:#059669;--red:#dc2626;--amber:#b45309;
+  --text:#1e293b;--muted:#64748b;--card-shadow:0 2px 14px rgba(15,23,42,.06);
+  --mono:'JetBrains Mono',monospace;
+}
+html{scrollbar-gutter:stable;overflow-y:scroll}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  padding:10px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));touch-action:manipulation;-webkit-text-size-adjust:100%}
+button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input{font-family:inherit;color:inherit}
+.hide{display:none!important}
+
+/* ─── Shell ─── */
+.app-shell{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+
+/* ─── Header ─── */
+header{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--card-shadow);overflow:hidden}
+.header-stripe{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px}
+.logo-area{display:flex;align-items:center;gap:9px;min-width:0}
+.logo-badge{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(37,99,235,.28);flex-shrink:0}
+.logo-badge svg{width:15px;height:15px}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px;line-height:1.1}
+.logo-sub{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-top:2px}
+.user-area{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#meChip{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);background:var(--surface2);
+  padding:3px 10px 3px 3px;border-radius:20px;border:1px solid var(--border);max-width:120px}
+#meChip i{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+  display:grid;place-items:center;font-size:9.5px;font-weight:700;font-style:normal;flex-shrink:0}
+#meN{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.out{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 11px;border-radius:8px;font-size:12px;font-weight:600;
+  white-space:nowrap;transition:all .2s}
+.out:active{background:var(--red);color:#fff}
+.tabs{display:flex;gap:6px;padding:0 14px 12px;border-top:1px solid var(--border);padding-top:10px}
+.tabs button{flex:1;min-width:0;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);
+  background:var(--surface2);color:var(--muted);min-height:40px;transition:all .18s;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ─── Cards ─── */
+main{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--card-shadow);padding:16px}
+.card h3{font-size:14px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:2px 0 12px;line-height:1.4}
+.row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.sec-ic{margin-right:4px}
+
+/* ─── Buttons / inputs ─── */
+.btn{padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;transition:all .2s;display:inline-flex;
+  align-items:center;justify-content:center;gap:6px;min-height:44px;background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.25)}
+.btn:active{background:#1d4ed8}
+.btn.g{background:var(--green);box-shadow:0 4px 14px rgba(5,150,105,.25)}.btn.g:active{background:#047857}
+.btn.r{background:var(--red);box-shadow:0 4px 14px rgba(220,38,38,.25)}.btn.r:active{background:#b91c1c}
+.btn.gh{background:var(--surface2);color:var(--text);border:1px solid var(--border);box-shadow:none}
+.btn.gh:active{border-color:var(--accent);color:var(--accent)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.in{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;font-weight:500;
+  padding:11px 14px;outline:none;transition:border-color .2s;-webkit-appearance:none;min-height:46px}
+.in:focus{border-color:var(--accent)}
+.in.mono{font-family:var(--mono);font-weight:600;letter-spacing:.3px}
+.fl{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.err{color:var(--red);font-weight:600;font-size:12.5px}
+
+/* ─── Report ─── */
+.hero{display:flex;align-items:center;gap:16px;margin-top:2px}
+.ring{position:relative;width:118px;height:118px;flex-shrink:0}
+.ring svg{width:118px;height:118px;transform:rotate(-90deg)}
+.ring div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring b{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1}
+.ring span{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1;min-width:0}
+.kp div{border-radius:8px;background:var(--surface2);border:1px solid var(--border);padding:7px 9px;min-width:0}
+.kp small{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;display:block;white-space:nowrap}
+.kp b{font-family:var(--mono);font-size:16px;font-weight:700;line-height:1.25}
+.kp .k-tot{border-color:rgba(37,99,235,.25)}.kp .k-tot b{color:var(--accent)}
+.kp .k-stk{border-color:rgba(8,145,178,.25)}.kp .k-stk b{color:var(--accent2)}
+.kp .k-loc{border-color:rgba(5,150,105,.25)}.kp .k-loc b{color:var(--green)}
+.kp .k-pen{border-color:rgba(220,38,38,.25)}.kp .k-pen b{color:var(--red)}
+.bar{display:grid;grid-template-columns:104px 1fr 34px;gap:8px;align-items:center;margin:11px 0;font-size:12.5px;font-weight:500}
+.bar i{display:block;height:8px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);overflow:hidden}
+.bar u{display:block;height:100%;border-radius:8px;transition:width .4s}
+.bar b{text-align:right;font-family:var(--mono);font-size:13px}
+.stack{display:flex;height:10px;border-radius:10px;overflow:hidden;margin:4px 0 12px;background:var(--surface2);border:1px solid var(--border)}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);font-weight:500}
+.leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+
+/* ─── Users ─── */
+.search-wrap{position:relative;flex:1;min-width:0}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--muted)}
+.search{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:14px;font-size:16px;padding:12px 14px 12px 40px;
+  outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;min-height:48px}
+.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.tool{display:flex;gap:8px}
+.tool .btn{min-height:48px;border-radius:14px;flex-shrink:0}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:12px -16px 4px;padding:0 16px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex-shrink:0;border:1px solid var(--border);background:var(--surface2);border-radius:20px;padding:6px 13px;font-size:12px;
+  font-weight:600;color:var(--muted);white-space:nowrap;min-height:32px}
+.chips button[aria-pressed="true"]{background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.35);color:var(--accent)}
+.ul{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.u{border:1px solid var(--border);border-radius:14px;background:var(--surface);overflow:hidden}
+.u-top{display:flex;align-items:center;gap:11px;padding:11px 12px}
+.u.off .av,.u.off .nm{opacity:.45}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.nm{flex:1;min-width:0}
+.nm b{display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;line-height:1.3}
+.nm b span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm small{color:var(--muted);font-size:11px;font-family:var(--mono);font-weight:500}
+.you{font-size:9px;font-weight:700;color:var(--green);background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);
+  padding:1px 7px;border-radius:20px;letter-spacing:.4px;flex-shrink:0}
+.u-bot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--surface2);border-top:1px solid var(--border)}
+.pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;border:1px solid}
+.pill.admin{color:var(--accent);background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.22)}
+.pill.editor{color:var(--accent2);background:rgba(8,145,178,.1);border-color:rgba(8,145,178,.22)}
+.pill.stock{color:var(--amber);background:rgba(180,83,9,.08);border-color:rgba(180,83,9,.22)}
+.pill.viewer{color:var(--muted);background:var(--surface);border-color:var(--border)}
+.cust-tag{font-size:10px;color:var(--amber);font-weight:600;margin-left:6px}
+.acts{display:flex;gap:6px;align-items:center}
+.sw{position:relative;width:44px;height:26px;flex-shrink:0;display:block}
+.sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:100%;height:100%;z-index:1}
+.sw i{position:absolute;inset:0;border-radius:20px;background:#cbd5e1;transition:background .2s}
+.sw i::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw input:checked+i{background:var(--green)}
+.sw input:checked+i::before{transform:translateX(18px)}
+.sw input:disabled+i{opacity:.5}
+.ib{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;color:var(--muted)}
+.ib:active{border-color:var(--accent);color:var(--accent)}
+.ib.del{color:var(--red)}.ib.del:active{border-color:var(--red);color:var(--red)}
+.ib svg{width:15px;height:15px}
+.empty{padding:24px 12px;text-align:center;color:var(--muted);border:1.5px dashed var(--border);border-radius:12px;font-size:13px}
+
+/* ─── Rights matrix ─── */
+.mx{margin:0 -4px}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{padding:9px 2px;border-bottom:1px solid var(--border);text-align:center}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700}
+td{font-size:12px;font-weight:500}
+th:first-child,td:first-child{text-align:left;width:36%;padding-left:4px;line-height:1.3}
+tbody tr:last-child td{border-bottom:none}
+.ck{width:26px;height:26px;border-radius:8px;border:2px solid var(--border);background:var(--surface);padding:0;display:inline-grid;place-items:center;color:transparent;transition:all .15s}
+.ck svg{width:13px;height:13px}
+.ck[aria-checked="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.ck:disabled{opacity:.55;cursor:not-allowed}
+.dirty{position:sticky;bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;
+  padding:10px 12px;border-radius:12px;border:1.5px solid rgba(180,83,9,.35);background:#fffbeb;font-weight:600;font-size:12.5px;color:var(--amber);
+  box-shadow:0 8px 24px rgba(15,23,42,.12)}
+
+/* ─── Activity ─── */
+.lg{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:500;line-height:1.35}
+.lg:last-child{border:none}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.lg small{color:var(--muted);font-size:11px;display:block;margin-top:2px;font-weight:400}
+
+/* ─── Bottom sheet ─── */
+.bk{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;display:flex;align-items:center;justify-content:center;padding:14px}
+.bk.anim{animation:fade .2s}
+.sheet{background:var(--surface);width:100%;max-width:440px;max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  border-radius:18px;box-shadow:0 20px 60px rgba(15,23,42,.3)}
+.bk.anim .sheet{animation:pop .22s cubic-bezier(.4,0,.2,1)}
+.sheet::-webkit-scrollbar{display:none}
+.sheet-stripe{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));position:sticky;top:0;z-index:2}
+.sh-in{padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sh-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0 10px}
+.sh-t{display:flex;align-items:center;gap:10px}
+.sh-ic{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:15px;box-shadow:0 4px 10px rgba(37,99,235,.28)}
+.sh-ic.red{background:linear-gradient(135deg,var(--red),#f59e0b);box-shadow:0 4px 10px rgba(220,38,38,.28)}
+.sh-h h2{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.x{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;color:var(--muted);font-size:13px}
+.sh-b{display:flex;flex-direction:column;gap:11px}
+.sheet .in{min-height:42px;padding:9px 12px}
+.pw{display:flex;gap:6px}.pw .in{flex:1;min-width:0}
+.pw .btn{min-height:46px;padding:0 12px;font-size:12px}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rg button{text-align:left;border:2px solid var(--border);background:var(--surface);border-radius:12px;padding:8px 10px;min-height:0}
+.rg b{display:block;font-size:13px;font-weight:700}.rg span{font-size:11px;color:var(--muted);line-height:1.3;display:block;margin-top:2px}
+.rg button[aria-pressed="true"]{border-color:var(--accent);background:rgba(37,99,235,.06)}
+.cust{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.cust summary{padding:12px 14px;font-weight:600;font-size:12.5px;cursor:pointer;background:var(--surface2);list-style:none;display:flex;justify-content:space-between;align-items:center}
+.cust summary::-webkit-details-marker{display:none}
+.cust summary::after{content:'▾';color:var(--muted)}
+.cust[open] summary::after{content:'▴'}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--border);font-size:12.5px;font-weight:500}
+.cr small{color:var(--amber);font-weight:700;font-size:10px;margin-left:4px;text-transform:uppercase}
+.sf{display:flex;gap:8px;margin-top:2px}.sf .btn{flex:1}
+.warn{padding:14px;border-radius:12px;border:1.5px solid rgba(220,38,38,.3);background:#fef2f2;font-size:13px;line-height:1.5}
+.lock{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.lock-head{display:flex;align-items:center;gap:10px}
+.lock-head .sh-ic{width:34px;height:34px}
+
+/* ─── Loader (same as index) ─── */
+#ld{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#eaf1ff 0%,#f4f6f9 55%,#e6f6fa 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.spin-ring{width:56px;height:56px;position:relative}
+.spin-ring::before,.spin-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:4px solid transparent}
+.spin-ring::before{border-top-color:var(--accent);border-bottom-color:var(--accent);animation:cw 1.1s linear infinite}
+.spin-ring::after{inset:8px;border-left-color:var(--accent2);border-right-color:var(--accent2);animation:ccw .9s linear infinite}
+@keyframes cw{to{transform:rotate(360deg)}}
+@keyframes ccw{to{transform:rotate(-360deg)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
+#ldTxt{color:#047857;background:#d1fae5;font-size:13px;font-weight:600;padding:5px 14px;border-radius:20px}
+#ldTxt.fail{color:#b91c1c;background:#fee2e2}
+#ldRetry{display:none}
+
+/* ─── Toast (same as index) ─── */
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:10px;
+  box-shadow:0 8px 26px rgba(15,23,42,.16);z-index:10000;transition:transform .3s cubic-bezier(.34,1.56,.64,1);width:max-content;max-width:calc(100vw - 32px)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast .td{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--green)}
+#toast.bad .td{background:var(--red)}
+
+.foot{text-align:center;padding:8px 0 2px;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px}
+
+@media (max-width:400px){
+  #meChip{display:none}
+  .hero{gap:12px}
+  .ring,.ring svg{width:104px;height:104px}
+  .ring b{font-size:23px}
+  .bar{grid-template-columns:92px 1fr 30px}
+  .logo-sub{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
+<body>
+<div id="ld"><div class="spin-ring" id="ldRing"></div><div id="ldTxt">Connecting to server…</div><button class="btn" id="ldRetry" onclick="location.reload()">↻ Retry</button></div>
 
-<body class="p-3">
+<div id="toast" role="status"><span class="td"></span><span id="toastMsg"></span></div>
 
-    <div class="container-fluid bg-white p-4 rounded shadow">
-
-        <!-- HEADER -->
-        <div class="header d-flex justify-content-between align-items-center flex-wrap">
-            <div class="d-flex align-items-center gap-3">
-                <img src="logo.jpg" style="height:60px">
-                <div>
-                    <div class="company-name">Balaji Action Buildwell Pvt. Ltd.</div>
-                    <div class="page-title">Admin – User Rights Management</div>
-                </div>
-            </div>
-
-            <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
-                <span class="fw-bold text-primary" id="welcomeUser"></span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </div>
-
-        <!-- SEARCH -->
-        <div class="card search-card mb-3">
-            <div class="search-row">
-                <input type="text" id="searchId" class="form-control search-input" placeholder="🆔 User ID">
-                <input type="text" id="searchName" class="form-control search-input" placeholder="🔍 User Name">
-                <input type="text" id="searchRole" class="form-control search-input" placeholder="🏢 Department">
-                <button id="refreshBtn" class="refresh-btn" onclick="refreshUsers()">Refresh</button>
-            </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="saved-table-wrapper">
-            <table class="table table-bordered mb-0" id="userTable">
-                <thead>
-                    <tr>
-                        <th>S.N</th>
-                        <th>User ID</th>
-                        <th>User Name</th>
-                        <th>Department</th>
-                        <th class="text-center">Approve Authorized</th>
-                        <th class="text-center">Save</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
+<div class="app-shell">
+  <header>
+    <div class="header-stripe"></div>
+    <div class="header-top">
+      <div class="logo-area">
+        <div class="logo-badge"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+        <div><div class="logo-text">ADMIN</div><div class="logo-sub">Store Indexing</div></div>
+      </div>
+      <div class="user-area">
+        <div id="meChip" class="hide"><i id="meI"></i><span id="meN"></span></div>
+        <button class="out" data-act="logout">Logout</button>
+      </div>
     </div>
+    <nav class="tabs hide" id="tabs" role="tablist"></nav>
+  </header>
+  <main id="main"></main>
+  <div class="foot">STORE INDEXING SYSTEM · ADMIN CONTROL</div>
+</div>
+<div id="sheetRoot"></div>
 
-    <!-- TOAST -->
-    <div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
-        <div id="refreshToast" class="toast toast-success" data-bs-delay="2500">
-            <div class="toast-body">✅ Data refreshed successfully</div>
-        </div>
-    </div>
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') throw new Error('Not admin');
+const API="https://script.google.com/macros/s/AKfycbynnO30UlaYwxcP10UCOxrizD20cYAdB_gxVJC7EQPeHHXPEuBFqiN-mSMFM0zalGQuNQ/exec";
+const ITEMS_API="https://script.google.com/macros/s/AKfycbyYF-SE_Cpp2yzPLmMq-r2WCtNotI2hytbR7uBIgbZNwOI_OmU8eUz__kI80TOhRYhN/exec";
+const PERMS=[['view','View items and stock'],['scan','Scan SAP / location'],['loc','Update location'],['add','Add new item'],['stock','Stock upload'],['enrich','Upload and Enrich'],['dl','Download CSV'],['binview','View bin lists'],['binprint','Print / clear bin lists'],['tools','Edit Quick Tools'],['admin','Open Admin Control']];
+const ALLP=PERMS.map(p=>p[0]),PN=Object.fromEntries(PERMS);
+const ROLES=[{id:'admin',n:'Admin',s:'Admin',d:'Full control, manages users'},{id:'editor',n:'Editor',s:'Editor',d:'Locations, items, bin lists'},{id:'stock',n:'Stock Keeper',s:'Stock',d:'Uploads stock, downloads'},{id:'viewer',n:'Read only',s:'Read',d:'Search and view only'}];
+const RN=Object.fromEntries(ROLES.map(r=>[r.id,r.n]));
+const COL=['#2563eb','#0891b2','#b45309','#7c3aed','#db2777','#059669'];
+const LC={add:'var(--green)',edit:'var(--accent)',del:'var(--red)',rights:'var(--amber)'};
+const TB=[['rep','📊 Reports'],['usr','👥 Users'],['rol','🔑 Rights'],['act','🕘 Activity']];
+const S={users:[],roles:{},log:[],me:'',tab:'rep',q:'',flt:'all',mx:null,sheet:null,busy:false,items:null,bins:null,lockErr:''};
+let AUTH=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ini=n=>String(n).trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const rd=id=>new Set(S.roles[id]||[]);
+const eff=u=>{const s=rd(u.role);for(const k in u.ov)u.ov[k]?s.add(k):s.delete(k);return s};
+const myId=()=>AUTH?AUTH.u.trim().toLowerCase():'';
+let tt;
+function toast(m,bad){const e=$('#toast');$('#toastMsg').textContent=m;e.classList.toggle('bad',!!bad);e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2800)}
+function loader(on,txt,fail){$('#ld').classList.toggle('hide',!on);if(txt)$('#ldTxt').textContent=txt;$('#ldTxt').classList.toggle('fail',!!fail);$('#ldRing').classList.toggle('hide',!!fail);$('#ldRetry').style.display=fail?'inline-flex':'none'}
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzp_nr9X12liqKDI52fh1e3rh8H_Na9FWEHXnvDYzzv8E6ofzLLZCSp0jKMgu8qdeQURw/exec";
-        if (!sessionStorage.getItem("userName")) {
-            location.href = "index.html";
-        }
-        const userName = sessionStorage.getItem("userName") || "Admin";
-        document.getElementById("welcomeUser").innerText = "Welcome: " + userName;
+async function call(action,extra){
+  let d;
+  try{const r=await fetch(API,{method:'POST',body:JSON.stringify(Object.assign({action,u:AUTH.u,p:AUTH.p},extra||{}))});d=await r.json()}
+  catch(e){toast('Network error',true);throw e}
+  if(d.status==='denied'){AUTH=null;S.lockErr='Wrong ID or password, or not an Admin.';loader(false);closeSheet();render();throw new Error('denied')}
+  return d;
+}
+async function load(){
+  const d=await call('adminData');
+  if(d.status!=='success')throw new Error(d.msg||'load failed');
+  S.users=d.users;S.roles=d.roles;S.log=d.log;S.me=d.me;
+}
+async function loadReports(){
+  const j=u=>fetch(u).then(r=>r.json());
+  const [it,bn]=await Promise.all([j(ITEMS_API+'?action=getItems').catch(()=>null),j(ITEMS_API+'?action=getBin').catch(()=>null)]);
+  S.items=Array.isArray(it)?it:null;S.bins=Array.isArray(bn)?bn:null;
+}
+async function start(){
+  loader(true,'Connecting to server…');
+  try{
+    await load();
+    $('#ldTxt').textContent='Preparing reports…';
+    await loadReports();
+    loader(false);render();
+  }catch(e){if(AUTH)loader(true,'Load failed — check connection',true)}
+}
+async function refreshReports(){
+  const b=$('[data-act="rfr"]');if(b){b.disabled=true;b.textContent='Refreshing…'}
+  await loadReports();render();toast(S.items?'Reports updated':'Could not load items',!S.items);
+}
 
-        function logout() {
-            sessionStorage.clear();
-            location.href = "index.html";
-        }
+function render(){
+  const ok=!!AUTH;
+  $('#tabs').classList.toggle('hide',!ok);$('#meChip').classList.toggle('hide',!ok);
+  if(!ok){$('#main').innerHTML=lockHTML();return}
+  $('#meI').textContent=ini(S.me);$('#meN').textContent=S.me;
+  $('#tabs').innerHTML=TB.map(t=>`<button role="tab" data-act="tab" data-v="${t[0]}" aria-selected="${S.tab===t[0]}">${t[1]}</button>`).join('');
+  $('#main').innerHTML=({rep:repHTML,usr:usrHTML,rol:rolHTML,act:logHTML})[S.tab]();
+  if(S.tab==='usr')updateList();
+}
+function lockHTML(){return`<form class="card lock" id="lockForm">
+<div class="lock-head"><div class="sh-ic">🔐</div><div><h3>Confirm Admin login</h3><div class="sub" style="margin:0">Admin ID aur password dobara daalein</div></div></div>
+<div><label class="fl" for="lu">User ID</label><input class="in mono" id="lu" maxlength="6" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+<div><label class="fl" for="lp">Password</label><input class="in" id="lp" type="password" autocomplete="current-password"></div>
+${S.lockErr?`<p class="err">${esc(S.lockErr)}</p>`:''}<button class="btn" id="lockBtn" type="submit">🔓 Unlock</button></form>`}
 
-        function loadUsers(cb) {
-            fetch(API_URL + "?action=getUsers")
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.querySelector("#userTable tbody");
-                    tbody.innerHTML = "";
-                    data.forEach((u, index) => {
-                        tbody.innerHTML += `
-                        <tr data-username="${u.Username}">
-                            <td>${index + 1}</td>
-                            <td>${u.Username}</td>
-                            <td>${u.Name}</td>
-                            <td>${u.Role}</td>
-                            <td class="text-center">
-                                <input type="checkbox" ${u.Approval === "YES" ? "checked" : ""}>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-success btn-sm btn-save">Save</button>
-                            </td>
-                        </tr>`;
-                    });
-                    attachSaveEvents();
-                    if (cb) cb();
-                });
-        }
+/* reports */
+function ring(p){const c=2*Math.PI*60,d=c*p/100;return`<svg viewBox="0 0 150 150"><defs><linearGradient id="g"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#0891b2"/></linearGradient></defs><circle cx="75" cy="75" r="60" fill="none" stroke="#f1f4f8" stroke-width="16"/><circle cx="75" cy="75" r="60" fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-dasharray="${d} ${c}"/></svg>`}
+function repHTML(){
+  const U=S.users,act=U.filter(u=>u.active).length,off=U.length-act;
+  const cnt=r=>U.filter(u=>u.role===r).length;
+  const RC=[['admin','var(--accent)'],['editor','var(--accent2)'],['stock','var(--amber)'],['viewer','#94a3b8']];
+  const roleCard=`<div class="card"><h3><span class="sec-ic">👥</span>Users by role</h3><p class="sub">${U.length} users, ${act} active</p>
+<div class="stack">${RC.map(x=>`<i style="width:${U.length?cnt(x[0])/U.length*100:0}%;background:${x[1]}"></i>`).join('')}</div>
+<div class="leg">${RC.map(x=>`<span><i style="background:${x[1]}"></i>${RN[x[0]]} ${cnt(x[0])}</span>`).join('')}</div></div>`;
+  const rfr=`<button class="btn gh sm" data-act="rfr">↻ Refresh</button>`;
+  if(!S.items)return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub" style="margin-bottom:0">Items ka data load nahi ho paya.</p></div>${rfr}</div></div>`+roleCard;
+  const I=S.items,has=v=>v!==undefined&&v!==null&&String(v).trim()!=='';
+  const total=I.length,loc=I.filter(i=>has(i.location)).length,pend=total-loc,inStock=I.filter(i=>has(i.curr_stock)).length;
+  const snl=I.filter(i=>parseFloat(i.curr_stock)>0&&!has(i.location)).length;
+  const pct=total?Math.round(loc/total*100):0;
+  const B=S.bins||[],pr=B.filter(b=>b.printed).length;
+  const bar=(n,v,mx,c)=>`<div class="bar"><span>${n}</span><i><u style="width:${mx?Math.min(100,v/mx*100):0}%;background:${c}"></u></i><b>${v}</b></div>`;
+  return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub">Kitne items ko bin location mil chuki hai</p></div>${rfr}</div>
+<div class="hero"><div class="ring">${ring(pct)}<div><b>${pct}%</b><span>located</span></div></div>
+<div class="kp"><div class="k-tot"><small>📦 Total</small><b>${total.toLocaleString()}</b></div><div class="k-stk"><small>📊 In stock</small><b>${inStock.toLocaleString()}</b></div><div class="k-loc"><small>📍 Located</small><b>${loc.toLocaleString()}</b></div><div class="k-pen"><small>⏳ Pending</small><b>${pend.toLocaleString()}</b></div></div></div></div>
+<div class="card"><h3><span class="sec-ic">⚡</span>Pending work</h3><p class="sub">Abhi action chahiye</p>
+${bar('Stock, no loc',snl,inStock,'var(--red)')}${S.bins?bar('Bins to print',B.length-pr,B.length,'var(--amber)')+bar('Printed, clear',pr,B.length,'var(--green)'):''}${bar('Disabled users',off,U.length,'#94a3b8')}</div>${roleCard}`;
+}
 
-        loadUsers();
+/* users */
+function usrHTML(){return`<div class="card"><div class="tool"><div class="search-wrap"><span class="search-icon">🔍</span><input class="search" id="q" placeholder="Search name or User ID" autocomplete="off" autocorrect="off" spellcheck="false" value="${esc(S.q)}"></div><button class="btn" data-act="add">＋ Add</button></div><div class="chips" id="flt"></div><div class="ul" id="ulist"></div></div>`}
+function updateList(){
+  const fl=$('#flt'),ul=$('#ulist');if(!ul)return;
+  fl.innerHTML=[['all','All']].concat(ROLES.map(r=>[r.id,r.n]),[['off','Disabled']]).map(x=>`<button data-act="flt" data-v="${x[0]}" aria-pressed="${S.flt===x[0]}">${x[1]}</button>`).join('');
+  const q=S.q.trim().toLowerCase();
+  const rows=S.users.filter(u=>{if(S.flt==='off'&&u.active)return false;if(S.flt!=='all'&&S.flt!=='off'&&u.role!==S.flt)return false;return!q||u.name.toLowerCase().includes(q)||u.username.includes(q)});
+  ul.innerHTML=rows.length?rows.map(u=>`<div class="u ${u.active?'':'off'}"><div class="u-top"><div class="av" style="background:${COL[S.users.indexOf(u)%6]}">${esc(ini(u.name))}</div>
+<div class="nm"><b><span class="t">${esc(u.name)}</span>${u.username===myId()?'<span class="you">YOU</span>':''}</b><small>${esc(u.username)}</small></div>
+<label class="sw"><input type="checkbox" data-act="toggle" data-u="${esc(u.username)}" ${u.active?'checked':''} aria-label="Active"><i></i></label></div>
+<div class="u-bot"><div><span class="pill ${esc(u.role)}">${esc(RN[u.role]||u.role)}</span>${Object.keys(u.ov).length?'<span class="cust-tag">custom rights</span>':''}</div>
+<div class="acts"><button class="ib" data-act="edit" data-u="${esc(u.username)}" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+<button class="ib del" data-act="del" data-u="${esc(u.username)}" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div></div></div>`).join(''):`<div class="empty">No users found.</div>`;
+}
 
-        function refreshUsers() {
-            const btn = document.getElementById("refreshBtn");
-            btn.innerText = "Refreshing...";
-            btn.disabled = true;
+/* roles */
+const CK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+function mxDirty(){return S.mx&&ROLES.some(r=>ALLP.some(p=>S.mx[r.id].has(p)!==rd(r.id).has(p)))}
+function rolHTML(){
+  const m=S.mx||Object.fromEntries(ROLES.map(r=>[r.id,rd(r.id)]));
+  return`<div class="card"><h3><span class="sec-ic">🔑</span>Roles and rights</h3><p class="sub">Har role ke default rights. Admin locked hai. Badlav next login se lagu honge.</p><div class="mx"><table><thead><tr><th>Right</th>${ROLES.map(r=>`<th>${r.s}</th>`).join('')}</tr></thead><tbody>${PERMS.map(([id,nm])=>`<tr><td>${nm}</td>${ROLES.map(r=>`<td><button class="ck" role="checkbox" aria-checked="${m[r.id].has(id)}" aria-label="${r.n}: ${nm}" ${r.id==='admin'?'disabled':''} data-act="mx" data-r="${r.id}" data-p="${id}">${CK}</button></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+${mxDirty()?`<div class="dirty"><span>Unsaved changes</span><div class="acts"><button class="btn gh sm" data-act="mxdiscard">Discard</button><button class="btn g sm" data-act="mxsave">Save rights</button></div></div>`:''}</div>`}
 
-            searchName.value = "";
-            searchId.value = "";
-            searchRole.value = "";
+/* activity */
+function logHTML(){return`<div class="card"><h3><span class="sec-ic">🕘</span>Activity</h3><p class="sub">Admin actions ka record</p>${S.log.length?S.log.map(l=>`<div class="lg"><span class="dot" style="background:${LC[l.k]||'var(--muted)'}"></span><div>${esc(l.t)}<small>${esc(l.m)}</small></div></div>`).join(''):'<div class="empty">No activity yet.</div>'}</div>`}
 
-            loadUsers(() => {
-                btn.innerText = "Refresh";
-                btn.disabled = false;
-                new bootstrap.Toast(document.getElementById("refreshToast")).show();
-            });
-        }
+/* sheet */
+function openSheet(mode,un){
+  const u=un?S.users.find(x=>x.username===un):null;
+  S.sheet={mode,id:un||'',err:'',showPw:false,d:{name:u?u.name:'',username:u?u.username:'',password:'',role:u?u.role:'viewer',perms:u?eff(u):rd('viewer')}};
+  renderSheet();
+}
+function closeSheet(){S.sheet=null;$('#sheetRoot').innerHTML='';document.body.style.overflow=''}
+function readForm(){const d=S.sheet&&S.sheet.d;if(!d)return;const n=$('#fName'),u=$('#fUser'),p=$('#fPass');if(n)d.name=n.value;if(u)d.username=u.value;if(p)d.password=p.value}
+function renderSheet(){
+  const sh=S.sheet;if(!sh){$('#sheetRoot').innerHTML='';document.body.style.overflow='';return}
+  const first=!$('.bk');const wasOpen=!!($('.cust')&&$('.cust').open);const prevScroll=$('.sheet')?$('.sheet').scrollTop:0;
+  let h;
+  if(sh.mode==='delete'){
+    const u=S.users.find(x=>x.username===sh.id),self=u.username===myId();
+    h=`<div class="sh-h"><div class="sh-t"><div class="sh-ic red">🗑️</div><h2>Delete user</h2></div><button class="x" data-act="close" aria-label="Close">✕</button></div><div class="sh-b"><div class="warn"><b>${self?'This user cannot be deleted':'Delete '+esc(u.name)+'?'}</b><br>${self?'You are logged in with this account.':'Login for '+esc(u.username)+' stops immediately. This cannot be undone.'}</div>${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn r" data-act="delok" ${self?'disabled':''}>Yes, delete</button></div></div>`;
+  }else{
+    const d=sh.d,add=sh.mode==='add',ar=d.role==='admin';
+    const nC=ALLP.filter(id=>d.perms.has(id)!==rd(d.role).has(id)).length;
+    h=`<div class="sh-h"><div class="sh-t"><div class="sh-ic">${add?'➕':'✏️'}</div><h2>${add?'Add user':'Edit user'}</h2></div><button class="x" data-act="close" aria-label="Close">✕</button></div><div class="sh-b">
+<div><label class="fl" for="fName">Full name</label><input class="in" id="fName" value="${esc(d.name)}" placeholder="Rahul Verma" autocomplete="off"></div>
+<div><label class="fl" for="fUser">User ID</label><input class="in mono" id="fUser" maxlength="6" value="${esc(d.username)}" placeholder="3 to 6 letters or digits" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+<div><label class="fl" for="fPass">${add?'Password':'New password (optional)'}</label><div class="pw"><input class="in mono" id="fPass" type="${sh.showPw?'text':'password'}" value="${esc(d.password)}" placeholder="${add?'Min 6 characters':'Leave blank to keep current'}" autocomplete="new-password"><button type="button" class="btn gh" data-act="showpw">${sh.showPw?'Hide':'Show'}</button><button type="button" class="btn gh" data-act="genpw">Generate</button></div></div>
+<div><span class="fl">Role</span><div class="rg">${ROLES.map(r=>`<button type="button" data-act="role" data-v="${r.id}" aria-pressed="${d.role===r.id}"><b>${r.n}</b><span>${r.d}</span></button>`).join('')}</div></div>
+<details class="cust" ${nC||wasOpen?'open':''}><summary><span>Custom rights · ${ar?'Full access':nC?nC+' changed':'Same as role'}</span></summary>${ALLP.map(id=>{const on=d.perms.has(id);return`<div class="cr"><span>${PN[id]}${on!==rd(d.role).has(id)?'<small>custom</small>':''}</span><label class="sw"><input type="checkbox" data-act="perm" data-p="${id}" ${on?'checked':''} ${ar?'disabled':''} aria-label="${PN[id]}"><i></i></label></div>`}).join('')}</details>
+${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn g" data-act="save" ${S.busy?'disabled':''}>${add?'Create user':'Save changes'}</button></div></div>`;
+  }
+  document.body.style.overflow='hidden';
+  $('#sheetRoot').innerHTML=`<div class="bk${first?' anim':''}" data-act="backdrop"><div class="sheet" role="dialog" aria-modal="true"><div class="sheet-stripe"></div><div class="sh-in">${h}</div></div></div>`;
+  const nb=$('.sheet');if(nb&&prevScroll)nb.scrollTop=prevScroll;
+}
+async function saveSheet(){
+  readForm();
+  const sh=S.sheet,d=sh.d,add=sh.mode==='add',name=d.name.trim(),un=d.username.trim().toLowerCase();
+  const fail=m=>{sh.err=m;renderSheet()};
+  if(!name)return fail('Full name is required.');
+  if(!/^[a-z0-9]{3,6}$/.test(un))return fail('User ID must be 3 to 6 letters or digits.');
+  if((add||d.password)&&d.password.length<6)return fail('Password must be at least 6 characters.');
+  const ov={};if(d.role!=='admin')ALLP.forEach(id=>{const h=d.perms.has(id);if(h!==rd(d.role).has(id))ov[id]=h});
+  if(S.busy)return;S.busy=true;sh.err='';renderSheet();
+  try{
+    const r=await call('saveUser',{user:{orig:add?'':sh.id,username:un,name,password:d.password,role:d.role,ov}});
+    if(r.status!=='success'){S.busy=false;return fail(r.msg||'Save failed.')}
+    await load();S.busy=false;closeSheet();render();toast(add?'User created':'Changes saved');
+  }catch(e){S.busy=false;if(S.sheet)fail('Could not save. Try again.')}
+}
+function logout(){localStorage.setItem('si_logoutSignal',String(Date.now()));sessionStorage.clear();location.replace('index.html')}
 
-        const searchId = document.getElementById("searchId");
-        const searchName = document.getElementById("searchName");
-        const searchRole = document.getElementById("searchRole");
+/* events */
+document.addEventListener('submit',async e=>{
+  if(e.target.id!=='lockForm')return;e.preventDefault();
+  const u=$('#lu').value.trim(),p=$('#lp').value;if(!u||!p)return;
+  const b=$('#lockBtn');b.disabled=true;b.textContent='Checking...';
+  AUTH={u,p};S.lockErr='';start();
+});
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const a=el.dataset.act,un=el.dataset.u;
+  if(a==='backdrop'){if(e.target===el)closeSheet();return}
+  if(el.tagName==='INPUT')return;
+  try{switch(a){
+    case 'logout':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}logout();break;
+    case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});break;
+    case 'rfr':await refreshReports();break;
+    case 'flt':S.flt=el.dataset.v;updateList();break;
+    case 'add':openSheet('add');break;
+    case 'edit':openSheet('edit',un);break;
+    case 'del':openSheet('delete',un);break;
+    case 'close':closeSheet();break;
+    case 'delok':{const r=await call('deleteUser',{username:S.sheet.id});if(r.status!=='success'){S.sheet.err=r.msg||'Delete failed.';renderSheet();break}await load();closeSheet();render();toast('User deleted');break}
+    case 'role':readForm();S.sheet.d.role=el.dataset.v;S.sheet.d.perms=rd(el.dataset.v);renderSheet();break;
+    case 'showpw':readForm();S.sheet.showPw=!S.sheet.showPw;renderSheet();break;
+    case 'genpw':{readForm();const c='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(8));S.sheet.d.password=Array.from(r,x=>c[x%c.length]).join('');S.sheet.showPw=true;renderSheet();break}
+    case 'save':await saveSheet();break;
+    case 'mx':{if(!S.mx)S.mx=Object.fromEntries(ROLES.map(r=>[r.id,rd(r.id)]));const s=S.mx[el.dataset.r],p=el.dataset.p;s.has(p)?s.delete(p):s.add(p);const y=window.scrollY;render();window.scrollTo({top:y});break}
+    case 'mxdiscard':S.mx=null;render();break;
+    case 'mxsave':{const roles=Object.fromEntries(ROLES.map(r=>[r.id,Array.from(S.mx[r.id])]));const r=await call('saveRoles',{roles});if(r.status!=='success'){toast(r.msg||'Save failed',true);break}S.mx=null;await load();render();toast('Rights saved. Applies from next login.');break}
+  }}catch(err){}
+});
+document.addEventListener('change',async e=>{
+  const el=e.target;if(!el.dataset||!el.dataset.act)return;
+  if(el.dataset.act==='toggle'){
+    const on=el.checked;
+    try{const r=await call('setActive',{username:el.dataset.u,active:on});if(r.status==='success')toast(on?'User enabled':'User disabled');else toast(r.msg||'Failed',true)}catch(err){}
+    try{await load();render()}catch(err){}
+  }
+  if(el.dataset.act==='perm'){readForm();const p=el.dataset.p;el.checked?S.sheet.d.perms.add(p):S.sheet.d.perms.delete(p);renderSheet()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;updateList()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet)closeSheet()});
+window.addEventListener('storage',e=>{if(e.key==='si_logoutSignal'){sessionStorage.clear();location.replace('index.html')}});
 
-        [searchId, searchName, searchRole].forEach(input => {
-            input.addEventListener("input", () => {
-                const tbody = document.querySelector("#userTable tbody");
-                const rows = tbody.querySelectorAll("tr");
-                rows.forEach(row => {
-                    const username = row.children[1].innerText.toLowerCase();
-                    const name = row.children[2].innerText.toLowerCase();
-                    const role = row.children[3].innerText.toLowerCase();
-                    const match =
-                        username.includes(searchId.value.toLowerCase()) &&
-                        name.includes(searchName.value.toLowerCase()) &&
-                        role.includes(searchRole.value.toLowerCase());
-                    row.style.display = match ? "" : "none";
-                });
-            });
-        });
-
-        function attachSaveEvents() {
-            document.querySelectorAll(".btn-save").forEach(btn => {
-                btn.onclick = () => {
-                    const row = btn.closest("tr");
-                    const username = row.getAttribute("data-username");
-                    const checkbox = row.querySelector("input[type='checkbox']");
-                    const approvalValue = checkbox.checked ? "YES" : "NO";
-
-                    btn.innerText = "Saving...";
-                    btn.disabled = true;
-
-                    fetch(API_URL + `?action=updateApproval&Username=${encodeURIComponent(username)}&Approval=${approvalValue}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            btn.innerText = "Save";
-                            btn.disabled = false;
-                        })
-                        .catch(err => {
-                            btn.innerText = "Save";
-                            btn.disabled = false;
-                            alert("Error saving approval");
-                        });
-                };
-            });
-        }
-    </script>
-
+try{
+  const a=JSON.parse(sessionStorage.getItem('adminAuth')||'null');
+  if(a&&a.u&&a.p){AUTH=a;start()}else{loader(false);render()}
+}catch(e){loader(false);render()}
+</script>
 </body>
-
 </html>
