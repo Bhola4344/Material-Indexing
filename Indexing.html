@@ -2514,7 +2514,7 @@
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbw6v7HuJf9ObHTGQB9Ol-ffes_8gUcnhvLC1137ZK1HeYaW56ZVML83FCF08bp8iBse/exec";
+    const API = "https://script.google.com/macros/s/AKfycbyYF-SE_Cpp2yzPLmMq-r2WCtNotI2hytbR7uBIgbZNwOI_OmU8eUz__kI80TOhRYhN/exec";
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -4751,7 +4751,7 @@ updates.push({ sap, stock: stockVal });
 
           fetch(API, {
             method: 'POST',
-            body: JSON.stringify({ action: 'updateStock', updates })
+            body: JSON.stringify({ action: 'updateStock', updates, includeZcap })
           })
             .then(r => r.json())
             .catch(() => {
