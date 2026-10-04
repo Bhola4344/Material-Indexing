@@ -4715,9 +4715,10 @@ function handleStockUpload(input) {
           const sap = padSAP(rawSap);
           if (!includeZcap && sap.startsWith('5')) { skipped++; return; }
           const rawStock = String(row[stockCol]).trim();
-          if (!/^\d+(\.\d+)?$/.test(rawStock)) { skipped++; return; }
-          const stockVal = parseFloat(rawStock);
-          updates.push({ sap, stock: stockVal });
+if (!/^\d+(\.\d+)?$/.test(rawStock)) { skipped++; return; }
+const stockVal = parseFloat(rawStock);
+if (stockVal <= 0) { skipped++; return; }
+updates.push({ sap, stock: stockVal });
         });
 
         if (!updates.length) {
