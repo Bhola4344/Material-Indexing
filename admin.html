@@ -11,6 +11,7 @@ if (sessionStorage.getItem('userRole') !== 'admin') {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Admin Control</title>
 <meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -257,7 +258,8 @@ tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="user-area">
         <div id="meChip" class="hide"><i id="meI"></i><span id="meN"></span></div>
-        <button class="out" data-act="logout">Logout</button>
+        <button class="btn gh sm" data-act="back">← Back</button>
+<button class="out" data-act="logout">Logout</button>
       </div>
     </div>
     <nav class="tabs hide" id="tabs" role="tablist"></nav>
@@ -446,6 +448,16 @@ async function saveSheet(){
     await load();S.busy=false;closeSheet();render();toast(add?'User created':'Changes saved');
   }catch(e){S.busy=false;if(S.sheet)fail('Could not save. Try again.')}
 }
+function goBack(){
+  if(window.opener){
+    window.close();
+    setTimeout(()=>{ if(!window.closed) location.replace('index.html'); },300);
+  }else if(history.length>1){
+    history.back();
+  }else{
+    location.replace('index.html');
+  }
+}
 function logout(){try{localStorage.removeItem(ACACHE)}catch(e){}localStorage.setItem('si_logoutSignal',String(Date.now()));sessionStorage.clear();location.replace('index.html')}
 
 /* events */
@@ -461,6 +473,7 @@ document.addEventListener('click',async e=>{
   if(a==='backdrop'){if(e.target===el)closeSheet();return}
   if(el.tagName==='INPUT')return;
   try{switch(a){
+    case 'back':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}goBack();break;
     case 'logout':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}logout();break;
     case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});break;
     case 'rfr':await refreshReports();break;
