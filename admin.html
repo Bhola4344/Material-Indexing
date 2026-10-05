@@ -5,7 +5,7 @@
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') {
   document.documentElement.style.display = 'none';
-  location.replace('index.html');
+  (window.top || window).location.replace('index.html');
 }
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -218,8 +218,8 @@ tbody tr:last-child td{border-bottom:none}
 @keyframes ccw{to{transform:rotate(-360deg)}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
-#ldTxt{color:#047857;background:#d1fae5;font-size:13px;font-weight:600;padding:5px 14px;border-radius:20px}
-#ldTxt.fail{color:#b91c1c;background:#fee2e2}
+#ldTxt{color:#2563eb;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);font-size:13px;font-weight:600;padding:5px 14px;border-radius:20px}
+#ldTxt.fail{color:#b91c1c;background:#fee2e2;border-color:rgba(185,28,28,.25)}
 #ldRetry{display:none}
 
 /* ─── Toast (same as index) ─── */
@@ -449,17 +449,21 @@ async function saveSheet(){
   }catch(e){S.busy=false;if(S.sheet)fail('Could not save. Try again.')}
 }
 function goBack(){
-  if(window.opener){
-    window.close();
-    setTimeout(()=>{ if(!window.closed) location.replace('index.html'); },300);
-  }else if(history.length>1){
-    history.back();
-  }else{
-    location.replace('index.html');
-  }
+  try{
+    if(window.parent!==window){
+      window.parent.history.back();
+      return;
+    }
+  }catch(e){ console.error(e); }
+  history.back();
 }
-function logout(){try{localStorage.removeItem(ACACHE)}catch(e){}localStorage.setItem('si_logoutSignal',String(Date.now()));sessionStorage.clear();location.replace('index.html')}
 
+function logout(){
+  try{localStorage.removeItem(ACACHE)}catch(e){}
+  try{localStorage.setItem('si_logoutSignal',String(Date.now()))}catch(e){}
+  sessionStorage.clear();
+  (window.top||window).location.replace('index.html');
+}
 /* events */
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='lockForm')return;e.preventDefault();
@@ -474,7 +478,7 @@ document.addEventListener('click',async e=>{
   if(el.tagName==='INPUT')return;
   try{switch(a){
     case 'back':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}goBack();break;
-    case 'logout':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}logout();break;
+    case 'logout':logout();break;
     case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});break;
     case 'rfr':await refreshReports();break;
     case 'flt':S.flt=el.dataset.v;updateList();break;
@@ -503,7 +507,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;updateList()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet)closeSheet()});
-window.addEventListener('storage',e=>{if(e.key==='si_logoutSignal'){sessionStorage.clear();location.replace('index.html')}});
+window.addEventListener('storage',e=>{if(e.key==='si_logoutSignal'){sessionStorage.clear();(window.top||window).location.replace('index.html')}});
 
 try{
   const a=JSON.parse(sessionStorage.getItem('adminAuth')||'null');
