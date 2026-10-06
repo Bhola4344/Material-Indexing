@@ -59,93 +59,7 @@
       touch-action: manipulation;
     }
 
-    /* ─── Spinner ─── */
-      #spinnerOverlay {
-      position: fixed;
-      inset: 0;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      gap: 16px;
-    }
-
-    .spin-ring {
-      width: 56px;
-      height: 56px;
-      position: relative;
-    }
-
-    .spin-ring::before,
-    .spin-ring::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 4px solid transparent;
-    }
-
-    .spin-ring::before {
-      border-top-color: var(--accent);
-      border-bottom-color: var(--accent);
-      animation: spinCW 1.1s linear infinite;
-    }
-
-    .spin-ring::after {
-      inset: 8px;
-      border-left-color: var(--accent2);
-      border-right-color: var(--accent2);
-      animation: spinCCW 0.9s linear infinite;
-    }
-
-    @keyframes spinCW {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes spinCCW {
-      to {
-        transform: rotate(-360deg);
-      }
-    }
-
-#loadProgress {
-  color: #2563eb;
-  background: rgba(37,99,235,.08);
-  border: 1px solid rgba(37,99,235,.25);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 20px;
-}
-#loadProgress.fail {
-  color: #b91c1c;
-  background: #fee2e2;
-  border-color: rgba(185,28,28,.25);
-}
-
-#retryBtn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 24px;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-#retryBtn:active { opacity: 0.85; }
-#retryBtn.show { display: inline-flex; }
-
-    /* ─── Layout ─── */
+        /* ─── Layout ─── */
     .app-shell {
       max-width: 600px;
       margin: 0 auto;
@@ -168,10 +82,26 @@
     }
 
     .header-stripe {
-      height: 5px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      flex-shrink: 0;
-    }
+  position: relative;
+  height: 5px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--border);
+}
+.header-stripe::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform-origin: left center;
+  transform: scaleX(1);
+  transition: transform .35s ease;
+}
+body.loading .header-stripe::before {
+  transform: scaleX(0);
+  animation: stripeFill 4s cubic-bezier(.1,.7,.2,1) forwards;
+}
+@keyframes stripeFill { from { transform: scaleX(0); } to { transform: scaleX(.9); } }
 
     .header-top {
       display: flex;
@@ -2148,16 +2078,13 @@
   .user-area { gap: 6px; }
   #welcomeUser { max-width: 64px; }
 }
+body.loading .btn-dl,
+body.loading .upload-zone { opacity: 0.45; }
 </style>
 </head>
 
-<body>
+<body class="loading">
 <div id="notifBackdrop"></div>
-<div id="spinnerOverlay">
-  <div class="spin-ring"></div>
-  <div id="loadProgress">Loading items...</div>
-  <button id="retryBtn" onclick="location.reload()">↻ Retry</button>
-</div>
 
   <!-- Toast -->
   <div id="toastEl">
@@ -2565,6 +2492,11 @@
     }
 
     let itemMaster = [];
+    let dataReady = false;
+    function setDataReady() {
+      dataReady = true;
+      document.body.classList.remove('loading');
+    }
     let currentItem = null;
     let ddIndex = -1;
     let ddItems = [];
@@ -3278,7 +3210,9 @@ function saveNotifItem(sn) {
       }
 
       // Add New Item button sirf tab dikhao jab koi result na mile
-      if (!items.length) {
+      if (!items.length && !dataReady) {
+        html += `<div class="dd-empty" style="padding-top:0">⏳ Data abhi load ho raha hai, thodi der baad dobara dekho</div>`;
+      } else if (!items.length) {
         html += `<div class="dd-add-btn" id="ddAddBtn">
           ➕ Item nahi mila? Add New Item
         </div>`;
@@ -4891,25 +4825,27 @@ window.addEventListener('pageshow', e => {
 
     // ─── Load Data (cache-first for instant load) ───
     const CACHE_KEY = 'itemMasterCache';
-    const prog = document.getElementById('loadProgress');
+
 
         const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         itemMaster = parsed.data || [];
+        if (itemMaster.length) setDataReady();
         renderStats();
-        document.getElementById('spinnerOverlay').style.display = 'none';
                 showToast(`${itemMaster.length.toLocaleString()} items loaded (cached)`, 'blue');
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
         if (lastTerm) { searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm); }
       } catch (e) { /* ignore bad cache */}
-    } else {
-      prog.textContent = 'Connecting to server…';
+        } else {
+      showToast('Items load ho rahe hain…', 'blue');
     }
 
-        fetch(API + '?action=getItems')
-      .then(r => {if (!cached) prog.textContent = 'Parsing data…'; return r.json();})
+         let loadRetryDelay = 2000;
+    function loadItems() {
+    fetch(API + '?action=getItems')
+      .then(r => r.json())
             .then(data => {
         itemMaster = data;
                 const now = Date.now();
@@ -4929,6 +4865,7 @@ window.addEventListener('pageshow', e => {
           }
         });
         applyPendingStock(itemMaster);
+        setDataReady();
         pendingStockUpdates = {};
         renderStats();
         if (notifOpen) { renderTabBadges(); renderNotifList(); }
@@ -4937,7 +4874,6 @@ window.addEventListener('pageshow', e => {
         } catch (e) {
           console.warn('Cache save skipped (storage full):', e);
         }
-        document.getElementById('spinnerOverlay').style.display = 'none';
                 showToast(`${data.length.toLocaleString()} items synced`, 'green');
                 syncBin();
         const lastTerm = sessionStorage.getItem('lastSearchTerm');
@@ -4957,21 +4893,21 @@ window.addEventListener('pageshow', e => {
             .catch((err) => {
         console.error('Load error:', err);
         if (!cached) {
-prog.textContent = 'Load failed — check connection';
-prog.classList.add('fail');
-document.querySelector('.spin-ring').style.display = 'none';
-document.getElementById('retryBtn').classList.add('show');
-          showToast('Failed to load items', 'red');
+          showToast('Connection issue — dobara try ho raha hai…', 'amber');
+          setTimeout(loadItems, loadRetryDelay);
+          loadRetryDelay = Math.min(loadRetryDelay * 2, 10000);
         } else {
           showToast('Sync failed — using cached data', 'amber');
         }
       });
+    }
+    loadItems();
 
     // ─── Silent Background Refresh (cross-device sync) ───
     let silentRefreshInFlight = false;
 
        function silentRefresh() {
-      if (silentRefreshInFlight) return;
+      if (silentRefreshInFlight || document.visibilityState !== 'visible') return;
       silentRefreshInFlight = true;
       syncBin();
 
@@ -4998,7 +4934,8 @@ document.getElementById('retryBtn').classList.add('show');
           });
           applyPendingStock(data);
 
-          itemMaster = data;
+                    itemMaster = data;
+          setDataReady();
 renderStats();
 if (locModalOpen) renderLocModal();
 // user notif list ke andar type kar raha hai ya nahi, check karo
@@ -5066,10 +5003,17 @@ const formOpen = document.getElementById('updateLocation');
 const PERMS = new Set(JSON.parse(sessionStorage.getItem('userPerms') || '[]'));
 const can = p => PERMS.has(p);
 
+const NEEDS_DATA = new Set(['add', 'dl', 'enrich', 'stock', 'binprint']);
 function guard(p) {
-  if (can(p)) return true;
-  showToast('You are not authorized', 'red');
-  return false;
+  if (!can(p)) {
+    showToast('You are not authorized', 'red');
+    return false;
+  }
+  if (NEEDS_DATA.has(p) && !dataReady) {
+    showToast('Data load ho raha hai, thodi der ruko', 'amber');
+    return false;
+  }
+  return true;
 }
 
 // purane logged-in session me userPerms nahi hota -> dobara login karwao
