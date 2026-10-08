@@ -305,6 +305,8 @@ tbody tr:last-child td{border-bottom:none}
 .srch{margin-bottom:6px}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.in::placeholder,.search::placeholder{font-family:'Inter',sans-serif;font-size:13px;font-weight:400;letter-spacing:0;color:#94a3b8;opacity:1;text-overflow:ellipsis}
+@media (max-width:400px){.pw .btn{font-size:11px;padding:0 8px}}
 </style>
 </head>
 <body>
@@ -619,8 +621,8 @@ function renderSheet(){
     const nC=ALLP.filter(id=>d.perms.has(id)!==rd(d.role).has(id)).length;
     h=`<div class="sh-h"><div class="sh-t"><div class="sh-ic">${add?'➕':'✏️'}</div><h2>${add?'Add user':'Edit user'}</h2></div><button class="x" data-act="close" aria-label="Close">✕</button></div><div class="sh-b">
 <div><label class="fl" for="fName">Full name</label><input class="in" id="fName" value="${esc(d.name)}" placeholder="Rahul Verma" autocomplete="off"></div>
-<div><label class="fl" for="fUser">User ID</label><input class="in mono" id="fUser" maxlength="6" value="${esc(d.username)}" placeholder="3 to 6 letters or digits" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
-<div><label class="fl" for="fPass">${add?'Password':'New password (optional)'}</label><div class="pw"><input class="in mono" id="fPass" type="${sh.showPw?'text':'password'}" value="${esc(d.password)}" placeholder="${add?'Min 6 characters':'Leave blank to keep current'}" autocomplete="new-password"><button type="button" class="btn gh" data-act="showpw">${sh.showPw?'Hide':'Show'}</button><button type="button" class="btn gh" data-act="genpw">Generate</button></div></div>
+<div><label class="fl" for="fUser">User ID</label><input class="in mono" id="fUser" maxlength="6" value="${esc(d.username)}" placeholder="3–6 letters or digits" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+<div><label class="fl" for="fPass">${add?'Password':'New password (optional)'}</label><div class="pw"><input class="in mono" id="fPass" type="${sh.showPw?'text':'password'}" value="${esc(d.password)}" placeholder="${add?'Min 6 characters':'Leave blank to keep'}" autocomplete="new-password"><button type="button" class="btn gh" data-act="showpw">${sh.showPw?'Hide':'Show'}</button><button type="button" class="btn gh" data-act="genpw">Generate</button></div></div>
 <div><span class="fl">Role</span><div class="rg">${ROLES.map(r=>`<button type="button" data-act="role" data-v="${r.id}" aria-pressed="${d.role===r.id}"><b>${r.n}</b><span>${r.d}</span></button>`).join('')}</div></div>
 <details class="cust" ${nC||wasOpen?'open':''}><summary><span>Custom rights · ${ar?'Full access':nC?nC+' changed':'Same as role'}</span></summary>${ALLP.map(id=>{const on=d.perms.has(id);return`<div class="cr"><span>${PN[id]}${on!==rd(d.role).has(id)?'<small>custom</small>':''}</span><label class="sw"><input type="checkbox" data-act="perm" data-p="${id}" ${on?'checked':''} ${ar?'disabled':''} aria-label="${PN[id]}"><i></i></label></div>`}).join('')}</details>
 ${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn g" data-act="save" ${S.busy?'disabled':''}>${S.busy?'Saving…':(add?'Create user':'Save changes')}</button></div></div>`;
