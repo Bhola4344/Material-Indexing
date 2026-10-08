@@ -2485,7 +2485,32 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbyYF-SE_Cpp2yzPLmMq-r2WCtNotI2hytbR7uBIgbZNwOI_OmU8eUz__kI80TOhRYhN/exec";
+    const API = "https://script.google.com/macros/s/AKfycby2l03EdnpV8Q6ohJgvDreamsH1krs4BsLv04bBDhX9MHt-g1ITCIxw_6FiFSiRu71I/exec";
+const LOGIN_API = "https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
+let actQ = [], actTimer = null, actBusy = false;
+try { actQ = JSON.parse(localStorage.getItem('actQueue') || '[]'); } catch (e) {}
+function saveActQ() { try { localStorage.setItem('actQueue', JSON.stringify(actQ)); } catch (e) {} }
+function logAct(k, t, m) {
+  try {
+    actQ.push({ k, t, m, ts: Date.now() });
+    saveActQ();
+    clearTimeout(actTimer);
+    actTimer = setTimeout(flushAct, 4000);
+  } catch (e) {}
+}
+function flushAct() {
+  if (actBusy || !actQ.length || userName === 'Guest') return;
+  const batch = actQ.slice(0, 50);
+  actBusy = true;
+  fetch(LOGIN_API, { method: 'POST',
+    body: JSON.stringify({ action: 'logActivity', u: userName, events: batch }) })
+    .then(r => r.json())
+    .then(d => { console.log('logActivity:', d); if (d.status === 'success' || d.status === 'denied') { actQ = actQ.slice(batch.length); saveActQ(); } })
+    .catch(e => console.warn('logActivity failed', e))
+    .finally(() => { actBusy = false; if (actQ.length) actTimer = setTimeout(flushAct, 10000); });
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushAct(); });
+window.addEventListener('pagehide', flushAct);
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
@@ -2960,6 +2985,7 @@ function bpDoPrint() {
   bpQR(r);
   bpEl('bpDone').style.display = '';
   const locs = bpAllMode ? bpAllLocs : [bpLoc];
+  logAct('i_bin', 'Bin list printed', locs.join(', ').slice(0, 120));
   locs.forEach(l => {
     const bp = binPending.find(x => x.loc === l);
     if (!bp) return;
@@ -3146,6 +3172,7 @@ function saveNotifItem(sn) {
   const btn = document.getElementById(`nbtn-${sn}`);
   row.classList.add('updating');
   btn.classList.add('saved');
+  logAct('i_loc', 'Location updated · ' + item.name, '→' + loc + ' · SAP ' + item.sap);
 
   item.location = loc;
   pendingUpdates[sn] = { location: loc, ts: Date.now() };
@@ -3772,6 +3799,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
             updation_date: new Date().toLocaleDateString()
           };
           itemMaster.push(newItem);
+          logAct('i_add', 'New item added · ' + name, (loc ? '→' + loc + ' · ' : '') + 'SAP ' + sap);
           if (loc) addBinPending(loc, 'Item added here');
           renderStats();
 
@@ -4016,6 +4044,7 @@ function lmPick(sn) {
   }
   renderStats();
 
+    logAct('i_loc', 'Location updated · ' + currentItem.name, (oldLoc || '') + '→' + loc + ' · SAP ' + currentItem.sap);
     const lb = document.getElementById('locBox');
   if (lb) {
     lb.className = 'info-box green tap';
@@ -4726,6 +4755,7 @@ updates.push({ sap, stock: stockVal });
           } catch (e) { /* ignore */ }
 
           stockFinishSuccess(total, updates.length, skipped);
+          logAct('i_stock', 'Stock uploaded', file.name + ' · ' + updates.length + ' updated, ' + skipped + ' skipped');
 
           fetch(API, {
             method: 'POST',
@@ -4768,6 +4798,7 @@ itemMaster.forEach(i =>
       a.download = filename;
       a.click();
       showToast(`Downloaded: ${filename}`, "blue");
+      logAct('i_dl', 'CSV downloaded', filename);
     }
 
         // ─── Double-space autofill ───
@@ -4786,6 +4817,7 @@ itemMaster.forEach(i =>
     document.addEventListener('DOMContentLoaded', () => {
       if (!sessionStorage.getItem('loggedIn')) return;
             userName = sessionStorage.getItem('userName') || 'Guest';
+      flushAct();
 
       const firstName = userName.trim().split(/\s+/)[0];
       document.getElementById('welcomeUser').textContent = '👤 ' + firstName;
