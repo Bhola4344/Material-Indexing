@@ -788,6 +788,48 @@ body.loading .header-stripe::before {
       background: rgba(220, 38, 38, 0.1);
       color: var(--red);
     }
+      .dd-badges {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .dd-x {
+      font-size: 7px;
+      vertical-align: 1px;
+    }
+
+    @media (max-width: 480px) {
+      .dd-badges {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+      .dd-stock-badge {
+        margin-top: 3px;
+      }
+    }
+
+    .dd-stock-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .dd-stock-badge.has {
+      background: rgba(8, 145, 178, 0.1);
+      color: var(--accent2);
+      border: 1px solid rgba(8, 145, 178, 0.2);
+    }
+
+       .dd-stock-badge.no {
+      background: rgba(220, 38, 38, 0.1);
+      color: var(--red);
+    }
 
     .dd-empty {
       padding: 20px;
@@ -3224,14 +3266,18 @@ function saveNotifItem(sn) {
       if (!items.length) {
         html = `<div class="dd-empty">No results for "<b>${query}</b>"</div>`;
       } else {
-        html = items.map((item, i) => {
+          html = items.map((item, i) => {
           const hasLoc = item.location && item.location.trim();
+          const hasStock = lmHasStock(item);
           return `<div class="dd-item" data-i="${i}">
             <div style="flex:1;min-width:0;">
               <div class="dd-name">${highlight(item.name, query)}</div>
               <div class="dd-sap">${highlight(String(item.sap), query)}</div>
             </div>
-            <span class="dd-loc-badge ${hasLoc ? 'has' : 'no'}">${hasLoc ? item.location : 'No Loc'}</span>
+            <div class="dd-badges">
+              <span class="dd-loc-badge ${hasLoc ? 'has' : 'no'}">${hasLoc ? '📍 ' + lmEsc(item.location) : '<span class="dd-x">❌</span> No Loc'}</span>
+              <span class="dd-stock-badge ${hasStock ? 'has' : 'no'}">${hasStock ? '📦 ' + lmEsc(item.curr_stock) : 'No Stock'}</span>
+            </div>
           </div>`;
         }).join('');
       }
