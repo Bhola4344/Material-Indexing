@@ -280,6 +280,31 @@ tbody tr:last-child td{border-bottom:none}
   .logo-sub{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.two{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.two .in{min-height:42px;padding:8px 10px}
+.seg{display:flex;gap:6px;margin:4px 0 14px}
+.seg button{flex:1;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);color:var(--muted);min-height:38px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.note{font-size:10.5px;color:var(--muted);margin-top:6px}
+.kp i{font-style:normal;font-size:10px;font-weight:700;margin-left:5px}
+.kp .k-amb{border-color:rgba(180,83,9,.25)}.kp .k-amb b{color:var(--amber)}
+.lp{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid;font-family:var(--mono)}
+.lp.r{color:var(--red);background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.22)}
+.lp.g{color:var(--green);background:rgba(5,150,105,.1);border-color:rgba(5,150,105,.22)}
+/* ─── New report / activity additions ─── */
+.new{font-size:8.5px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.3);border-radius:10px;padding:1px 7px;letter-spacing:.3px;margin-left:6px}
+.lpx{display:inline-block;margin:0 4px 4px 0}
+.lp.b{color:var(--accent);background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.22)}
+.lp.a{color:var(--amber);background:rgba(180,83,9,.08);border-color:rgba(180,83,9,.22)}
+.hm{display:grid;grid-template-columns:30px repeat(14,1fr);gap:2px;font-size:9px;color:var(--muted)}
+.hm div{aspect-ratio:1;border-radius:3px;background:var(--surface2)}
+.hm span{display:grid;align-items:center}
+.fr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.fr:last-child{border:0}.fr b{font-family:var(--mono);font-size:12px}
+.ut th:first-child,.ut td:first-child{width:22%}
+.srch{margin-bottom:6px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -310,7 +335,7 @@ tbody tr:last-child td{border-bottom:none}
   </div>
   <div id="ftBody">
     <div class="ft-inner">
-      <p class="sub" style="margin:0">Saved admin data is device me cache hota hai. Kuch purana dikhe to clear karo.</p>
+      <p class="sub" style="margin:0">Admin data is cached on this device. Clear it if you see stale data.</p>
       <button class="btn gh sm" onclick="clearAdminCache()">🧹 Clear cached data</button>
     </div>
   </div>
@@ -321,8 +346,8 @@ tbody tr:last-child td{border-bottom:none}
 
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') throw new Error('Not admin');
-const API="https://script.google.com/macros/s/AKfycbynnO30UlaYwxcP10UCOxrizD20cYAdB_gxVJC7EQPeHHXPEuBFqiN-mSMFM0zalGQuNQ/exec";
-const ITEMS_API="https://script.google.com/macros/s/AKfycbyYF-SE_Cpp2yzPLmMq-r2WCtNotI2hytbR7uBIgbZNwOI_OmU8eUz__kI80TOhRYhN/exec";
+const API="https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
+const ITEMS_API="https://script.google.com/macros/s/AKfycby2l03EdnpV8Q6ohJgvDreamsH1krs4BsLv04bBDhX9MHt-g1ITCIxw_6FiFSiRu71I/exec";
 const PERMS=[['view','View items and stock'],['scan','Scan SAP / location'],['loc','Update location'],['add','Add new item'],['stock','Stock upload'],['enrich','Upload and Enrich'],['dl','Download CSV'],['binview','View bin lists'],['binprint','Print / clear bin lists'],['tools','Edit Quick Tools'],['admin','Open Admin Control']];
 const ALLP=PERMS.map(p=>p[0]),PN=Object.fromEntries(PERMS);
 const ROLES=[{id:'admin',n:'Admin',s:'Admin',d:'Full control, manages users'},{id:'editor',n:'Editor',s:'Editor',d:'Locations, items, bin lists'},{id:'stock',n:'Stock Keeper',s:'Stock',d:'Uploads stock, downloads'},{id:'viewer',n:'Read only',s:'Read',d:'Search and view only'}];
@@ -333,6 +358,8 @@ const TB=[['rep','📊 Reports'],['usr','👥 Users'],['rol','🔑 Rights'],['ac
 const S={users:[],roles:{},log:[],me:'',tab:'rep',q:'',flt:'all',mx:null,sheet:null,busy:false,items:null,bins:null,lockErr:'',mo:null,rsel:'editor'};
 let AUTH=null;
 const $=s=>document.querySelector(s);
+const NEW='<span class="new">NEW</span>';
+const bar2=(n,v,mx,c)=>`<div class="bar"><span>${n}</span><i><u style="width:${mx?Math.min(100,v/mx*100):0}%;background:${c}"></u></i><b>${v}</b></div>`;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ini=n=>String(n).trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 const rd=id=>new Set(S.roles[id]||[]);
@@ -394,9 +421,10 @@ async function start(){
     const typing=document.activeElement&&document.activeElement.id==='q';
     if(!typing)render();
     loadReports().catch(()=>{}).finally(()=>{if(S.tab==='rep')render()});
+    loadAct();
   }catch(e){
     if(!AUTH)return;
-    if(hasCache)toast('Sync failed — cached data dikha raha hoon',true);
+    if(hasCache)toast('Sync failed — showing cached data',true);
     else loader(true,'Load failed — check connection',true);
   }
 }
@@ -416,7 +444,7 @@ function render(){
   if(S.tab==='usr')updateList();
 }
 function lockHTML(){return`<form class="card lock" id="lockForm">
-<div class="lock-head"><div class="sh-ic">🔐</div><div><h3>Confirm Admin login</h3><div class="sub" style="margin:0">Admin ID aur password dobara daalein</div></div></div>
+<div class="lock-head"><div class="sh-ic">🔐</div><div><h3>Confirm Admin login</h3><div class="sub" style="margin:0">Enter your Admin ID and password again</div></div></div>
 <div><label class="fl" for="lu">User ID</label><input class="in mono" id="lu" maxlength="6" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
 <div><label class="fl" for="lp">Password</label><input class="in" id="lp" type="password" autocomplete="current-password"></div>
 ${S.lockErr?`<p class="err">${esc(S.lockErr)}</p>`:''}<button class="btn" id="lockBtn" type="submit">🔓 Unlock</button></form>`}
@@ -431,18 +459,30 @@ function repHTML(){
 <div class="stack">${RC.map(x=>`<i style="width:${U.length?cnt(x[0])/U.length*100:0}%;background:${x[1]}"></i>`).join('')}</div>
 <div class="leg">${RC.map(x=>`<span><i style="background:${x[1]}"></i>${RN[x[0]]} ${cnt(x[0])}</span>`).join('')}</div></div>`;
   const rfr=`<button class="btn gh sm" data-act="rfr">↻ Refresh</button>`;
-  if(!S.items)return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub" style="margin-bottom:0">${repLoading?'Items load ho rahe hain…':'Items ka data load nahi ho paya. Refresh dabao.'}</p></div>${rfr}</div></div>`+roleCard;
+  if(!S.items)return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub" style="margin-bottom:0">${repLoading?'Loading items…':'Could not load items. Tap Refresh.'}</p></div>${rfr}</div></div>`+roleCard;
   const I=S.items,has=v=>v!==undefined&&v!==null&&String(v).trim()!=='';
+  const n=i=>parseFloat(i.curr_stock)||0;
   const total=I.length,loc=I.filter(i=>has(i.location)).length,pend=total-loc,inStock=I.filter(i=>has(i.curr_stock)).length;
-  const snl=I.filter(i=>parseFloat(i.curr_stock)>0&&!has(i.location)).length;
+  const snl=I.filter(i=>n(i)>0&&!has(i.location)).length;
   const pct=total?Math.round(loc/total*100):0;
   const B=S.bins||[],pr=B.filter(b=>b.printed).length;
-  const bar=(n,v,mx,c)=>`<div class="bar"><span>${n}</span><i><u style="width:${mx?Math.min(100,v/mx*100):0}%;background:${c}"></u></i><b>${v}</b></div>`;
-  return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub">Kitne items ko bin location mil chuki hai</p></div>${rfr}</div>
+  /* new calculations */
+  const stk=I.filter(i=>n(i)>0),dead=I.filter(i=>has(i.location)&&n(i)<=0).length;
+  const sb=[['Out of stock',i=>n(i)<=0,'#94a3b8'],['1 – 10',i=>n(i)>=1&&n(i)<=10,'var(--amber)'],['11 – 100',i=>n(i)>10&&n(i)<=100,'var(--accent2)'],['100+',i=>n(i)>100,'var(--green)']];
+  const lm={};I.forEach(i=>{if(has(i.location)){const l=String(i.location).trim();lm[l]=(lm[l]||0)+1}});
+  const ls=Object.entries(lm).sort((a,b)=>b[1]-a[1]);
+  const zm={};I.forEach(i=>{if(has(i.location)){const z=String(i.location).trim()[0].toUpperCase();zm[z]=zm[z]||[0,0];zm[z][0]++;if(n(i)>0)zm[z][1]++}});
+  const zk=Object.keys(zm).sort(),zx=Math.max(1,...zk.map(z=>zm[z][0]));
+  return`<div class="card"><div class="row"><div><h3><span class="sec-ic">📍</span>Location coverage</h3><p class="sub">How many items have a bin location</p></div>${rfr}</div>
 <div class="hero"><div class="ring">${ring(pct)}<div><b>${pct}%</b><span>located</span></div></div>
 <div class="kp"><div class="k-tot"><small>📦 Total</small><b>${total.toLocaleString()}</b></div><div class="k-stk"><small>📊 In stock</small><b>${inStock.toLocaleString()}</b></div><div class="k-loc"><small>📍 Located</small><b>${loc.toLocaleString()}</b></div><div class="k-pen"><small>⏳ Pending</small><b>${pend.toLocaleString()}</b></div></div></div></div>
-<div class="card"><h3><span class="sec-ic">⚡</span>Pending work</h3><p class="sub">Abhi action chahiye</p>
-${bar('Stock, no loc',snl,inStock,'var(--red)')}${S.bins?bar('Bins to print',B.length-pr,B.length,'var(--amber)')+bar('Printed, clear',pr,B.length,'var(--green)'):''}${bar('Disabled users',off,U.length,'#94a3b8')}</div>${roleCard}`;
+<div class="card"><h3><span class="sec-ic">⚡</span>Pending work</h3><p class="sub">Needs action now</p>
+${bar2('Stock, no loc',snl,inStock,'var(--red)')}${S.bins?bar2('Bins to print',B.length-pr,B.length,'var(--amber)')+bar2('Printed, clear',pr,B.length,'var(--green)'):''}${bar2('Disabled users',off,U.length,'#94a3b8')}</div>
+<div class="card"><h3><span class="sec-ic">🩺</span>Stock health${NEW}</h3><p class="sub">Items grouped by current stock</p>${sb.map(b=>bar2(b[0],I.filter(b[1]).length,total,b[2])).join('')}
+<div class="rgrp">Stock vs location</div>${bar2('Stock + located',stk.length-snl,stk.length,'var(--green)')}${bar2('Stock, no loc',snl,stk.length,'var(--red)')}${bar2('Loc, no stock',dead,loc,'var(--amber)')}<p class="note">"Loc, no stock" = location assigned but stock is zero. These locations can be freed up.</p></div>
+<div class="card"><h3><span class="sec-ic">🗂️</span>Coverage by zone${NEW}</h3><p class="sub">Zone = first letter of location code</p>${zk.length?zk.map(z=>bar2('Zone '+z,zm[z][0],zx,'var(--accent)')).join('')+'<div class="rgrp">In-stock items by zone</div>'+zk.map(z=>bar2('Zone '+z,zm[z][1],zx,'var(--green)')).join(''):'<div class="empty">No located items</div>'}</div>
+<div class="card"><h3><span class="sec-ic">📦</span>Location usage${NEW}</h3><p class="sub">${ls.length} locations in use</p>${ls.length?`<div class="kp"><div class="k-tot"><small>Locations used</small><b>${ls.length}</b></div><div class="k-loc"><small>Avg items / loc</small><b>${(loc/ls.length).toFixed(1)}</b></div><div class="k-amb"><small>Single-item locs</small><b>${ls.filter(x=>x[1]===1).length}</b></div><div class="k-pen"><small>Max in one loc</small><b>${ls[0][1]}</b></div></div>
+<div class="rgrp">Most crowded locations</div>${ls.slice(0,8).map(x=>`<span class="lp b lpx">${esc(x[0])} · ${x[1]}</span>`).join('')}`:'<div class="empty">No located items</div>'}</div>${roleCard}`;
 }
 
 /* users */
@@ -480,9 +520,85 @@ function rolHTML(){
 ${adm?'<div class="rlock">🔒 Admin ke saare rights locked hain</div>':''}
 ${RG.map(g=>`<div class="rgrp">${g[0]}</div><div class="rlist">${g[1].map(id=>{const on=m[sel].has(id),ch=on!==rd(sel).has(id);return`<div class="rp${ch?' chg':''}"><span>${PN[id]}${ch?'<small>changed</small>':''}</span><button class="rsw" role="switch" aria-checked="${on}" aria-label="${PN[id]}" ${adm?'disabled':''} data-act="mx" data-r="${sel}" data-p="${id}"><b></b></button></div>`}).join('')}</div>`).join('')}
 ${mxDirty()?`<div class="dirty"><span>${tot} unsaved change${tot>1?'s':''}</span><div class="acts"><button class="btn gh sm" data-act="mxdiscard">Discard</button><button class="btn g sm" data-act="mxsave">Save rights</button></div></div>`:''}</div>`}
-/* activity */
-function logHTML(){return`<div class="card"><h3><span class="sec-ic">🕘</span>Activity</h3><p class="sub">Admin actions ka record</p>${S.log.length?S.log.map(l=>`<div class="lg"><span class="dot" style="background:${LC[l.k]||'var(--muted)'}"></span><div>${esc(l.t)}<small>${esc(l.m)}</small></div></div>`).join(''):'<div class="empty">No activity yet.</div>'}</div>`}
-
+const DAY=864e5,sod=t=>{const d=new Date(t);return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()};
+const AS={p:'7',v:'rep',u:'all',k:'all',n:30,q:'',rows:null,loading:false,cf:0,ct:0};
+const AK={i_loc:['📍 Location update','#2563eb'],i_add:['➕ New item','#059669'],i_stock:['📦 Stock upload','#b45309'],i_bin:['🖨️ Bin print','#7c3aed'],i_dl:['⬇️ Download','#94a3b8']};
+const APL=[['today','Today'],['yest','Yesterday'],['7','Last 7 days'],['month','This month'],['last','Last month'],['custom','Custom']];
+const aFm=x=>new Date(x).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const aIso=x=>{const d=new Date(x);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const aTm=x=>new Date(x).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+function parseAct(r){const p=String(r.m||'').split(' · '),by=p.shift().replace(/^by /,''),d=p.join(' · '),m=/^(\S*)→(\S+)/.exec(d)||[];return{ts:+r.ts,k:r.k,t:String(r.t||''),u:by,d:d,o:m[1]||'',w:m[2]||''}}
+async function loadAct(){AS.loading=true;if(S.tab==='act')render();try{const d=await call('activity');if(d.status==='success')AS.rows=d.rows.map(parseAct)}catch(e){}AS.loading=false;if(S.tab==='act')render()}
+function aRange(){const t=sod(Date.now()),n=new Date(),p=AS.p;
+if(p==='today')return[t,t];if(p==='yest')return[t-DAY,t-DAY];if(p==='7')return[t-6*DAY,t];
+if(p==='month')return[new Date(n.getFullYear(),n.getMonth(),1).getTime(),t];
+if(p==='last')return[new Date(n.getFullYear(),n.getMonth()-1,1).getTime(),new Date(n.getFullYear(),n.getMonth(),0).getTime()];
+return[AS.cf||t-13*DAY,AS.ct||t]}
+function aPick(x,y){return AS.rows.filter(r=>r.ts>=x&&r.ts<y+DAY&&(AS.u==='all'||r.u===AS.u)&&(AS.k==='all'||r.k===AS.k))}
+function aDl(c,p){if(!p)return'';const x=Math.round((c-p)/p*100);return x?`<i style="color:var(--${x>0?'green':'red'})">${x>0?'▲':'▼'}${Math.abs(x)}%</i>`:''}
+function aCsv(){if(!AS.rows)return;const[a,b]=aRange(),rows=[['Time','User','Action','Details']];aPick(a,b).forEach(r=>rows.push([new Date(r.ts).toLocaleString('en-GB'),r.u,r.t,r.d]));const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');const x=document.createElement('a');x.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));x.download='activity_'+aIso(a)+'_to_'+aIso(b)+'.csv';x.click();toast('CSV downloaded')}
+function logHTML(){
+const[a,b]=aRange();
+const head=`<div class="row"><div><h3><span class="sec-ic">🕘</span>Activity</h3><p class="sub" style="margin-bottom:12px">${a===b?aFm(a):aFm(a)+' to '+aFm(b)}</p></div><button class="btn gh sm" data-act="acsv">⬇ CSV</button></div>`;
+if(!AS.rows)return`<div class="card">${head}<div class="empty">${AS.loading?'Loading…':'Could not load data.'}</div><button class="btn gh sm" style="margin-top:10px" data-act="aref">↻ Retry</button></div>`;
+const len=Math.round((b-a)/DAY)+1,cur=aPick(a,b),prev=aPick(a-len*DAY,a-DAY);
+const users=[...new Set(AS.rows.map(r=>r.u))].sort();
+const top=`<div class="chips" style="margin-top:0">${APL.map(x=>`<button data-act="ap" data-v="${x[0]}" aria-pressed="${AS.p===x[0]}">${x[1]}</button>`).join('')}</div>
+${AS.p==='custom'?`<div class="two"><input class="in" type="date" data-act="adf" value="${aIso(a)}"><span class="sub" style="margin:0">to</span><input class="in" type="date" data-act="adt" value="${aIso(b)}"></div>`:''}
+<div class="two"><select class="in" data-act="au"><option value="all">All users</option>${users.map(n=>`<option value="${esc(n)}" ${AS.u===n?'selected':''}>${esc(n)}</option>`).join('')}</select><select class="in" data-act="ak"><option value="all">All actions</option>${Object.keys(AK).map(k=>`<option value="${k}" ${AS.k===k?'selected':''}>${AK[k][0]}</option>`).join('')}</select></div>
+<div class="seg"><button data-act="av" data-v="rep" aria-pressed="${AS.v==='rep'}">📊 Report</button><button data-act="av" data-v="log" aria-pressed="${AS.v==='log'}">📋 Log</button></div>`;
+return`<div class="card">${head}${top}${AS.v==='rep'?aRep(cur,prev,b,len):aLog(cur)}</div>`}
+function aRep(cur,prev,b,len){
+const cn=(r,k)=>r.filter(e=>e.k===k).length;
+const M=[['k-tot','📦 Total',cur.length,prev.length],['k-stk','📍 Location',cn(cur,'i_loc'),cn(prev,'i_loc')],['k-loc','➕ New items',cn(cur,'i_add'),cn(prev,'i_add')],['k-amb','👥 Active users',new Set(cur.map(e=>e.u)).size,new Set(prev.map(e=>e.u)).size]];
+let h=`<div class="kp">${M.map(m=>`<div class="${m[0]}"><small>${m[1]}</small><b>${m[2]}</b>${aDl(m[2],m[3])}</div>`).join('')}</div><p class="note">▲▼ compared with previous ${len===1?'day':len+' days'}</p>`;
+let bk=[],lb=[];
+if(len===1){for(let hr=6;hr<=21;hr++){bk.push(cur.filter(e=>new Date(e.ts).getHours()===hr).length);lb.push(hr)}}
+else{const n=Math.min(len,31);for(let i=0;i<n;i++){const d0=b-(n-1-i)*DAY;bk.push(cur.filter(e=>e.ts>=d0&&e.ts<d0+DAY).length);lb.push(new Date(d0).getDate())}}
+const mx=Math.max(1,...bk),g=bk.length>16?2:5;
+h+=`<div class="rgrp">${len===1?'By hour':'By day'}</div><div style="display:flex;align-items:flex-end;gap:${g}px;height:84px">${bk.map(v=>`<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="height:${v/mx*100}%;min-height:${v?3:1}px;background:${v?'linear-gradient(180deg,#2563eb,#0891b2)':'#e2e8f0'};border-radius:3px 3px 0 0"></div></div>`).join('')}</div><div style="display:flex;gap:${g}px;margin-top:3px">${lb.map((l,i)=>`<div style="flex:1;text-align:center;font-size:${bk.length>16?9:10.5}px;color:var(--muted);font-family:var(--mono)">${bk.length>16&&i%3?'':l}</div>`).join('')}</div>`;
+const ks=Object.keys(AK),km=Math.max(1,...ks.map(k=>cn(cur,k)));
+h+=`<div class="rgrp">By action</div>${ks.map(k=>`<div class="bar"><span>${AK[k][0]}</span><i><u style="width:${cn(cur,k)/km*100}%;background:${AK[k][1]}"></u></i><b>${cn(cur,k)}</b></div>`).join('')}`;
+const names=[...new Set(AS.rows.map(r=>r.u))].sort();
+const uc=names.map((n,i)=>[n,i,cur.filter(e=>e.u===n).length]).filter(x=>x[2]).sort((x,y)=>y[2]-x[2]),um=Math.max(1,uc.length?uc[0][2]:1);
+h+=`<div class="rgrp">By user</div>${uc.length?uc.map(x=>`<div class="bar"><span style="display:flex;align-items:center;gap:6px;overflow:hidden"><span style="width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;font-weight:700;color:#fff;flex-shrink:0;background:${COL[x[1]%6]}">${esc(ini(x[0]))}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x[0].split(' ')[0])}</span></span><i><u style="width:${x[2]/um*100}%;background:${COL[x[1]%6]}"></u></i><b>${x[2]}</b></div>`).join(''):'<div class="empty">No data</div>'}`;
+const lm={};cur.filter(e=>(e.k==='i_loc'||e.k==='i_add')&&e.w).forEach(e=>lm[e.w]=(lm[e.w]||0)+1);
+const tl=Object.entries(lm).sort((x,y)=>y[1]-x[1]).slice(0,4);
+h+=`<div class="rgrp">Most active locations</div><div style="display:flex;gap:6px;flex-wrap:wrap">${tl.length?tl.map(x=>`<span class="lp g">${esc(x[0])} · ${x[1]}</span>`).join(''):'<div class="empty" style="width:100%">No data</div>'}</div>`;
+const first=cur.filter(e=>e.k==='i_loc'&&!e.o).length,moved=cur.filter(e=>e.k==='i_loc'&&e.o).length;
+h+=`<div class="rgrp">Location updates: new vs moved${NEW}</div>${bar2('First-time assign',first,first+moved,'var(--green)')}${bar2('Moved / changed',moved,first+moved,'var(--amber)')}<p class="note">First-time = no old location. Moved = item already had a location.</p>`;
+const hrs={},dys={},grid={},DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+cur.forEach(e=>{const d=new Date(e.ts),hh=d.getHours(),w=(d.getDay()+6)%7;hrs[hh]=(hrs[hh]||0)+1;dys[w]=(dys[w]||0)+1;grid[w+'-'+hh]=(grid[w+'-'+hh]||0)+1});
+const tp=o=>Object.entries(o).sort((x,y)=>y[1]-x[1])[0],ad=new Set(cur.map(e=>sod(e.ts))).size||1,bh=tp(hrs),bd=tp(dys);
+h+=`<div class="rgrp">Peak times${NEW}</div><div class="kp"><div class="k-tot"><small>Busiest hour</small><b>${bh?bh[0]+':00':'—'}</b></div><div class="k-stk"><small>Busiest day</small><b>${bd?DN[bd[0]]:'—'}</b></div><div class="k-loc"><small>Avg / active day</small><b>${(cur.length/ad).toFixed(1)}</b></div><div class="k-amb"><small>Active days</small><b>${ad}/${len}</b></div></div>`;
+const gm=Math.max(1,...Object.values(grid));let hm='<div style="background:none"></div>'+[...Array(14)].map((_,i)=>`<span style="justify-items:center">${i%2?'':i+7}</span>`).join('');
+DN.forEach((nm,w)=>{hm+=`<span>${nm}</span>`;for(let hh=7;hh<21;hh++){const v=grid[w+'-'+hh]||0;hm+=`<div title="${v}" style="${v?`background:var(--accent);opacity:${(.2+.8*v/gm).toFixed(2)}`:''}"></div>`}});
+h+=`<div class="rgrp">Weekday × hour heatmap${NEW}</div><div class="hm">${hm}</div><p class="note">Darker = more activity. Hours 7 to 20.</p>`;
+const mv={};cur.filter(e=>e.k==='i_loc'&&e.o&&e.w).forEach(e=>{const k=e.o+' → '+e.w;mv[k]=(mv[k]||0)+1});
+const tm=Object.entries(mv).sort((x,y)=>y[1]-x[1]).slice(0,6);
+h+=`<div class="rgrp">Top location moves${NEW}</div><div>${tm.length?tm.map(x=>`<span class="lp a lpx">${esc(x[0])} · ${x[1]}</span>`).join(''):'<div class="empty">No moves in this period</div>'}</div>`;
+const sc={};cur.forEach(e=>{const m=/\b\d{6,}\b/.exec(e.t+' '+e.d);if(m)sc[m[0]]=(sc[m[0]]||0)+1});
+const ts=Object.entries(sc).sort((x,y)=>y[1]-x[1]).slice(0,6);
+h+=`<div class="rgrp">Most touched SAP codes${NEW}</div><div>${ts.length?ts.map(x=>`<span class="lp b lpx">${x[0]} · ${x[1]}×</span>`).join(''):'<div class="empty">No data</div>'}</div><p class="note">Codes touched many times may mean repeated corrections.</p>`;
+const uu=names.map(nm=>[nm,ks.map(k=>cur.filter(e=>e.u===nm&&e.k===k).length)]).filter(x=>x[1].some(Boolean));
+h+=`<div class="rgrp">User × action${NEW}</div><table class="ut"><tr><th>User</th>${ks.map(k=>`<th>${AK[k][0].split(' ')[0]}</th>`).join('')}<th>Σ</th></tr>${uu.map(x=>`<tr><td>${esc(x[0].split(' ')[0])}</td>${x[1].map(v=>`<td>${v||'·'}</td>`).join('')}<td><b>${x[1].reduce((p,q)=>p+q,0)}</b></td></tr>`).join('')}</table>`;
+const ina=S.users.filter(u=>u.active&&!cur.some(e=>e.u===u.name));
+h+=`<div class="rgrp">Active users with no activity${NEW}</div><div>${ina.length?ina.map(u=>`<span class="lp r lpx">${esc(u.name)}</span>`).join(''):'<div class="empty">Everyone was active</div>'}</div>`;
+const lastEv=k=>{const e=AS.rows.find(x=>x.k===k);if(!e)return'—';const hh=Math.round((Date.now()-e.ts)/36e5);return(hh<48?hh+'h':Math.round(hh/24)+'d')+' ago · '+esc(e.u.split(' ')[0])};
+h+=`<div class="rgrp">Last event of each type${NEW}</div>${['i_stock','i_bin','i_dl','i_add'].map(k=>`<div class="fr"><span>${AK[k][0]}</span><b>${lastEv(k)}</b></div>`).join('')}`;
+return h}
+function aList(cur){
+  const q=AS.q.trim().toLowerCase(),L=q?cur.filter(e=>(e.t+' '+e.d+' '+e.o+' '+e.w+' '+e.u).toLowerCase().includes(q)):cur;
+  if(!L.length)return'<div class="empty">No activity found in this period</div>';
+  const T0=sod(Date.now());let last='',h=`<p class="sub" style="margin:0">${L.length} entries</p>`;
+  L.slice(0,AS.n).forEach(e=>{const ds=sod(e.ts),lab=ds===T0?'Today':ds===T0-DAY?'Yesterday':new Date(e.ts).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  if(lab!==last){h+=`<div class="rgrp" style="margin-top:12px">${lab}</div>`;last=lab}
+  const ch=((e.k==='i_loc'||e.k==='i_add')&&e.w)?`<div style="margin-top:6px;display:flex;align-items:center;gap:6px">${e.o?`<span class="lp r">${esc(e.o)}</span><span style="color:var(--muted);font-size:12px">→</span>`:''}<span class="lp g">${esc(e.w)}</span></div>`:'';
+  const det=(e.k==='i_loc'||e.k==='i_add')?'':(e.d?' · '+esc(e.d):'');
+  h+=`<div class="lg"><span class="dot" style="background:${(AK[e.k]||['','#94a3b8'])[1]}"></span><div style="flex:1;min-width:0">${esc(e.t)}${det}${ch}<small>${esc(e.u)} · ${aTm(e.ts)}</small></div></div>`});
+  if(L.length>AS.n)h+=`<button class="btn gh sm" style="width:100%;margin-top:10px" data-act="amore">+ ${L.length-AS.n} more</button>`;
+  return h}
+function aLog(cur){return`<input class="in srch" id="lq" placeholder="🔍 Search SAP code, location or user" value="${esc(AS.q)}" autocomplete="off" autocorrect="off" spellcheck="false"><div id="lbody">${aList(cur)}</div>`}
 /* sheet */
 function openSheet(mode,un){
   const u=un?S.users.find(x=>x.username===un):null;
@@ -497,7 +613,7 @@ function renderSheet(){
   let h;
   if(sh.mode==='delete'){
     const u=S.users.find(x=>x.username===sh.id),self=u.username===myId();
-    h=`<div class="sh-h"><div class="sh-t"><div class="sh-ic red">🗑️</div><h2>Delete user</h2></div><button class="x" data-act="close" aria-label="Close">✕</button></div><div class="sh-b"><div class="warn"><b>${self?'This user cannot be deleted':'Delete '+esc(u.name)+'?'}</b><br>${self?'You are logged in with this account.':'Login for '+esc(u.username)+' stops immediately. This cannot be undone.'}</div>${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn r" data-act="delok" ${self?'disabled':''}>Yes, delete</button></div></div>`;
+    h=`<div class="sh-h"><div class="sh-t"><div class="sh-ic red">🗑️</div><h2>Delete user</h2></div><button class="x" data-act="close" aria-label="Close">✕</button></div><div class="sh-b"><div class="warn"><b>${self?'This user cannot be deleted':'Delete '+esc(u.name)+'?'}</b><br>${self?'You are logged in with this account.':'Login for '+esc(u.username)+' stops immediately. This cannot be undone.'}</div>${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close" ${S.busy?'disabled':''}>Cancel</button><button class="btn r" data-act="delok" ${self||S.busy?'disabled':''}>${S.busy?'Deleting…':'Yes, delete'}</button></div></div>`;
   }else{
     const d=sh.d,add=sh.mode==='add',ar=d.role==='admin';
     const nC=ALLP.filter(id=>d.perms.has(id)!==rd(d.role).has(id)).length;
@@ -507,7 +623,7 @@ function renderSheet(){
 <div><label class="fl" for="fPass">${add?'Password':'New password (optional)'}</label><div class="pw"><input class="in mono" id="fPass" type="${sh.showPw?'text':'password'}" value="${esc(d.password)}" placeholder="${add?'Min 6 characters':'Leave blank to keep current'}" autocomplete="new-password"><button type="button" class="btn gh" data-act="showpw">${sh.showPw?'Hide':'Show'}</button><button type="button" class="btn gh" data-act="genpw">Generate</button></div></div>
 <div><span class="fl">Role</span><div class="rg">${ROLES.map(r=>`<button type="button" data-act="role" data-v="${r.id}" aria-pressed="${d.role===r.id}"><b>${r.n}</b><span>${r.d}</span></button>`).join('')}</div></div>
 <details class="cust" ${nC||wasOpen?'open':''}><summary><span>Custom rights · ${ar?'Full access':nC?nC+' changed':'Same as role'}</span></summary>${ALLP.map(id=>{const on=d.perms.has(id);return`<div class="cr"><span>${PN[id]}${on!==rd(d.role).has(id)?'<small>custom</small>':''}</span><label class="sw"><input type="checkbox" data-act="perm" data-p="${id}" ${on?'checked':''} ${ar?'disabled':''} aria-label="${PN[id]}"><i></i></label></div>`}).join('')}</details>
-${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn g" data-act="save" ${S.busy?'disabled':''}>${add?'Create user':'Save changes'}</button></div></div>`;
+${sh.err?`<p class="err">${esc(sh.err)}</p>`:''}<div class="sf"><button class="btn gh" data-act="close">Cancel</button><button class="btn g" data-act="save" ${S.busy?'disabled':''}>${S.busy?'Saving…':(add?'Create user':'Save changes')}</button></div></div>`;
   }
   document.body.style.overflow='hidden';
   $('#sheetRoot').innerHTML=`<div class="bk${first?' anim':''}" data-act="backdrop"><div class="sheet" role="dialog" aria-modal="true"><div class="sheet-stripe"></div><div class="sh-in">${h}</div></div></div>`;
@@ -559,15 +675,27 @@ document.addEventListener('click',async e=>{
   try{switch(a){
     case 'back':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}goBack();break;
     case 'logout':logout();break;
-    case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});break;
+        case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});if(S.tab==='act')loadAct();break;
     case 'rfr':await refreshReports();break;
+    case 'ap':AS.p=el.dataset.v;AS.n=30;if(AS.p==='custom'&&!AS.cf){const t=sod(Date.now());AS.cf=t-13*DAY;AS.ct=t}render();break;
+    case 'av':AS.v=el.dataset.v;AS.n=30;render();break;
+    case 'aref':loadAct();break;
+    case 'amore':AS.n+=30;render();break;
+    case 'acsv':aCsv();break;
     case 'flt':S.flt=el.dataset.v;updateList();break;
     case 'more':S.mo=S.mo===un?null:un;updateList();break;
     case 'add':openSheet('add');break;
     case 'edit':openSheet('edit',un);break;
     case 'del':openSheet('delete',un);break;
     case 'close':closeSheet();break;
-    case 'delok':{const r=await call('deleteUser',{username:S.sheet.id});if(r.status!=='success'){S.sheet.err=r.msg||'Delete failed.';renderSheet();break}await load();closeSheet();render();toast('User deleted');break}
+    case 'delok':{if(S.busy||!S.sheet)break;const id=S.sheet.id;S.busy=true;renderSheet();
+  try{const r=await call('deleteUser',{username:id});
+    S.busy=false;
+    if(r.status!=='success'){if(S.sheet){S.sheet.err=r.msg||'Delete failed.';renderSheet()}else toast(r.msg||'Delete failed',true);break}
+    S.users=S.users.filter(u=>u.username!==id);closeSheet();render();toast('User deleted');
+    load().then(()=>render()).catch(()=>{});
+  }catch(err){S.busy=false;if(S.sheet){S.sheet.err='Could not delete. Check your connection and try again.';renderSheet()}}
+  break}
     case 'role':readForm();S.sheet.d.role=el.dataset.v;S.sheet.d.perms=rd(el.dataset.v);renderSheet();break;
     case 'showpw':readForm();S.sheet.showPw=!S.sheet.showPw;renderSheet();break;
     case 'genpw':{readForm();const c='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(8));S.sheet.d.password=Array.from(r,x=>c[x%c.length]).join('');S.sheet.showPw=true;renderSheet();break}
@@ -575,19 +703,36 @@ document.addEventListener('click',async e=>{
     case 'mx':{if(!S.mx)S.mx=Object.fromEntries(ROLES.map(r=>[r.id,rd(r.id)]));const s=S.mx[el.dataset.r],p=el.dataset.p;s.has(p)?s.delete(p):s.add(p);const y=window.scrollY;render();window.scrollTo({top:y});break}
     case 'rsel':S.rsel=el.dataset.v;render();break;
     case 'mxdiscard':S.mx=null;render();break;
-    case 'mxsave':{const roles=Object.fromEntries(ROLES.map(r=>[r.id,Array.from(S.mx[r.id])]));const r=await call('saveRoles',{roles});if(r.status!=='success'){toast(r.msg||'Save failed',true);break}S.mx=null;await load();render();toast('Rights saved. Applies from next login.');break}
+    case 'mxsave':{if(S.busy)break;S.busy=true;el.disabled=true;el.textContent='Saving…';
+  try{const roles=Object.fromEntries(ROLES.map(r=>[r.id,Array.from(S.mx[r.id])]));const res=await call('saveRoles',{roles});
+    S.busy=false;
+    if(res.status!=='success'){toast(res.msg||'Save failed',true);render();break}
+    S.roles=roles;S.mx=null;render();toast('Rights saved. Applies from next login.');
+    load().then(()=>render()).catch(()=>{});
+  }catch(err){S.busy=false;render()}
+  break}
   }}catch(err){}
 });
 document.addEventListener('change',async e=>{
   const el=e.target;if(!el.dataset||!el.dataset.act)return;
-  if(el.dataset.act==='toggle'){
-    const on=el.checked;
-    try{const r=await call('setActive',{username:el.dataset.u,active:on});if(r.status==='success')toast(on?'User enabled':'User disabled');else toast(r.msg||'Failed',true)}catch(err){}
-    try{await load();render()}catch(err){}
+    if(el.dataset.act==='toggle'){
+    const un=el.dataset.u,on=el.checked;el.disabled=true;toast(on?'Enabling user…':'Disabling user…');
+    try{const r=await call('setActive',{username:un,active:on});
+      if(r.status==='success'){const u=S.users.find(x=>x.username===un);if(u)u.active=on;toast(on?'User enabled':'User disabled')}
+      else toast(r.msg||'Failed',true)}catch(err){}
+    render();
+    load().then(()=>render()).catch(()=>{});
   }
-  if(el.dataset.act==='perm'){readForm();const p=el.dataset.p;el.checked?S.sheet.d.perms.add(p):S.sheet.d.perms.delete(p);renderSheet()}
+    if(el.dataset.act==='perm'){readForm();const p=el.dataset.p;el.checked?S.sheet.d.perms.add(p):S.sheet.d.perms.delete(p);renderSheet()}
+  if(el.dataset.act==='au'){AS.u=el.value;AS.n=30;render()}
+  if(el.dataset.act==='ak'){AS.k=el.value;AS.n=30;render()}
+  if(el.dataset.act==='adf'){const v=new Date(el.value+'T00:00');if(!isNaN(v)){AS.cf=sod(v);if(AS.cf>AS.ct)AS.ct=AS.cf;render()}}
+  if(el.dataset.act==='adt'){const v=new Date(el.value+'T00:00');if(!isNaN(v)){AS.ct=sod(v);if(AS.ct<AS.cf)AS.cf=AS.ct;render()}}
 });
-document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;updateList()}});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){S.q=e.target.value;updateList()}
+  if(e.target.id==='lq'){AS.q=e.target.value;AS.n=30;const[a,b]=aRange();$('#lbody').innerHTML=aList(aPick(a,b))}
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sheet)closeSheet()});
 window.addEventListener('storage',e=>{if(e.key==='si_logoutSignal'){sessionStorage.clear();(window.top||window).location.replace('index.html')}});
 
@@ -603,7 +748,7 @@ function toggleFoot(){
 }
 function clearAdminCache(){
   try{localStorage.removeItem(ACACHE)}catch(e){}
-  toast('Cache clear ho gaya');
+  toast('Cache cleared');
 }
 applyFoot();
 
