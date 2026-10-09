@@ -61,10 +61,19 @@ body.load-fail .header-stripe::before{background:var(--red)}
 .hb.back:active{border-color:var(--accent);color:var(--accent)}
 .out{background:transparent;border:1px solid var(--red);color:var(--red)}
 .out:active{background:var(--red);color:#fff}
-.tabs{display:flex;gap:6px;padding:0 14px 12px;border-top:1px solid var(--border);padding-top:10px}
-.tabs button{flex:1;min-width:0;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid var(--border);
-  background:var(--surface2);color:var(--muted);min-height:40px;transition:all .18s;white-space:nowrap}
-.tabs button[aria-selected="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tabs{padding:10px 14px 12px;border-top:1px solid var(--border)}
+.seg-track{--i:0;position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:#eef2f7;border:1px solid var(--border);border-radius:14px;padding:3px}
+.seg-pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/4);border-radius:11px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 4px 12px rgba(37,99,235,.35);
+  transform:translateX(calc(var(--i)*100%));transition:transform .38s cubic-bezier(.34,1.35,.64,1)}
+.seg-track button{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-width:0;min-height:46px;padding:6px 2px;border:0;background:transparent;border-radius:11px;color:var(--muted);
+  font-size:10.5px;font-weight:600;white-space:nowrap;transition:color .25s,transform .12s}
+.seg-track button .ti{font-size:15px;line-height:1;transition:transform .3s}
+.seg-track button[aria-selected="true"]{color:#fff}
+.seg-track button[aria-selected="true"] .ti{transform:scale(1.12)}
+.seg-track button:active{transform:scale(.95)}
+@media (hover:hover){.seg-track button:not([aria-selected="true"]):hover{color:var(--accent)}}
 
 /* ─── Cards ─── */
 main{display:flex;flex-direction:column;gap:10px}
@@ -436,12 +445,23 @@ async function refreshReports(){
   await loadReports();render();toast(S.items?'Reports updated':'Could not load items',!S.items);
 }
 
+function paintTabs(){
+  const nav=$('#tabs');
+  if(!nav.firstElementChild){
+    nav.innerHTML='<div class="seg-track"><span class="seg-pill"></span>'+
+      TB.map(t=>{const sp=t[1].indexOf(' ');
+        return `<button role="tab" data-act="tab" data-v="${t[0]}"><span class="ti">${t[1].slice(0,sp)}</span><span>${t[1].slice(sp+1)}</span></button>`}).join('')+'</div>';
+  }
+  nav.querySelector('.seg-track').style.setProperty('--i',TB.findIndex(t=>t[0]===S.tab));
+  nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===S.tab));
+}
+
 function render(){
   const ok=!!AUTH;
   $('#tabs').classList.toggle('hide',!ok);$('#meChip').classList.toggle('hide',!ok);
   if(!ok){$('#main').innerHTML=lockHTML();return}
   $('#meI').textContent=ini(S.me);$('#meN').textContent=S.me;
-  $('#tabs').innerHTML=TB.map(t=>`<button role="tab" data-act="tab" data-v="${t[0]}" aria-selected="${S.tab===t[0]}">${t[1]}</button>`).join('');
+  paintTabs();
   $('#main').innerHTML=({rep:repHTML,usr:usrHTML,rol:rolHTML,act:logHTML})[S.tab]();
   if(S.tab==='usr')updateList();
 }
