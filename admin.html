@@ -76,7 +76,9 @@ body.load-fail .header-stripe::before{background:var(--red)}
 @media (hover:hover){.seg-track button:not([aria-selected="true"]):hover{color:var(--accent)}}
 
 /* ─── Cards ─── */
-main{display:flex;flex-direction:column;gap:10px}
+main{display:flex;flex-direction:column;gap:10px;min-height:60vh;align-content:flex-start;will-change:transform;touch-action:pan-y}
+main.snap{transition:transform .26s cubic-bezier(.25,.8,.3,1),opacity .26s}
+body{overflow-x:hidden}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--card-shadow);padding:16px}
 .card h3{font-size:14px;font-weight:700}
 .sub{font-size:12px;color:var(--muted);margin:2px 0 12px;line-height:1.4}
@@ -328,7 +330,7 @@ tbody tr:last-child td{border-bottom:none}
     <div class="header-top">
       <div class="logo-area">
         <div class="logo-badge"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="9" width="18" height="11" rx="1.5" stroke="#fff" stroke-width="1.8"/><path d="M3 9L12 4L21 9" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
-        <div><div class="logo-text">ADMIN</div><div class="logo-sub">Store Indexing</div></div>
+        <div><div class="logo-text">INDEX</div><div class="logo-sub">Activities</div></div>
       </div>
       <div class="user-area">
         <div id="meChip" class="hide"><i id="meI"></i><span id="meN"></span></div>
@@ -358,7 +360,7 @@ tbody tr:last-child td{border-bottom:none}
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') throw new Error('Not admin');
 const API="https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
-const ITEMS_API="https://script.google.com/macros/s/AKfycby2l03EdnpV8Q6ohJgvDreamsH1krs4BsLv04bBDhX9MHt-g1ITCIxw_6FiFSiRu71I/exec";
+const ITEMS_API="https://script.google.com/macros/s/AKfycbxBtyqwHSHt_GjEvgb0wx_snq1jvklIpk66qY1ct6q8waG7CNLJnmIRXSXpjmGQ95ok/exec";
 const PERMS=[['view','View items and stock'],['scan','Scan SAP / location'],['loc','Update location'],['add','Add new item'],['stock','Stock upload'],['enrich','Upload and Enrich'],['dl','Download CSV'],['binview','View bin lists'],['binprint','Print / clear bin lists'],['tools','Edit Quick Tools'],['admin','Open Admin Control']];
 const ALLP=PERMS.map(p=>p[0]),PN=Object.fromEntries(PERMS);
 const ROLES=[{id:'admin',n:'Admin',s:'Admin',d:'Full control, manages users'},{id:'editor',n:'Editor',s:'Editor',d:'Locations, items, bin lists'},{id:'stock',n:'Stock Keeper',s:'Stock',d:'Uploads stock, downloads'},{id:'viewer',n:'Read only',s:'Read',d:'Search and view only'}];
@@ -460,7 +462,7 @@ function render(){
   const ok=!!AUTH;
   $('#tabs').classList.toggle('hide',!ok);$('#meChip').classList.toggle('hide',!ok);
   if(!ok){$('#main').innerHTML=lockHTML();return}
-  $('#meI').textContent=ini(S.me);$('#meN').textContent=S.me;
+  $('#meI').textContent=ini(S.me);$('#meN').textContent=String(S.me||'').trim().split(/\s+/)[0];
   paintTabs();
   $('#main').innerHTML=({rep:repHTML,usr:usrHTML,rol:rolHTML,act:logHTML})[S.tab]();
   if(S.tab==='usr')updateList();
@@ -689,6 +691,74 @@ document.addEventListener('submit',async e=>{
   const b=$('#lockBtn');b.disabled=true;b.textContent='Checking...';
   AUTH={u,p};S.lockErr='';start();
 });
+
+/* ─── Tab change (click + swipe dono yahi use karte hain) ─── */
+function setTab(v){
+  if(mxDirty()&&v!=='rol'){toast('Save or discard rights first',true);return false}
+  S.tab=v;render();window.scrollTo({top:0});if(S.tab==='act')loadAct();
+  return true;
+}
+
+/* ─── Swipe left/right se tab badlo ─── */
+(function(){
+  const main=document.getElementById('main');
+  let x0=0,y0=0,dx=0,t0=0,mode=null,startOK=false;
+  const idxNow=()=>TB.findIndex(t=>t[0]===S.tab);
+  function canSwipeFrom(el){
+    if(!AUTH||S.sheet) return false;
+    if(el.closest('input,textarea,select,[contenteditable]')) return false;
+    for(let n=el;n&&n!==main;n=n.parentElement){
+      if(n.scrollWidth>n.clientWidth+2&&/(auto|scroll)/.test(getComputedStyle(n).overflowX)) return false;
+    }
+    return true;
+  }
+  main.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1) return;
+    const t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;t0=Date.now();mode=null;
+    startOK=canSwipeFrom(e.target);
+    main.classList.remove('snap');
+  },{passive:true});
+  main.addEventListener('touchmove',e=>{
+    if(!startOK) return;
+    const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
+    if(mode===null){
+      if(Math.abs(mx)<8&&Math.abs(my)<8) return;
+      mode=Math.abs(mx)>Math.abs(my)*1.2?'h':'v';
+    }
+    if(mode!=='h') return;
+    dx=mx;
+    const i=idxNow(),atEdge=(dx>0&&i===0)||(dx<0&&i===TB.length-1);
+    const pull=atEdge?dx*0.25:dx;
+    main.style.transform='translateX('+pull+'px)';
+    main.style.opacity=String(1-Math.min(Math.abs(pull)/600,.35));
+  },{passive:true});
+  function end(){
+    if(mode!=='h') return;
+    const i=idxNow(),w=main.clientWidth||320,dt=Math.max(Date.now()-t0,1);
+    const fast=Math.abs(dx)/dt>0.45,far=Math.abs(dx)>w*0.28;
+    const ni=i+(dx<0?1:-1),goLeft=dx<0;
+    main.classList.add('snap');
+    if((fast||far)&&ni>=0&&ni<TB.length){
+      main.style.transform='translateX('+(goLeft?-w:w)+'px)';main.style.opacity='0';
+      setTimeout(()=>{
+        main.classList.remove('snap');
+        if(!setTab(TB[ni][0])){            // rights unsaved → wapas
+          main.style.transform='translateX(0)';main.style.opacity='1';return;
+        }
+        main.style.transform='translateX('+(goLeft?w:-w)+'px)';
+        main.getBoundingClientRect();
+        main.classList.add('snap');
+        main.style.transform='translateX(0)';main.style.opacity='1';
+      },180);
+    }else{
+      main.style.transform='translateX(0)';main.style.opacity='1';
+    }
+    mode=null;dx=0;
+  }
+  main.addEventListener('touchend',end,{passive:true});
+  main.addEventListener('touchcancel',end,{passive:true});
+})();
+
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-act]');if(!el)return;
   const a=el.dataset.act,un=el.dataset.u;
@@ -697,7 +767,7 @@ document.addEventListener('click',async e=>{
   try{switch(a){
     case 'back':if(mxDirty()){toast('Save or discard rights first',true);S.tab='rol';render();break}goBack();break;
     case 'logout':logout();break;
-        case 'tab':if(mxDirty()&&el.dataset.v!=='rol'){toast('Save or discard rights first',true);break}S.tab=el.dataset.v;render();window.scrollTo({top:0});if(S.tab==='act')loadAct();break;
+    case 'tab':setTab(el.dataset.v);break;
     case 'rfr':await refreshReports();break;
     case 'ap':AS.p=el.dataset.v;AS.n=30;if(AS.p==='custom'&&!AS.cf){const t=sod(Date.now());AS.cf=t-13*DAY;AS.ct=t}render();break;
     case 'av':AS.v=el.dataset.v;AS.n=30;render();break;
