@@ -2118,6 +2118,55 @@ body.loading .header-stripe::before {
 }
 body.loading .btn-dl,
 body.loading .upload-zone { opacity: 0.45; }
+
+/* ─── Stock Alert ─── */
+#saBody{display:grid;grid-template-rows:1fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1)}
+#saBody.collapsed{grid-template-rows:0fr}
+#saBody>.sa-inner{overflow:hidden;min-height:0;transition:opacity .22s ease,transform .28s cubic-bezier(.4,0,.2,1)}
+#saBody.collapsed>.sa-inner{opacity:0;transform:translateY(-6px)}
+.sa-card{position:relative;border:1.5px solid var(--bc);border-radius:8px;padding:14px 14px 12px;margin-top:14px;color:var(--c)}
+.sa-card.set{--c:var(--green);--bc:#C5EBD9}
+.sa-card.unset{--c:var(--red);--bc:#F5C6C6}
+.sa-card{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.sa-card input{user-select:text;cursor:text}
+.sa-cap{position:absolute;top:-9px;left:12px;background:var(--surface);padding:0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;color:var(--c)}
+.sa-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sa-right{display:flex;align-items:center;gap:10px}
+.sa-badge,.sa-setbtn{height:32px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:9px;line-height:1;white-space:nowrap}
+.sa-setbtn{width:32px;padding:0;font-size:18px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:'Inter',sans-serif}
+.sa-setbtn:active{opacity:.85}
+.sa-badge.r{background:rgba(220,38,38,.1);color:var(--red)}
+.sa-badge.a{background:rgba(180,83,9,.1);color:var(--amber)}
+.sa-badge.g{background:rgba(5,150,105,.1);color:var(--green)}
+.sa-badge.p{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.sa-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sa-g3 .form-input{padding:11px 8px;text-align:center;margin-bottom:6px}
+.sa-err{font-size:12px;color:var(--red);font-weight:600;margin:2px 0 10px}
+.sa-hint{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.sa-zb{position:relative;display:flex;gap:2px;height:8px;margin:16px 8px 8px}
+.sa-zb i{display:block;height:100%}
+.sa-zb i:first-child{border-radius:6px 0 0 6px}
+.sa-zb i:last-child{border-radius:0 6px 6px 0}
+.sa-zb.off i{background:#e2e8f0!important}
+.sa-zk{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 5px rgba(15,23,42,.35);transform:translate(-50%,-50%)}
+.sa-lv{display:flex;justify-content:space-between;font:500 10px 'JetBrains Mono',monospace;color:var(--muted);margin-bottom:12px;padding:0 2px}
+.sa-lv span{display:flex;align-items:center;gap:4px}
+.sa-lv u{width:7px;height:7px;border-radius:50%}
+.sa-tg{display:flex;flex-direction:row-reverse;align-items:center;gap:8px;height:32px;padding:0 10px 0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.sa-tg em{font:700 12px 'Inter',sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.sa-tg.on{border-color:rgba(5,150,105,.45);background:rgba(5,150,105,.08)}
+.sa-tg.on em{color:var(--green)}
+.sa-tgs{position:relative;width:32px;height:18px;border-radius:20px;background:rgba(100,116,139,.35);transition:background .2s}
+.sa-tgs::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.sa-tg.on .sa-tgs{background:var(--green)}
+.sa-tg.on .sa-tgs::before{transform:translateX(14px)}
+.sa-fch{display:flex;gap:6px;margin:0 12px 8px}
+.sa-fchip{flex:1;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer;background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.sa-fchip.sel{border-width:1.5px}
+.sa-fchip b{font:700 14px 'JetBrains Mono',monospace}
+.sa-fchip span{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.sa-nft{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted)}
+.sa-nft b{font-family:'JetBrains Mono',monospace;color:var(--text)}
 </style>
 </head>
 
@@ -2285,8 +2334,13 @@ body.loading .upload-zone { opacity: 0.45; }
         🖨️ Bin Lists
         <span class="tab-badge hidden" id="notifTabBinBadge">0</span>
       </button>
+      <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')">
+        🚨 Alerts
+        <span class="tab-badge hidden" id="notifTabAlertBadge">0</span>
+      </button>
     </div>
-              <div class="notif-search-wrap" id="notifSearchWrap">
+<div class="sa-fch" id="saFilter" style="display:none;"></div>
+        <div class="notif-search-wrap" id="notifSearchWrap">
         <span class="notif-search-icon">🔍</span>
         <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
         <button id="notifSearchClear" onclick="clearNotifSearch()" style="display:none;">✕</button>
@@ -2523,7 +2577,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycby2l03EdnpV8Q6ohJgvDreamsH1krs4BsLv04bBDhX9MHt-g1ITCIxw_6FiFSiRu71I/exec";
+    const API = "https://script.google.com/macros/s/AKfycbxBtyqwHSHt_GjEvgb0wx_snq1jvklIpk66qY1ct6q8waG7CNLJnmIRXSXpjmGQ95ok/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
 let actQ = [], actTimer = null, actBusy = false;
 try { actQ = JSON.parse(localStorage.getItem('actQueue') || '[]'); } catch (e) {}
@@ -2631,11 +2685,13 @@ window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); }
   if (stockEl) stockEl.textContent = inStock.toLocaleString();
 
 if (document.getElementById('bellBadge')) {
-  const c = getStockNoLocationItems().length + binPending.length;
+  const c = getStockNoLocationItems().length + binPending.length + getStockAlertItems().length;
   document.getElementById('bellBadge').textContent = c;
   document.getElementById('bellBadge').classList.toggle('hidden', c === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', c > 0);
+  if (notifOpen) { renderTabBadges(); if (activeNotifTab === 'alert') renderAlertList(); }
 }
+
 }
 
 let notifOpen = false;
@@ -2735,6 +2791,229 @@ function addBinPending(loc, reason) {
 }
 loadBinPending();
 
+// ─── STOCK ALERT ───
+const LV_CACHE_KEY = 'levelsCache';
+let levelsMap = {};
+try { levelsMap = JSON.parse(localStorage.getItem(LV_CACHE_KEY)) || {}; } catch (e) { levelsMap = {}; }
+let pendingLevels = {};
+let lvTick = 0;
+let alFormOpen = false, alRmAsk = false, alForSn = null, alertFilter = 'all';
+let saOpen = localStorage.getItem('stockAlertOpen') === 'true';
+function setSAOpen(v) {
+  saOpen = v;
+  try { localStorage.setItem('stockAlertOpen', String(v)); } catch (e) {}
+}
+function toggleSA() {
+  setSAOpen(!saOpen);
+  const b = document.getElementById('saBody');
+  if (b) b.classList.toggle('collapsed', !saOpen);
+}
+function saCardClick(e) {
+  if (alFormOpen) return;
+  if (e.target.closest('button, input, label, a, .sa-tg')) return;
+  if (!lvOf(currentItem)) { openAlertForm(); return; }
+  toggleSA();
+}
+
+function saveLevelsCache() { try { localStorage.setItem(LV_CACHE_KEY, JSON.stringify(levelsMap)); } catch (e) {} }
+function lvOf(it) { return it ? (levelsMap[String(it.sap).trim()] || null) : null; }
+function lvStockNum(it) { const v = parseFloat(it.curr_stock); return isNaN(v) ? 0 : v; }
+
+function lvState(it) {
+  const l = lvOf(it);
+  if (!l) return null;
+  if (l.off) return { k: 'off', label: 'Paused', cls: 'p' };
+  const q = lvStockNum(it);
+  if (q <= l.min) return { k: 'crit', label: 'Critical', cls: 'r' };
+  if (q <= l.reorder) return { k: 're', label: 'Reorder', cls: 'a' };
+  return { k: 'ok', label: 'OK', cls: 'g' };
+}
+
+function getStockAlertItems() {
+  const out = [];
+  itemMaster.forEach(it => {
+    const s = lvState(it);
+    if (s && (s.k === 'crit' || s.k === 're')) out.push(it);
+  });
+  return out.sort((a, b) => (lvStockNum(a) / (lvOf(a).max || 1)) - (lvStockNum(b) / (lvOf(b).max || 1)));
+}
+
+function lvBarHTML(it, legend) {
+  const l = lvOf(it), s = lvState(it), q = lvStockNum(it);
+  const top = Math.max(l.max, q) || 1, p = v => v / top * 100;
+  const col = s.k === 'crit' ? 'var(--red)' : s.k === 're' ? '#f59e0b' : s.k === 'off' ? '#94a3b8' : 'var(--green)';
+  let h = `<div class="sa-zb${s.k === 'off' ? ' off' : ''}"><i style="width:${p(l.min)}%;background:#fca5a5"></i><i style="width:${p(l.reorder) - p(l.min)}%;background:#fcd34d"></i><i style="flex:1;background:#86efac"></i><span class="sa-zk" style="left:${p(q)}%;background:${col}"></span></div>`;
+  if (legend) h += `<div class="sa-lv"><span><u style="background:#ef4444"></u>Min ${l.min}</span><span><u style="background:#f59e0b"></u>Reorder ${l.reorder}</span><span><u style="background:#22c55e"></u>Max ${l.max}</span></div>`;
+  return h;
+}
+
+function renderAlertBox() {
+  const box = document.getElementById('stockAlertBox');
+  if (!box || !currentItem) return;
+  if (alForSn !== currentItem.sn) { alForSn = currentItem.sn; alFormOpen = false; alRmAsk = false; }
+  const it = currentItem, l = lvOf(it), s = lvState(it);
+  let h = `<div class="sa-card ${l ? 'set' : 'unset'}" onclick="saCardClick(event)"><span class="sa-cap">Stock Alert</span><div class="sa-head">`;
+  h += l ? `<span class="sa-badge ${s.cls}">${s.label}</span>` : `<span class="sa-badge p">Not set</span>`;
+  h += `<div class="sa-right">`;
+    if (l && !alFormOpen) h += `<div class="sa-tg ${l.off ? '' : 'on'}" onclick="toggleAlertOff()"><div class="sa-tgs"></div><em>Alert</em></div>`;
+    if (!l && !alFormOpen) h += `<button class="sa-setbtn" onclick="openAlertForm()" aria-label="Set alert">＋</button>`;
+  h += `</div></div><div id="saBody" class="${saOpen ? '' : 'collapsed'}"><div class="sa-inner">`;
+  if (alFormOpen) {
+    const v = l || { min: '', reorder: '', max: '' };
+    h += `<div class="sa-g3" style="margin-top:10px;">
+      <div><label class="form-label">Min</label><input class="form-input" id="alMin" type="number" inputmode="numeric" min="0" value="${v.min}"></div>
+      <div><label class="form-label">Reorder</label><input class="form-input" id="alRe" type="number" inputmode="numeric" min="0" value="${v.reorder}"></div>
+      <div><label class="form-label">Max</label><input class="form-input" id="alMax" type="number" inputmode="numeric" min="0" value="${v.max}"></div>
+    </div><div class="sa-err" id="alErr"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="closeAlertForm()" style="flex:1;justify-content:center;">Cancel</button>
+      <button class="btn btn-success" onclick="saveAlertLevels()" style="flex:2;justify-content:center;">💾 ${l ? 'Update Levels' : 'Save Alert'}</button>
+    </div>`;
+  } else if (!l) {
+    // Not set: body khali
+  } else {
+    h += `<div style="margin-top:2px;">` + lvBarHTML(it, true);
+    if (l.off) h += `<div class="sa-hint">Alerts are paused. This item won't trigger alerts after a stock upload.</div>`;
+    if (alRmAsk) {
+      h += `<div class="sa-hint" style="color:var(--text);font-weight:600;margin-bottom:8px;">Remove this item from stock alerts?</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="cancelRemoveAlert()" style="flex:1;justify-content:center;">No</button>
+        <button class="btn btn-ghost" onclick="removeAlertLevels()" style="flex:1;justify-content:center;color:var(--red);border-color:rgba(220,38,38,.35);">🗑️ Yes, remove</button>
+      </div>`;
+    } else {
+      h += `<div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="openAlertForm()" style="flex:1;justify-content:center;">✏️ Edit Levels</button>
+        <button class="btn btn-ghost" onclick="askRemoveAlert()" style="flex:1;justify-content:center;color:var(--red);border-color:rgba(220,38,38,.35);">🗑️ Remove</button>
+      </div>`;
+    }
+    h += `</div>`;
+  }
+  box.innerHTML = h + '</div></div></div>';
+}
+
+function openAlertForm() { setSAOpen(true); alFormOpen = true; alRmAsk = false; renderAlertBox(); setTimeout(() => { const i = document.getElementById('alMin'); if (i) i.focus(); }, 80); }
+function closeAlertForm() { alFormOpen = false; renderAlertBox(); }
+function askRemoveAlert() { alRmAsk = true; renderAlertBox(); }
+function cancelRemoveAlert() { alRmAsk = false; renderAlertBox(); }
+
+function pushLevels(sap, lv) {
+  levelsMap[sap] = lv;
+  pendingLevels[sap] = { op: 'set', ts: lv.ts };
+  saveLevelsCache();
+  binSend({ action: 'setLevels', sap, min: lv.min, reorder: lv.reorder, max: lv.max, off: lv.off ? '1' : '0', by: userName, ts: lv.ts });
+}
+function afterLevelsChange() { renderAlertBox(); renderStats(); }
+
+function saveAlertLevels() {
+  if (!currentItem) return;
+  const g = id => document.getElementById(id).value.trim();
+  const a = g('alMin'), b = g('alRe'), c = g('alMax'), err = document.getElementById('alErr');
+  if (a === '' || b === '' || c === '') { err.textContent = 'Fill all three levels'; return; }
+  const mn = +a, re = +b, mx = +c;
+  if (isNaN(mn) || isNaN(re) || isNaN(mx) || mn < 0 || mn > re || re > mx) { err.textContent = 'Keep Min ≤ Reorder ≤ Max'; return; }
+  const sap = String(currentItem.sap).trim();
+  const was = levelsMap[sap];
+  pushLevels(sap, { min: mn, reorder: re, max: mx, off: was ? !!was.off : false, ts: Date.now() });
+  alFormOpen = false;
+  afterLevelsChange();
+  const s = lvState(currentItem);
+  const inList = s && (s.k === 'crit' || s.k === 're');
+  showToast((was ? 'Levels updated ✓' : 'Stock alert added ✓') + (inList ? ' · added to ' + s.label + ' list' : ''), s && s.k === 'crit' ? 'red' : s && s.k === 're' ? 'amber' : 'green');
+}
+
+function toggleAlertOff() {
+  if (!currentItem) return;
+  const sap = String(currentItem.sap).trim(), l = levelsMap[sap];
+  if (!l) return;
+  pushLevels(sap, { min: l.min, reorder: l.reorder, max: l.max, off: !l.off, ts: Date.now() });
+  afterLevelsChange();
+  showToast(!l.off ? 'Stock alert OFF — alerts paused for this item' : 'Stock alert ON — alerts active', !l.off ? 'amber' : 'green');
+}
+
+function removeAlertLevels() {
+  if (!currentItem) return;
+  const sap = String(currentItem.sap).trim();
+  delete levelsMap[sap];
+  pendingLevels[sap] = { op: 'remove', ts: Date.now() };
+  saveLevelsCache();
+  binSend({ action: 'removeLevels', sap });
+  alRmAsk = false;
+  afterLevelsChange();
+  showToast('Removed from stock alerts', 'green');
+}
+
+function loadLevels() {
+  return fetch(`${API}?action=getLevels`)
+    .then(r => r.json())
+    .then(rows => {
+      if (!Array.isArray(rows)) return;
+      const map = {};
+      rows.forEach(r => { map[r.sap] = { min: r.min, reorder: r.reorder, max: r.max, off: !!r.off, ts: r.ts }; });
+      const now = Date.now();
+      Object.keys(pendingLevels).forEach(sap => {
+        const p = pendingLevels[sap], s = map[sap], expired = now - p.ts > 120000;
+        if (p.op === 'remove') {
+          if (!s || expired) delete pendingLevels[sap]; else delete map[sap];
+        } else {
+          if ((s && s.ts >= p.ts) || expired) delete pendingLevels[sap];
+          else if (levelsMap[sap]) map[sap] = levelsMap[sap];
+        }
+      });
+      levelsMap = map;
+      saveLevelsCache();
+      renderStats();
+      if (currentItem && !addItemMode && !document.getElementById('alMin')) renderAlertBox();
+    })
+    .catch(() => {});
+}
+
+function setAlertFilter(f) { alertFilter = f; renderAlertList(); }
+
+function renderAlertList() {
+  const all = getStockAlertItems();
+  const crit = all.filter(i => lvState(i).k === 'crit').length, re = all.length - crit;
+  document.getElementById('notifCountBadge').textContent = all.length;
+  document.getElementById('notifSub').textContent = all.length ? 'Items at or below reorder level' : 'All items are well stocked 🎉';
+  const chip = (k, n, l, c) => `<div class="sa-fchip${alertFilter === k ? ' sel' : ''}" style="${alertFilter === k ? 'border-color:' + c : ''}" onclick="setAlertFilter('${k}')"><b style="color:${c}">${n}</b><span>${l}</span></div>`;
+  document.getElementById('saFilter').innerHTML = chip('all', all.length, 'All', 'var(--text)') + chip('crit', crit, 'Critical', 'var(--red)') + chip('re', re, 'Reorder', 'var(--amber)');
+  const show = all.filter(i => alertFilter === 'all' || lvState(i).k === alertFilter);
+  const list = document.getElementById('notifList');
+  if (!show.length) { list.innerHTML = `<div class="notif-empty">✅ No stock alerts</div>`; return; }
+  list.innerHTML = show.map(i => {
+    const l = lvOf(i), s = lvState(i), q = lvStockNum(i);
+    return `<div class="notif-row" onclick="openAlertItem(${i.sn})" style="cursor:pointer;">
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><span class="sa-badge ${s.cls}">${s.label}</span></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);">${lmEsc(i.sap)}${i.location ? ' · 📍 ' + lmEsc(i.location) : ''}</div>
+      ${lvBarHTML(i, false)}
+      <div class="sa-nft"><span>Stock <b>${q}</b> · Min <b>${l.min}</b> · Reorder <b>${l.reorder}</b></span><span>Order <b style="color:var(--red)">${Math.max(0, l.max - q)}</b></span></div>
+    </div>`;
+  }).join('');
+}
+
+function openAlertItem(sn) {
+  const it = itemMaster.find(i => String(i.sn) === String(sn));
+  if (!it) return;
+  closeNotif();
+  ddItems = [it];
+  pickItem(0);
+}
+
+function downloadStockAlerts() {
+  const items = getStockAlertItems();
+  if (!items.length) { showToast("No stock alerts 🎉", "green"); return; }
+  const rows = [["SAP", "Description", "Location", "Stock", "Min", "Reorder", "Max", "Status", "Order Qty"]];
+  items.forEach(i => {
+    const l = lvOf(i), q = lvStockNum(i);
+    rows.push([i.sap || '', i.name || '', i.location || '', q, l.min, l.reorder, l.max, lvState(i).label, Math.max(0, l.max - q)]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'stock_alerts.csv';
+  a.click();
+  showToast('Downloaded: stock_alerts.csv', "blue");
+}
+
 function getStockNoLocationItems() {
   return itemMaster.filter(i => {
     const stockVal = parseFloat(i.curr_stock);
@@ -2769,7 +3048,8 @@ function downloadBinList() {
 }
 
 function downloadActiveNotifTab() {
-  if (activeNotifTab === 'stock') downloadPendingFromNotif();
+    if (activeNotifTab === 'stock') downloadPendingFromNotif();
+  else if (activeNotifTab === 'alert') downloadStockAlerts();
   else downloadBinList();
 }
 
@@ -2777,6 +3057,7 @@ function switchNotifTab(tab) {
   activeNotifTab = tab;
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
   document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
+  document.getElementById('notifTabAlert').classList.toggle('active', tab === 'alert');
   renderActiveNotifTab();
 }
 
@@ -2788,6 +3069,10 @@ function renderTabBadges() {
   sB.classList.toggle('hidden', stockCount === 0);
   bB.textContent = binPending.length;
   bB.classList.toggle('hidden', binPending.length === 0);
+  const aB = document.getElementById('notifTabAlertBadge');
+  const alertCount = getStockAlertItems().length;
+  aB.textContent = alertCount;
+  aB.classList.toggle('hidden', alertCount === 0);
 }
 
 function renderActiveNotifTab() {
@@ -2798,24 +3083,28 @@ function renderActiveNotifTab() {
   const countChip = document.getElementById('notifCountChip');
   const dlBtn = document.getElementById('notifDlBtn');
   const footer = document.getElementById('notifFooter');
+  const isBin = activeNotifTab === 'bin';
+
+  stripe.classList.toggle('bin', isBin);
+  iconBadge.classList.toggle('bin', isBin);
+  countChip.classList.toggle('bin', isBin);
+  dlBtn.classList.toggle('bin', isBin);
+  document.getElementById('saFilter').style.display = activeNotifTab === 'alert' ? 'flex' : 'none';
+  searchWrap.style.display = activeNotifTab === 'stock' ? '' : 'none';
 
   if (activeNotifTab === 'stock') {
-    stripe.classList.remove('bin');
-    iconBadge.classList.remove('bin'); iconBadge.textContent = '📊';
+    iconBadge.textContent = '📊';
     titleText.textContent = 'IN STOCK, NO LOCATION';
-    countChip.classList.remove('bin');
-    dlBtn.classList.remove('bin');
-    searchWrap.style.display = '';
     footer.textContent = 'Tap Save ✓ to assign — list updates live';
     renderNotifList();
+  } else if (activeNotifTab === 'alert') {
+    iconBadge.textContent = '🚨';
+    titleText.textContent = 'STOCK ALERTS';
+    footer.textContent = 'Tap an item to open it — edit or remove its levels';
+    renderAlertList();
   } else {
-    stripe.classList.add('bin');
-    iconBadge.classList.add('bin'); iconBadge.textContent = '🖨️';
+    iconBadge.textContent = '🖨️';
     titleText.textContent = 'BIN LISTS TO UPDATE';
-    countChip.classList.add('bin');
-    dlBtn.classList.add('bin');
-    searchWrap.style.display = 'none';
-
     footer.textContent = "Locations get added here automatically when an item's location changes";
     renderBinList();
   }
@@ -3741,8 +4030,10 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
             Photos
           </button>
         </div>
-        <div id="updateForm"></div>
+                <div id="updateForm"></div>
+        <div id="stockAlertBox"></div>
       `;
+      renderAlertBox();
     }
 
     function showAddItemForm(prefill) {
@@ -4786,13 +5077,16 @@ updates.push({ sap, stock: stockVal });
             stockMap[u.sap] = u.stock;
             pendingStockUpdates[u.sap] = u.stock;
           });
-          itemMaster.forEach(i => {
+                    itemMaster.forEach(i => {
             const sapKey = padSAP(String(i.sap || '').trim());
             if (stockMap.hasOwnProperty(sapKey)) {
               i.curr_stock = stockMap[sapKey];
+            } else if (includeZcap || !sapKey.startsWith('5')) {
+              i.curr_stock = '';
             }
           });
-                    renderStats();
+
+          renderStats();
           if (notifOpen) { renderTabBadges(); renderNotifList(); }
           try {
             localStorage.setItem(CACHE_KEY, JSON.stringify({ data: itemMaster, ts: Date.now() }));
@@ -4960,7 +5254,7 @@ window.addEventListener('pageshow', e => {
           if (fresh) {
             const changed = !itemsEqual(fresh, currentItem);
             currentItem = fresh;
-            if (changed && !document.getElementById('updateLocation')) { renderItem(); renderAI(); }
+            if (changed && !document.getElementById('updateLocation') && !document.getElementById('alMin')) { renderItem(); renderAI(); }
           }
         } else if (lastTerm && !searchBox.value.trim()) {
           searchBox.value = lastTerm; document.getElementById('clearSearch').classList.add('visible'); doSearch(lastTerm);
@@ -4978,6 +5272,7 @@ window.addEventListener('pageshow', e => {
       });
     }
     loadItems();
+    loadLevels();
 
     // ─── Silent Background Refresh (cross-device sync) ───
     let silentRefreshInFlight = false;
@@ -4985,6 +5280,7 @@ window.addEventListener('pageshow', e => {
        function silentRefresh() {
       if (silentRefreshInFlight || document.visibilityState !== 'visible') return;
       silentRefreshInFlight = true;
+      if (++lvTick % 2 === 0) loadLevels();
       syncBin();
 
       const prevPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
@@ -5027,7 +5323,7 @@ if (notifOpen && !typingInNotif) {
   }
 }
 
-const formOpen = document.getElementById('updateLocation');
+const formOpen = document.getElementById('updateLocation') || document.getElementById('alMin');
           if (currentItem && !addItemMode && !formOpen) {
             const updated = itemMaster.find(i => i.sn === currentItem.sn);
             if (updated && !itemsEqual(updated, currentItem)) {
@@ -5101,6 +5397,7 @@ if (!sessionStorage.getItem('userPerms')) {
 // existing functions ko wrap karo, andar ka code touch nahi hota
 const WRAP = {
   showUpdateForm:'loc', updateLocation:'loc', saveNotifItem:'loc',
+  openAlertForm:'loc', saveAlertLevels:'loc', removeAlertLevels:'loc', toggleAlertOff:'loc',
   showAddItemForm:'add', submitNewItem:'add',
   handleDownload:'dl', handleUpload:'enrich', handleStockUpload:'stock',
   openBinPrint:'binprint', openBinPrintAll:'binprint',
