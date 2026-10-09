@@ -800,15 +800,11 @@ body.loading .header-stripe::before {
       vertical-align: 1px;
     }
 
-    @media (max-width: 480px) {
-      .dd-badges {
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-      }
-      .dd-stock-badge {
-        margin-top: 3px;
-      }
+       .dd-sap-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
     }
 
     .dd-stock-badge {
@@ -3270,13 +3266,15 @@ function saveNotifItem(sn) {
           const hasLoc = item.location && item.location.trim();
           const hasStock = lmHasStock(item);
           return `<div class="dd-item" data-i="${i}">
-            <div style="flex:1;min-width:0;">
+                        <div style="flex:1;min-width:0;">
               <div class="dd-name">${highlight(item.name, query)}</div>
-              <div class="dd-sap">${highlight(String(item.sap), query)}</div>
+              <div class="dd-sap-row">
+                <span class="dd-sap">${highlight(String(item.sap), query)}</span>
+                <span class="dd-stock-badge ${hasStock ? 'has' : 'no'}">${hasStock ? '<span class="dd-x">📦</span> ' + lmEsc(item.curr_stock) : 'No Stock'}</span>
+              </div>
             </div>
             <div class="dd-badges">
               <span class="dd-loc-badge ${hasLoc ? 'has' : 'no'}">${hasLoc ? '📍 ' + lmEsc(item.location) : '<span class="dd-x">❌</span> No Loc'}</span>
-              <span class="dd-stock-badge ${hasStock ? 'has' : 'no'}">${hasStock ? '📦 ' + lmEsc(item.curr_stock) : 'No Stock'}</span>
             </div>
           </div>`;
         }).join('');
