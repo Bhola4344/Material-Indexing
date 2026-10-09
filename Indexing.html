@@ -2119,52 +2119,73 @@ body.loading .header-stripe::before {
 body.loading .btn-dl,
 body.loading .upload-zone { opacity: 0.45; }
 
-/* ─── Stock Alert ─── */
-#saBody{display:grid;grid-template-rows:1fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1)}
-#saBody.collapsed{grid-template-rows:0fr}
-#saBody>.sa-inner{overflow:hidden;min-height:0;transition:opacity .22s ease,transform .28s cubic-bezier(.4,0,.2,1)}
-#saBody.collapsed>.sa-inner{opacity:0;transform:translateY(-6px)}
-.sa-card{position:relative;border:1.5px solid var(--bc);border-radius:8px;padding:14px 14px 12px;margin-top:14px;color:var(--c)}
-.sa-card.set{--c:var(--green);--bc:#C5EBD9}
-.sa-card.unset{--c:var(--red);--bc:#F5C6C6}
-.sa-card{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
-.sa-card input{user-select:text;cursor:text}
-.sa-cap{position:absolute;top:-9px;left:12px;background:var(--surface);padding:0 6px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;color:var(--c)}
-.sa-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.sa-right{display:flex;align-items:center;gap:10px}
-.sa-badge,.sa-setbtn{height:32px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:9px;line-height:1;white-space:nowrap}
-.sa-setbtn{width:32px;padding:0;font-size:18px;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:'Inter',sans-serif}
-.sa-setbtn:active{opacity:.85}
-.sa-badge.r{background:rgba(220,38,38,.1);color:var(--red)}
-.sa-badge.a{background:rgba(180,83,9,.1);color:var(--amber)}
-.sa-badge.g{background:rgba(5,150,105,.1);color:var(--green)}
-.sa-badge.p{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
-.sa-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.sa-g3 .form-input{padding:11px 8px;text-align:center;margin-bottom:6px}
-.sa-err{font-size:12px;color:var(--red);font-weight:600;margin:2px 0 10px}
-.sa-hint{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
-.sa-zb{position:relative;display:flex;gap:2px;height:8px;margin:16px 8px 8px}
-.sa-zb i{display:block;height:100%}
-.sa-zb i:first-child{border-radius:6px 0 0 6px}
-.sa-zb i:last-child{border-radius:0 6px 6px 0}
-.sa-zb.off i{background:#e2e8f0!important}
-.sa-zk{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 5px rgba(15,23,42,.35);transform:translate(-50%,-50%)}
-.sa-lv{display:flex;justify-content:space-between;font:500 10px 'JetBrains Mono',monospace;color:var(--muted);margin-bottom:12px;padding:0 2px}
-.sa-lv span{display:flex;align-items:center;gap:4px}
-.sa-lv u{width:7px;height:7px;border-radius:50%}
-.sa-tg{display:flex;flex-direction:row-reverse;align-items:center;gap:8px;height:32px;padding:0 10px 0 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-.sa-tg em{font:700 12px 'Inter',sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
-.sa-tg.on{border-color:rgba(5,150,105,.45);background:rgba(5,150,105,.08)}
-.sa-tg.on em{color:var(--green)}
-.sa-tgs{position:relative;width:32px;height:18px;border-radius:20px;background:rgba(100,116,139,.35);transition:background .2s}
-.sa-tgs::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
-.sa-tg.on .sa-tgs{background:var(--green)}
-.sa-tg.on .sa-tgs::before{transform:translateX(14px)}
+/* ─── Stock Alert v2 ─── */
+.sa-row{margin-top:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface2);overflow:hidden;transition:border-color .2s,background .2s}
+.sa-row.unset{border-style:dashed;background:#fafbfd}
+.sa-row.ok{border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.04)}
+.sa-row.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.07)}
+.sa-row.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.05)}
+.sa-row.off{opacity:.85}
+.sa-top{display:flex;align-items:center;gap:10px;padding:10px 12px;min-height:56px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sa-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0;background:#e8edf3}
+.sa-row.ok .sa-ic{background:rgba(5,150,105,.14)}
+.sa-row.re .sa-ic{background:rgba(245,158,11,.2)}
+.sa-row.crit .sa-ic{background:rgba(220,38,38,.14)}
+.sa-tx{flex:1;min-width:0}
+.sa-t{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;line-height:1.2}
+.sa-s{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa-chip{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.sa-chip.ok{background:rgba(5,150,105,.12);color:var(--green)}
+.sa-chip.re{background:rgba(180,83,9,.12);color:var(--amber)}
+.sa-chip.crit{background:rgba(220,38,38,.12);color:var(--red)}
+.sa-chip.off{background:#e8edf3;color:var(--muted)}
+.sa-set{height:36px;padding:0 14px;border-radius:9px;border:1.5px solid rgba(37,99,235,.3);background:rgba(37,99,235,.07);color:var(--accent);font:700 12px 'Inter',sans-serif;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sa-sw{position:relative;width:38px;height:22px;border-radius:20px;background:#cbd5e1;border:0;flex-shrink:0;transition:background .2s;cursor:pointer;padding:0}
+.sa-sw::before{content:'';position:absolute;inset:-11px -6px}
+.sa-sw::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sa-sw.on{background:var(--green)}
+.sa-sw.on::after{transform:translateX(16px)}
+.sa-chev{display:inline-block;font-size:11px;color:var(--muted);transition:transform .25s}
+.sa-row.open .sa-chev{transform:rotate(180deg)}
+.sa-mini{position:relative;height:6px;margin:0 12px 10px;border-radius:6px;display:flex;gap:2px}
+.sa-mini i{display:block;height:100%}
+.sa-mini i:first-child{border-radius:6px 0 0 6px}
+.sa-mini i:nth-child(3){border-radius:0 6px 6px 0}
+.sa-mini span{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;border:2.5px solid #fff;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(15,23,42,.35)}
+.sa-mini.off i{background:#e2e8f0!important}
+.sa-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1)}
+.sa-row.open .sa-body{grid-template-rows:1fr}
+.sa-body>div{overflow:hidden;min-height:0}
+.sa-bin{padding:2px 12px 12px}
+.sa-lv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.sa-lv>div{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 8px;text-align:center}
+.sa-lv small{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.sa-lv b{font:700 15px 'JetBrains Mono',monospace}
+.sa-lv .a b{color:var(--red)}.sa-lv .b b{color:var(--amber)}.sa-lv .c b{color:var(--green)}
+.sa-order{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+.sa-order b{font:700 13px 'JetBrains Mono',monospace}
+.sa-two{display:flex;gap:8px}
+.sa-two .btn{flex:1;justify-content:center;min-height:40px;font-size:12px}
+.btn.sa-del{color:var(--red);border-color:rgba(220,38,38,.35)}
+.sa-f3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.sa-f3 label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.sa-f3 input{width:100%;border:2px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;font:600 16px 'JetBrains Mono',monospace;background:#fff;outline:none;-webkit-appearance:none}
+.sa-f3 input:focus{border-color:var(--accent)}
+.sa-err{font-size:12px;color:var(--red);font-weight:600;min-height:16px;margin-bottom:6px}
+.sa-hint{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+
+/* notification list */
 .sa-fch{display:flex;gap:6px;margin:0 12px 8px}
-.sa-fchip{flex:1;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer;background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.sa-fchip{flex:1;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer;background:var(--surface);display:flex;align-items:center;justify-content:space-between;font-family:inherit;color:inherit}
 .sa-fchip.sel{border-width:1.5px}
 .sa-fchip b{font:700 14px 'JetBrains Mono',monospace}
-.sa-fchip span{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.sa-fchip span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.notif-row.sa-nrow{cursor:pointer}
+.sa-nrow.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.04)}
+.sa-nrow.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.06)}
+.sa-nrow:active{transform:scale(.99)}
+.sa-nsap{font:10.5px 'JetBrains Mono',monospace;color:var(--accent2);margin-bottom:8px}
+.sa-nrow .sa-mini{margin:0 0 8px}
 .sa-nft{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted)}
 .sa-nft b{font-family:'JetBrains Mono',monospace;color:var(--text)}
 </style>
@@ -2804,13 +2825,13 @@ function setSAOpen(v) {
   try { localStorage.setItem('stockAlertOpen', String(v)); } catch (e) {}
 }
 function toggleSA() {
-  setSAOpen(!saOpen);
-  const b = document.getElementById('saBody');
-  if (b) b.classList.toggle('collapsed', !saOpen);
-}
-function saCardClick(e) {
   if (alFormOpen) return;
-  if (e.target.closest('button, input, label, a, .sa-tg')) return;
+  setSAOpen(!saOpen);
+  const r = document.getElementById('saRow');
+  if (r) r.classList.toggle('open', saOpen);
+}
+function saTopClick() {
+  if (alFormOpen) return;
   if (!lvOf(currentItem)) { openAlertForm(); return; }
   toggleSA();
 }
@@ -2838,57 +2859,58 @@ function getStockAlertItems() {
   return out.sort((a, b) => (lvStockNum(a) / (lvOf(a).max || 1)) - (lvStockNum(b) / (lvOf(b).max || 1)));
 }
 
-function lvBarHTML(it, legend) {
+function lvBarHTML(it) {
   const l = lvOf(it), s = lvState(it), q = lvStockNum(it);
   const top = Math.max(l.max, q) || 1, p = v => v / top * 100;
-  const col = s.k === 'crit' ? 'var(--red)' : s.k === 're' ? '#f59e0b' : s.k === 'off' ? '#94a3b8' : 'var(--green)';
-  let h = `<div class="sa-zb${s.k === 'off' ? ' off' : ''}"><i style="width:${p(l.min)}%;background:#fca5a5"></i><i style="width:${p(l.reorder) - p(l.min)}%;background:#fcd34d"></i><i style="flex:1;background:#86efac"></i><span class="sa-zk" style="left:${p(q)}%;background:${col}"></span></div>`;
-  if (legend) h += `<div class="sa-lv"><span><u style="background:#ef4444"></u>Min ${l.min}</span><span><u style="background:#f59e0b"></u>Reorder ${l.reorder}</span><span><u style="background:#22c55e"></u>Max ${l.max}</span></div>`;
-  return h;
+  const pos = Math.min(97, Math.max(3, p(q)));
+  const col = s.k === 'crit' ? '#dc2626' : s.k === 're' ? '#f59e0b' : s.k === 'off' ? '#94a3b8' : '#059669';
+  return `<div class="sa-mini${s.k === 'off' ? ' off' : ''}"><i style="width:${p(l.min)}%;background:#fca5a5"></i><i style="width:${p(l.reorder) - p(l.min)}%;background:#fcd34d"></i><i style="flex:1;background:#86efac"></i><span style="left:${pos}%;background:${col}"></span></div>`;
 }
 
 function renderAlertBox() {
   const box = document.getElementById('stockAlertBox');
   if (!box || !currentItem) return;
   if (alForSn !== currentItem.sn) { alForSn = currentItem.sn; alFormOpen = false; alRmAsk = false; }
-  const it = currentItem, l = lvOf(it), s = lvState(it);
-  let h = `<div class="sa-card ${l ? 'set' : 'unset'}" onclick="saCardClick(event)"><span class="sa-cap">Stock Alert</span><div class="sa-head">`;
-  h += l ? `<span class="sa-badge ${s.cls}">${s.label}</span>` : `<span class="sa-badge p">Not set</span>`;
-  h += `<div class="sa-right">`;
-    if (l && !alFormOpen) h += `<div class="sa-tg ${l.off ? '' : 'on'}" onclick="toggleAlertOff()"><div class="sa-tgs"></div><em>Alert</em></div>`;
-    if (!l && !alFormOpen) h += `<button class="sa-setbtn" onclick="openAlertForm()" aria-label="Set alert">＋</button>`;
-  h += `</div></div><div id="saBody" class="${saOpen ? '' : 'collapsed'}"><div class="sa-inner">`;
+  const it = currentItem, l = lvOf(it), s = lvState(it), q = lvStockNum(it);
+  const k = l ? s.k : 'unset';
+  const ICON = { unset: '🔔', ok: '✅', re: '⚠️', crit: '🚨', off: '🔕' };
+  const open = l ? saOpen : alFormOpen;
+  let top, body = '';
+
+  if (!l) {
+    top = `<div class="sa-ic">${ICON.unset}</div>
+      <div class="sa-tx"><div class="sa-t">Stock alert</div><div class="sa-s">Get notified when stock runs low</div></div>
+      ${alFormOpen ? '' : '<button class="sa-set" onclick="event.stopPropagation();openAlertForm()">＋ Set</button>'}`;
+  } else {
+    top = `<div class="sa-ic">${ICON[k]}</div>
+      <div class="sa-tx"><div class="sa-t">Stock alert <span class="sa-chip ${k}">${s.label}</span><span class="sa-chev">▾</span></div>
+      <div class="sa-s">Stock ${q} · Min ${l.min} · Reorder ${l.reorder}</div></div>
+      ${alFormOpen ? '' : `<button class="sa-sw${l.off ? '' : ' on'}" role="switch" aria-checked="${!l.off}" aria-label="Alert on/off" onclick="event.stopPropagation();toggleAlertOff()"></button>`}`;
+  }
+
   if (alFormOpen) {
     const v = l || { min: '', reorder: '', max: '' };
-    h += `<div class="sa-g3" style="margin-top:10px;">
-      <div><label class="form-label">Min</label><input class="form-input" id="alMin" type="number" inputmode="numeric" min="0" value="${v.min}"></div>
-      <div><label class="form-label">Reorder</label><input class="form-input" id="alRe" type="number" inputmode="numeric" min="0" value="${v.reorder}"></div>
-      <div><label class="form-label">Max</label><input class="form-input" id="alMax" type="number" inputmode="numeric" min="0" value="${v.max}"></div>
-    </div><div class="sa-err" id="alErr"></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost" onclick="closeAlertForm()" style="flex:1;justify-content:center;">Cancel</button>
-      <button class="btn btn-success" onclick="saveAlertLevels()" style="flex:2;justify-content:center;">💾 ${l ? 'Update Levels' : 'Save Alert'}</button>
-    </div>`;
-  } else if (!l) {
-    // Not set: body khali
-  } else {
-    h += `<div style="margin-top:2px;">` + lvBarHTML(it, true);
-    if (l.off) h += `<div class="sa-hint">Alerts are paused. This item won't trigger alerts after a stock upload.</div>`;
-    if (alRmAsk) {
-      h += `<div class="sa-hint" style="color:var(--text);font-weight:600;margin-bottom:8px;">Remove this item from stock alerts?</div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="cancelRemoveAlert()" style="flex:1;justify-content:center;">No</button>
-        <button class="btn btn-ghost" onclick="removeAlertLevels()" style="flex:1;justify-content:center;color:var(--red);border-color:rgba(220,38,38,.35);">🗑️ Yes, remove</button>
-      </div>`;
-    } else {
-      h += `<div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="openAlertForm()" style="flex:1;justify-content:center;">✏️ Edit Levels</button>
-        <button class="btn btn-ghost" onclick="askRemoveAlert()" style="flex:1;justify-content:center;color:var(--red);border-color:rgba(220,38,38,.35);">🗑️ Remove</button>
-      </div>`;
-    }
-    h += `</div>`;
+    const f = (id, lb, val) => `<div><label for="${id}">${lb}</label><input id="${id}" type="number" inputmode="numeric" min="0" value="${val}"></div>`;
+    body = `<div class="sa-bin"><div class="sa-f3">${f('alMin', 'Min', v.min)}${f('alRe', 'Reorder', v.reorder)}${f('alMax', 'Max', v.max)}</div>
+      <div class="sa-err" id="alErr"></div>
+      <div class="sa-two"><button class="btn btn-ghost" onclick="closeAlertForm()">Cancel</button><button class="btn btn-success" style="flex:2" onclick="saveAlertLevels()">💾 ${l ? 'Update Levels' : 'Save Alert'}</button></div></div>`;
+  } else if (l && alRmAsk) {
+    body = `<div class="sa-bin"><div class="sa-order" style="color:var(--text);font-weight:600">Remove this item from stock alerts?</div>
+      <div class="sa-two"><button class="btn btn-ghost" onclick="cancelRemoveAlert()">No</button><button class="btn btn-ghost sa-del" onclick="removeAlertLevels()">🗑️ Yes, remove</button></div></div>`;
+  } else if (l) {
+    const need = Math.max(0, l.max - q);
+    const needTxt = (s.k === 'crit' || s.k === 're') ? `<b style="color:var(--red)">${need}</b>` : `<b style="color:var(--muted)">—</b>`;
+    body = `<div class="sa-bin">
+      <div class="sa-lv"><div class="a"><small>Min</small><b>${l.min}</b></div><div class="b"><small>Reorder</small><b>${l.reorder}</b></div><div class="c"><small>Max</small><b>${l.max}</b></div></div>
+      <div class="sa-order"><span>Qty to order</span>${needTxt}</div>
+      ${l.off ? `<div class="sa-hint">Alerts are paused. This item won't trigger alerts after a stock upload.</div>` : ''}
+      <div class="sa-two"><button class="btn btn-ghost" onclick="openAlertForm()">✏️ Edit levels</button><button class="btn btn-ghost sa-del" onclick="askRemoveAlert()">🗑️ Remove</button></div></div>`;
   }
-  box.innerHTML = h + '</div></div></div>';
+
+  box.innerHTML = `<div class="sa-row ${k}${open ? ' open' : ''}" id="saRow">
+    <div class="sa-top" onclick="saTopClick()">${top}</div>
+    ${l ? lvBarHTML(it) : ''}
+    <div class="sa-body"><div>${body}</div></div></div>`;
 }
 
 function openAlertForm() { setSAOpen(true); alFormOpen = true; alRmAsk = false; renderAlertBox(); setTimeout(() => { const i = document.getElementById('alMin'); if (i) i.focus(); }, 80); }
@@ -2910,7 +2932,7 @@ function saveAlertLevels() {
   const a = g('alMin'), b = g('alRe'), c = g('alMax'), err = document.getElementById('alErr');
   if (a === '' || b === '' || c === '') { err.textContent = 'Fill all three levels'; return; }
   const mn = +a, re = +b, mx = +c;
-  if (isNaN(mn) || isNaN(re) || isNaN(mx) || mn < 0 || mn > re || re > mx) { err.textContent = 'Keep Min ≤ Reorder ≤ Max'; return; }
+  if (isNaN(mn) || isNaN(re) || isNaN(mx) || mn < 0 || mn > re || re > mx || mx < 1) { err.textContent = 'Keep Min ≤ Reorder ≤ Max'; return; }
   const sap = String(currentItem.sap).trim();
   const was = levelsMap[sap];
   pushLevels(sap, { min: mn, reorder: re, max: mx, off: was ? !!was.off : false, ts: Date.now() });
@@ -2974,17 +2996,17 @@ function renderAlertList() {
   const crit = all.filter(i => lvState(i).k === 'crit').length, re = all.length - crit;
   document.getElementById('notifCountBadge').textContent = all.length;
   document.getElementById('notifSub').textContent = all.length ? 'Items at or below reorder level' : 'All items are well stocked 🎉';
-  const chip = (k, n, l, c) => `<div class="sa-fchip${alertFilter === k ? ' sel' : ''}" style="${alertFilter === k ? 'border-color:' + c : ''}" onclick="setAlertFilter('${k}')"><b style="color:${c}">${n}</b><span>${l}</span></div>`;
+  const chip = (k, n, l, c) => `<button type="button" class="sa-fchip${alertFilter === k ? ' sel' : ''}" style="${alertFilter === k ? 'border-color:' + c : ''}" onclick="setAlertFilter('${k}')"><b style="color:${c}">${n}</b><span>${l}</span></button>`;
   document.getElementById('saFilter').innerHTML = chip('all', all.length, 'All', 'var(--text)') + chip('crit', crit, 'Critical', 'var(--red)') + chip('re', re, 'Reorder', 'var(--amber)');
   const show = all.filter(i => alertFilter === 'all' || lvState(i).k === alertFilter);
   const list = document.getElementById('notifList');
   if (!show.length) { list.innerHTML = `<div class="notif-empty">✅ No stock alerts</div>`; return; }
   list.innerHTML = show.map(i => {
     const l = lvOf(i), s = lvState(i), q = lvStockNum(i);
-    return `<div class="notif-row" onclick="openAlertItem(${i.sn})" style="cursor:pointer;">
-      <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><span class="sa-badge ${s.cls}">${s.label}</span></div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);">${lmEsc(i.sap)}${i.location ? ' · 📍 ' + lmEsc(i.location) : ''}</div>
-      ${lvBarHTML(i, false)}
+    return `<div class="notif-row sa-nrow ${s.k}" onclick="openAlertItem(${i.sn})">
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><span class="sa-chip ${s.k}">${s.label}</span></div>
+      <div class="sa-nsap">${lmEsc(i.sap)}${i.location ? ' · 📍 ' + lmEsc(i.location) : ''}</div>
+      ${lvBarHTML(i)}
       <div class="sa-nft"><span>Stock <b>${q}</b> · Min <b>${l.min}</b> · Reorder <b>${l.reorder}</b></span><span>Order <b style="color:var(--red)">${Math.max(0, l.max - q)}</b></span></div>
     </div>`;
   }).join('');
