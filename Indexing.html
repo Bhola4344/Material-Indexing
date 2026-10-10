@@ -2176,10 +2176,15 @@ body.loading .upload-zone { opacity: 0.45; }
 
 /* notification list */
 .sa-fch{display:flex;gap:6px;margin:0 12px 8px}
-.sa-fchip{flex:1;border:1px solid var(--border);border-radius:10px;padding:6px 8px;cursor:pointer;background:var(--surface);display:flex;align-items:center;justify-content:space-between;font-family:inherit;color:inherit}
-.sa-fchip.sel{border-width:1.5px}
-.sa-fchip b{font:700 14px 'JetBrains Mono',monospace}
-.sa-fchip span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.sa-fchip{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 8px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:inherit;font-family:inherit;cursor:pointer;transition:background .15s,border-color .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.sa-fchip:active{transform:scale(.97)}
+.sa-fchip.all{--c:var(--accent);--t:rgba(37,99,235,.09)}
+.sa-fchip.crit{--c:var(--red);--t:rgba(220,38,38,.09)}
+.sa-fchip.re{--c:var(--amber);--t:rgba(180,83,9,.09)}
+.sa-fchip b{font:700 14px 'JetBrains Mono',monospace;color:var(--c);line-height:1}
+.sa-fchip span{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.sa-fchip.sel{background:var(--t);border-color:var(--c)}
+.sa-fchip.sel span{color:var(--c)}
 .notif-row.sa-nrow{cursor:pointer}
 .sa-nrow.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.04)}
 .sa-nrow.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.06)}
@@ -2188,6 +2193,27 @@ body.loading .upload-zone { opacity: 0.45; }
 .sa-nrow .sa-mini{margin:0 0 8px}
 .sa-nft{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted)}
 .sa-nft b{font-family:'JetBrains Mono',monospace;color:var(--text)}
+
+/* alert row: call / mail / edit */
+.sapline{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.sapline .sa-nsap{margin-bottom:0;min-width:0}
+.rc{display:flex;gap:6px;flex-shrink:0}
+.ct-ic{position:relative;width:26px;height:26px;border-radius:7px;border:1px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;padding:0;text-decoration:none;color:#94a3b8;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ct-ic svg{width:13px;height:13px}
+.ct-ic::before{content:'';position:absolute;inset:-7px -3px}
+.ct-ic.call.on{color:var(--green);border:1px solid rgba(5,150,105,.35);background:rgba(5,150,105,.08)}
+.ct-ic.mail.on{color:var(--accent);border:1px solid rgba(37,99,235,.3);background:rgba(37,99,235,.07)}
+.ct-ic.ed{border:1px solid var(--border);color:var(--muted);background:var(--surface)}
+.ct-ic:active{transform:scale(.9)}
+.ct-form{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);cursor:default}
+.ct-err{font-size:12px;color:var(--red);font-weight:600;min-height:14px;margin-bottom:6px}
+/* status + order capsule */
+.sa-cap{display:flex;align-items:stretch;height:24px;border-radius:20px;overflow:hidden;flex-shrink:0;white-space:nowrap;border:1px solid var(--cb)}
+.sa-cap.crit{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
+.sa-cap.re{--cb:rgba(180,83,9,.4);--ct:rgba(180,83,9,.12);--cc:var(--amber)}
+.sa-cap .s{display:flex;align-items:center;padding:0 9px;background:var(--ct);color:var(--cc);font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.sa-cap .o{display:flex;align-items:center;gap:5px;padding:0 9px;background:var(--surface);color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.sa-cap .o b{font:700 12px 'JetBrains Mono',monospace;color:var(--cc);letter-spacing:0}
 </style>
 </head>
 
@@ -2932,6 +2958,7 @@ function saveAlertLevels() {
   const a = g('alMin'), b = g('alRe'), c = g('alMax'), err = document.getElementById('alErr');
   if (a === '' || b === '' || c === '') { err.textContent = 'Fill all three levels'; return; }
   const mn = +a, re = +b, mx = +c;
+  if (mx < 1) { err.textContent = 'Max must be at least 1'; return; }
   if (isNaN(mn) || isNaN(re) || isNaN(mx) || mn < 0 || mn > re || re > mx || mx < 1) { err.textContent = 'Keep Min ≤ Reorder ≤ Max'; return; }
   const sap = String(currentItem.sap).trim();
   const was = levelsMap[sap];
@@ -2989,25 +3016,108 @@ function loadLevels() {
     .catch(() => {});
 }
 
-function setAlertFilter(f) { alertFilter = f; renderAlertList(); }
+function setAlertFilter(f) { alertFilter = f; ctFormSap = null; renderAlertList(); }
+
+
+// ─── Alert row contacts (call / mail / edit) ───
+const CT_KEY = 'itemContacts';
+let ctMap = {};
+try { ctMap = JSON.parse(localStorage.getItem(CT_KEY)) || {}; } catch (e) { ctMap = {}; }
+let ctFormSap = null;
+const CT_SVG = {
+  call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 13"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'
+};
+function ctSave() { try { localStorage.setItem(CT_KEY, JSON.stringify(ctMap)); } catch (e) {} }
+function ctTel(m) {
+  const d = String(m || '').replace(/[^\d+]/g, '');
+  return d.replace(/\D/g, '').length >= 8 ? 'tel:' + d : '';
+}
+function ctMailHref(i, email) {
+  const l = lvOf(i), q = lvStockNum(i), need = l ? Math.max(0, l.max - q) : 0;
+  return 'mailto:' + email +
+    '?subject=' + encodeURIComponent('Stock Alert: ' + i.name) +
+    '&body=' + encodeURIComponent(i.name + '\r\nStock ' + q + ' | Order ' + need);
+}
+function ctIcons(i) {
+  const sap = String(i.sap).trim(), c = ctMap[sap] || {}, t = ctTel(c.mobile);
+  const stop = 'event.stopPropagation();';
+  const call = t
+    ? `<a class="ct-ic call on" href="${t}" aria-label="Call" onclick="${stop}">${CT_SVG.call}</a>`
+    : `<button type="button" class="ct-ic call" aria-label="Add mobile" onclick="${stop}ctOpen('${sap}')">${CT_SVG.call}</button>`;
+  const mail = c.email
+    ? `<a class="ct-ic mail on" href="${lmEsc(ctMailHref(i, c.email))}" aria-label="Email" onclick="${stop}">${CT_SVG.mail}</a>`
+    : `<button type="button" class="ct-ic mail" aria-label="Add email" onclick="${stop}ctOpen('${sap}')">${CT_SVG.mail}</button>`;
+  const ed = `<button type="button" class="ct-ic ed" aria-label="Edit contact" onclick="${stop}ctOpen('${sap}')">${CT_SVG.edit}</button>`;
+  return `<span class="rc">${call}${mail}${ed}</span>`;
+}
+function ctFormHTML(i) {
+  const sap = String(i.sap).trim();
+  if (ctFormSap !== sap) return '';
+  const c = ctMap[sap] || {};
+  return `<div class="ct-form" onclick="event.stopPropagation()">
+    <label class="form-label" for="ctM">Mobile</label>
+    <input class="form-input-reg" id="ctM" type="tel" inputmode="tel" value="${lmEsc(c.mobile)}" placeholder="+91 98765 43210" autocomplete="off">
+    <label class="form-label" for="ctE">Email</label>
+    <input class="form-input-reg" id="ctE" type="email" inputmode="email" value="${lmEsc(c.email)}" placeholder="name@company.com" autocomplete="off" autocapitalize="off">
+    <div class="ct-err" id="ctErr"></div>
+    <div class="sa-two">
+      <button class="btn btn-ghost" onclick="ctClose()">Cancel</button>
+      ${(c.mobile || c.email) ? `<button class="btn btn-ghost sa-del" onclick="ctDel('${sap}')">🗑️</button>` : ''}
+      <button class="btn btn-success" style="flex:2" onclick="ctSaveForm('${sap}')">💾 Save</button>
+    </div></div>`;
+}
+function ctOpen(sap) {
+  ctFormSap = sap;
+  renderAlertList();
+  setTimeout(() => {
+    const c = ctMap[sap] || {};
+    const x = document.getElementById(c.mobile && !c.email ? 'ctE' : 'ctM');
+    if (x) x.focus();
+  }, 60);
+}
+function ctClose() { ctFormSap = null; renderAlertList(); }
+function ctSaveForm(sap) {
+  const m = document.getElementById('ctM').value.trim();
+  const e = document.getElementById('ctE').value.trim();
+  const er = document.getElementById('ctErr');
+  if (!m && !e) { er.textContent = 'Enter a mobile number or an email'; return; }
+  if (m && m.replace(/\D/g, '').length < 8) { er.textContent = 'Mobile number looks invalid'; return; }
+  if (e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { er.textContent = 'Email looks invalid'; return; }
+  ctMap[sap] = { mobile: m, email: e };
+  ctSave();
+  ctFormSap = null;
+  renderAlertList();
+  showToast('Contact saved ✓', 'green');
+}
+function ctDel(sap) {
+  delete ctMap[sap];
+  ctSave();
+  ctFormSap = null;
+  renderAlertList();
+  showToast('Contact removed', 'green');
+}
 
 function renderAlertList() {
+  if (ctFormSap && document.getElementById('ctM')) return;   // do not wipe the open contact form
   const all = getStockAlertItems();
   const crit = all.filter(i => lvState(i).k === 'crit').length, re = all.length - crit;
   document.getElementById('notifCountBadge').textContent = all.length;
   document.getElementById('notifSub').textContent = all.length ? 'Items at or below reorder level' : 'All items are well stocked 🎉';
-  const chip = (k, n, l, c) => `<button type="button" class="sa-fchip${alertFilter === k ? ' sel' : ''}" style="${alertFilter === k ? 'border-color:' + c : ''}" onclick="setAlertFilter('${k}')"><b style="color:${c}">${n}</b><span>${l}</span></button>`;
-  document.getElementById('saFilter').innerHTML = chip('all', all.length, 'All', 'var(--text)') + chip('crit', crit, 'Critical', 'var(--red)') + chip('re', re, 'Reorder', 'var(--amber)');
+    const chip = (k, n, l) => `<button type="button" class="sa-fchip ${k}${alertFilter === k ? ' sel' : ''}" onclick="setAlertFilter('${k}')"><b>${n}</b><span>${l}</span></button>`;
+  document.getElementById('saFilter').innerHTML = chip('all', all.length, 'All') + chip('crit', crit, 'Critical') + chip('re', re, 'Reorder');
   const show = all.filter(i => alertFilter === 'all' || lvState(i).k === alertFilter);
   const list = document.getElementById('notifList');
   if (!show.length) { list.innerHTML = `<div class="notif-empty">✅ No stock alerts</div>`; return; }
   list.innerHTML = show.map(i => {
     const l = lvOf(i), s = lvState(i), q = lvStockNum(i);
     return `<div class="notif-row sa-nrow ${s.k}" onclick="openAlertItem(${i.sn})">
-      <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><span class="sa-chip ${s.k}">${s.label}</span></div>
-      <div class="sa-nsap">${lmEsc(i.sap)}${i.location ? ' · 📍 ' + lmEsc(i.location) : ''}</div>
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><div class="sa-cap ${s.k}"><span class="s">${s.label}</span><span class="o">Order <b>${Math.max(0, l.max - q)}</b></span></div></div>
+            <div class="sapline"><div class="sa-nsap">${lmEsc(i.sap)}${i.location ? ' · 📍 ' + lmEsc(i.location) : ''}</div></div>
       ${lvBarHTML(i)}
-      <div class="sa-nft"><span>Stock <b>${q}</b> · Min <b>${l.min}</b> · Reorder <b>${l.reorder}</b></span><span>Order <b style="color:var(--red)">${Math.max(0, l.max - q)}</b></span></div>
+            <div class="sa-nft"><span>Stock <b>${q}</b> · Min <b>${l.min}</b> · Reorder <b>${l.reorder}</b></span>${ctIcons(i)}</div>
+      ${ctFormHTML(i)}
     </div>`;
   }).join('');
 }
@@ -3077,6 +3187,7 @@ function downloadActiveNotifTab() {
 
 function switchNotifTab(tab) {
   activeNotifTab = tab;
+  ctFormSap = null;
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
   document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
   document.getElementById('notifTabAlert').classList.toggle('active', tab === 'alert');
