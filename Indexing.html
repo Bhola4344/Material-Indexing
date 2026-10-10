@@ -1985,8 +1985,9 @@ body.loading .header-stripe::before {
   display: block;
 }
 /* ─── Notif Tabs & Bin List ─── */
-.notif-tabs{display:flex;gap:6px;margin:0 12px 10px;}
-.notif-tab{display:flex;align-items:center;gap:4px;height:28px;padding:0 11px;border-radius:8px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
+.notif-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 12px 10px;padding:0;overflow:visible;}
+.notif-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:46px;padding:4px 2px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap;min-width:0;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
+.notif-tab i{font-style:normal;font-size:16px;line-height:1;}
 .notif-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}.notif-tab .tab-badge{position:absolute;top:-5px;right:-5px;min-width:14px;height:14px;padding:0 3px;border-radius:20px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--red);color:#fff;border:2px solid var(--surface2);}
 .notif-tab.active .tab-badge{border-color:var(--accent);}
 .notif-tab .tab-badge.hidden{display:none;}
@@ -2221,6 +2222,47 @@ body.loading .upload-zone { opacity: 0.45; }
 .sa-cinfo div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sa-cinfo i{color:var(--muted);font-weight:500}
 .sa-ctf .form-input-reg{margin-bottom:8px}
+
+/* ─── Physical Adjust ─── */
+.info-box.ds{--c:var(--red);--bc:#F5C6C6;background:rgba(220,38,38,.07)}
+.info-box.de{--c:var(--accent);--bc:#BFD3FB;background:rgba(37,99,235,.07)}
+.notif-stock-chip{cursor:pointer}
+.notif-stock-chip.ds{background:rgba(220,38,38,.1);color:var(--red);border-color:rgba(220,38,38,.3)}
+.notif-stock-chip.de{background:rgba(37,99,235,.1);color:var(--accent);border-color:rgba(37,99,235,.3)}
+.sa-fchip.ex{--c:var(--accent);--t:rgba(37,99,235,.09)}
+.sa-cap.sh{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
+.sa-cap.ex{--cb:rgba(37,99,235,.4);--ct:rgba(37,99,235,.12);--cc:var(--accent)}
+.ph-act{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.ph-act small{font-size:10.5px;color:var(--muted)}
+.ph-act>div{display:flex;gap:6px}
+.ph-bk{position:fixed;inset:0;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:960}
+.ph-bk.open{opacity:1;pointer-events:auto}
+.ph-sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:600px;background:var(--surface);border-radius:20px 20px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px));transform:translate(-50%,105%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:961;box-shadow:0 -12px 40px rgba(15,23,42,.3)}
+.ph-sheet.open{transform:translate(-50%,0)}
+.ph-grip{width:38px;height:4px;border-radius:4px;background:var(--border);margin:0 auto 10px}
+.ph-hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}
+.ph-pn{font-size:13.5px;font-weight:600;line-height:1.35}
+.ph-ps{font:11px 'JetBrains Mono',monospace;color:var(--accent2);margin-top:2px}
+.ph-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0}
+.ph-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ph-mb{border:1.5px solid var(--border);border-radius:10px;padding:8px;text-align:center}
+.ph-mb small{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.ph-mb b{font:700 24px 'JetBrains Mono',monospace}
+.ph-mb.p{border-color:var(--c,var(--border))}.ph-mb.p b{color:var(--c,var(--text))}
+#phRng{width:100%;accent-color:var(--accent);height:30px;margin-bottom:6px}
+.ph-stp{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;margin-bottom:12px}
+.ph-stp button{height:46px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:22px;font-weight:700;cursor:pointer}
+.ph-stp button:active{background:var(--border)}
+.ph-stp input{min-width:0;text-align:center;font:700 20px 'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)}
+.ph-stp input:focus{outline:none;border-color:var(--accent)}
+.ph-res{border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;line-height:1.45;border:1.5px solid var(--c,var(--border));background:var(--surface2)}
+.ph-res strong{display:block;font-size:14px;color:var(--c,var(--text))}
+.ph-res.s{--c:var(--red)}.ph-res.e{--c:var(--accent)}.ph-res.m{--c:var(--green)}
+.ph-save{width:100%;height:48px;border:0;border-radius:12px;font:700 14px 'Inter',sans-serif;cursor:pointer;color:#fff;background:var(--c,var(--muted))}
+.ph-save:disabled{opacity:.45;cursor:not-allowed}
+.ph-save.s{--c:var(--red)}.ph-save.e{--c:var(--accent)}
+#notifPanel > *{flex-shrink:0;}
+#notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
 </style>
 </head>
 
@@ -2281,6 +2323,21 @@ body.loading .upload-zone { opacity: 0.45; }
   </div>
 </div>
 <div id="bpPrintRoot"></div>
+
+<!-- Physical Adjust Sheet -->
+<div class="ph-bk" id="phBk" onclick="closePhys()"></div>
+<div class="ph-sheet" id="phSheet">
+  <div class="ph-grip"></div>
+  <div class="ph-hd"><div><div class="ph-pn" id="phPn"></div><div class="ph-ps" id="phPs"></div></div><button class="ph-x" onclick="closePhys()">✕</button></div>
+  <div class="ph-two">
+    <div class="ph-mb"><small>System stock</small><b id="phSys"></b></div>
+    <div class="ph-mb p" id="phBox"><small>Physical found</small><b id="phVal"></b></div>
+  </div>
+  <input type="range" id="phRng" min="0" step="1" oninput="phSet(this.value)" aria-label="Physical quantity">
+  <div class="ph-stp"><button onclick="phBump(-1)" aria-label="Minus">−</button><input id="phNum" type="number" step="any" inputmode="decimal" min="0" oninput="phSet(this.value,1)" aria-label="Physical quantity"><button onclick="phBump(1)" aria-label="Plus">+</button></div>
+  <div class="ph-res m" id="phRes"></div>
+  <button class="ph-save" id="phSv" onclick="savePhys()"></button>
+</div>
 
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
@@ -2380,18 +2437,10 @@ body.loading .upload-zone { opacity: 0.45; }
       </div>
     </div>
     <div class="notif-tabs">
-      <button class="notif-tab active" id="notifTabStock" onclick="switchNotifTab('stock')">
-        📍 Location
-        <span class="tab-badge hidden" id="notifTabStockBadge">0</span>
-      </button>
-      <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')">
-        🖨️ Bin Lists
-        <span class="tab-badge hidden" id="notifTabBinBadge">0</span>
-      </button>
-      <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')">
-        🚨 Alerts
-        <span class="tab-badge hidden" id="notifTabAlertBadge">0</span>
-      </button>
+      <button class="notif-tab active" id="notifTabStock" onclick="switchNotifTab('stock')"><i>📍</i>Location<span class="tab-badge hidden" id="notifTabStockBadge">0</span></button>
+<button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')"><i>🖨️</i>Bins<span class="tab-badge hidden" id="notifTabBinBadge">0</span></button>
+<button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')"><i>🚨</i>Alerts<span class="tab-badge hidden" id="notifTabAlertBadge">0</span></button>
+<button class="notif-tab" id="notifTabPhys" onclick="switchNotifTab('phys')"><i>⚖️</i>Physical<span class="tab-badge hidden" id="notifTabPhysBadge">0</span></button>
     </div>
 <div class="sa-fch" id="saFilter" style="display:none;"></div>
         <div class="notif-search-wrap" id="notifSearchWrap">
@@ -2631,7 +2680,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbxBtyqwHSHt_GjEvgb0wx_snq1jvklIpk66qY1ct6q8waG7CNLJnmIRXSXpjmGQ95ok/exec";
+    const API = "https://script.google.com/macros/s/AKfycbzTgYUwe7Jcv_qV_k3tQTNCCVZDFur7VrZPiMJQAB543FMRnQ6ANSrB_q2yVr4lHcZu/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
 let actQ = [], actTimer = null, actBusy = false;
 try { actQ = JSON.parse(localStorage.getItem('actQueue') || '[]'); } catch (e) {}
@@ -2739,7 +2788,7 @@ window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); }
   if (stockEl) stockEl.textContent = inStock.toLocaleString();
 
 if (document.getElementById('bellBadge')) {
-  const c = getStockNoLocationItems().length + binPending.length + getStockAlertItems().length;
+  const c = getStockNoLocationItems().length + binPending.length + getStockAlertItems().length + physList.length;
   document.getElementById('bellBadge').textContent = c;
   document.getElementById('bellBadge').classList.toggle('hidden', c === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', c > 0);
@@ -3142,6 +3191,195 @@ function downloadStockAlerts() {
   showToast('Downloaded: stock_alerts.csv', "blue");
 }
 
+
+// ─── PHYSICAL ADJUST (Sheet1 untouched, sab PhysicalAdj me) ───
+const PH_KEY = 'physList';
+let physList = [];
+try { physList = JSON.parse(localStorage.getItem(PH_KEY)) || []; } catch (e) { physList = []; }
+let physOps = {}, physFilter = 'all', physSyncing = false;
+const PH = { sn: 0, sys: 0, val: 0 };
+function phEl(id) { return document.getElementById(id); }
+function phSaveLocal() { try { localStorage.setItem(PH_KEY, JSON.stringify(physList)); } catch (e) {} }
+function phEntry(sn) { return physList.find(p => String(p.sn) === String(sn)); }
+function phKind(sn) { const p = phEntry(sn); return p ? (p.phys < p.sys ? 's' : 'e') : ''; }
+function phChipCls(sn) { const k = phKind(sn); return k === 's' ? 'ds' : k === 'e' ? 'de' : ''; }
+
+// effective stock: physical entry ho to wo, warna Sheet1 ka curr_stock
+function phStock(it) { const p = phEntry(it.sn); return p ? p.phys : it.curr_stock; }
+
+function phBoxCls(it) {
+  const k = phKind(it.sn);
+  if (k) return 'info-box tap ' + (k === 's' ? 'ds' : 'de');
+  const n = parseFloat(it.curr_stock);
+  return 'info-box tap ' + (!isNaN(n) && n > 0 ? 'green' : 'red');
+}
+function phBoxInner(it) {
+  const v = phStock(it), has = v !== undefined && v !== null && String(v).trim() !== '';
+  const n = parseFloat(v), ok = has && !isNaN(n) && n > 0;
+  return `<span class="cap">Stock</span><span class="v ${ok ? '' : 'sm'}">${has ? '📊 ' + lmEsc(v) : 'No Stock'}<span class="ar">›</span></span>`;
+}
+function phPaint() {
+  const b = phEl('stockBox');
+  if (!b || !currentItem) return;
+  b.className = phBoxCls(currentItem);
+  b.innerHTML = phBoxInner(currentItem);
+}
+function phTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + ' ' +
+         d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+// server list ke upar local pending changes (120 sec tak)
+function mergePhys(rows) {
+  const now = Date.now();
+  let list = rows.map(r => ({ sn: r.sn, sap: r.sap, name: r.name, loc: r.loc, sys: r.sys, phys: r.phys, ts: r.ts }));
+  Object.keys(physOps).forEach(k => {
+    const op = physOps[k], s = list.find(x => String(x.sn) === k), exp = now - op.ts > 120000;
+    if (op.type === 'remove') {
+      if (!s || exp) delete physOps[k]; else list = list.filter(x => String(x.sn) !== k);
+    } else {
+      if ((s && s.ts >= op.ts) || exp) delete physOps[k];
+      else { list = list.filter(x => String(x.sn) !== k); list.push(op.item); }
+    }
+  });
+  return list.sort((a, b) => b.ts - a.ts);
+}
+function loadPhys() {
+  if (physSyncing) return Promise.resolve();
+  physSyncing = true;
+  return fetch(`${API}?action=getPhys`).then(r => r.json()).then(rows => {
+    if (!Array.isArray(rows)) return;
+    physList = mergePhys(rows);
+    phSaveLocal(); renderStats(); phPaint();
+    if (notifOpen) { renderTabBadges(); if (activeNotifTab === 'phys') renderPhysList(); }
+  }).catch(() => {}).finally(() => { physSyncing = false; });
+}
+
+function openPhys(sn) {
+  const it = itemMaster.find(i => String(i.sn) === String(sn));
+  if (!it) return;
+  const old = phEntry(sn), base = lvStockNum(it);   // base = Sheet1 ka system stock
+  PH.sn = it.sn; PH.sys = old ? old.sys : base;
+  const cur = old ? old.phys : base;
+  phEl('phPn').textContent = it.name;
+  phEl('phPs').textContent = it.sap;
+  phEl('phSys').textContent = PH.sys;
+  phEl('phRng').max = Math.max(10, PH.sys * 2, cur);
+  phSet(cur);
+  phEl('phBk').classList.add('open');
+  phEl('phSheet').classList.add('open');
+}
+function closePhys() {
+  phEl('phBk').classList.remove('open');
+  phEl('phSheet').classList.remove('open');
+}
+function phBump(d) { phSet(PH.val + d); }
+function phSet(v, fromInput) {
+  v = Math.max(0, Number(v) || 0); PH.val = v;
+  const rng = phEl('phRng');
+  if (v > Number(rng.max)) rng.max = v;
+  rng.value = v;
+  if (!fromInput) phEl('phNum').value = v;
+  phEl('phVal').textContent = v;
+  const d = v - PH.sys, r = phEl('phRes'), s = phEl('phSv'), pb = phEl('phBox');
+  if (d < 0) {
+    r.className = 'ph-res s';
+    r.innerHTML = `<strong>⬇ Physical Short: ${Math.abs(d)}</strong>System ${PH.sys} → physical ${v}. Sirf Physical list me save hoga.`;
+    s.className = 'ph-save s'; s.disabled = false; s.textContent = 'Save · Short ' + Math.abs(d);
+    pb.style.setProperty('--c', 'var(--red)');
+  } else if (d > 0) {
+    r.className = 'ph-res e';
+    r.innerHTML = `<strong>⬆ Physical Excess: +${d}</strong>System ${PH.sys} → physical ${v}. Sirf Physical list me save hoga.`;
+    s.className = 'ph-save e'; s.disabled = false; s.textContent = 'Save · Excess +' + d;
+    pb.style.setProperty('--c', 'var(--accent)');
+  } else {
+    r.className = 'ph-res m';
+    r.innerHTML = '<strong>✓ Matches system</strong>No difference, nothing to save.';
+    s.className = 'ph-save'; s.disabled = true; s.textContent = 'No difference';
+    pb.style.removeProperty('--c');
+  }
+}
+
+function savePhys() {
+  const it = itemMaster.find(i => String(i.sn) === String(PH.sn));
+  if (!it) return;
+  const sys = PH.sys, val = PH.val, ts = Date.now();
+  const sap = String(it.sap).trim();
+
+  physList = physList.filter(p => String(p.sn) !== String(it.sn));
+  if (val !== sys) {
+    const item = { sn: it.sn, sap, name: it.name, loc: it.location || '—', sys, phys: val, ts };
+    physList.unshift(item);
+    physOps[it.sn] = { type: 'set', ts, item };
+    binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts });
+  } else {
+    physOps[it.sn] = { type: 'remove', ts };
+    binSend({ action: 'removePhys', sn: it.sn });
+  }
+  phSaveLocal(); closePhys(); phPaint(); renderStats();
+  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
+  showToast(val < sys ? `Saved ✓ Physical Short ${sys - val}` : val > sys ? `Saved ✓ Physical Excess +${val - sys}` : 'Back to system stock — entry hata di',
+            val < sys ? 'red' : val > sys ? 'blue' : 'green');
+}
+
+function setPhysFilter(f) { physFilter = f; renderPhysList(); }
+function renderPhysList() {
+  const all = physList, sh = all.filter(p => p.phys < p.sys).length, ex = all.length - sh;
+  document.getElementById('notifCountBadge').textContent = all.length;
+  document.getElementById('notifSub').textContent = all.length ? 'Short / Excess — download and adjust in SAP' : 'No pending adjustments';
+  const chip = (k, c, n, l) => `<button type="button" class="sa-fchip ${c}${physFilter === k ? ' sel' : ''}" onclick="setPhysFilter('${k}')"><b>${n}</b><span>${l}</span></button>`;
+  document.getElementById('saFilter').innerHTML = chip('all', 'all', all.length, 'All') + chip('s', 'crit', sh, 'Short') + chip('e', 'ex', ex, 'Excess');
+  const show = all.filter(p => physFilter === 'all' || (physFilter === 's' ? p.phys < p.sys : p.phys > p.sys));
+  const list = document.getElementById('notifList');
+  if (!all.length) { list.innerHTML = '<div class="notif-empty">✅ No pending adjustments</div>'; return; }
+  const bar = `<div class="pa-bar"><div class="pa-txt">${all.length} pending</div><div class="pa-grp"><button class="pa-clr" onclick="clrAllPhys()">✓ Clear All</button></div></div>`;
+  if (!show.length) { list.innerHTML = bar + '<div class="notif-empty">Is filter me kuch nahi</div>'; return; }
+  list.innerHTML = bar + show.map(p => {
+    const s = p.phys < p.sys, d = Math.abs(p.phys - p.sys);
+    return `<div class="notif-row" id="prow-${p.sn}">
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(p.name)}</div><div class="sa-cap ${s ? 'sh' : 'ex'}"><span class="s">${s ? 'Short' : 'Excess'}</span><span class="o"><b>${s ? '−' : '+'}${d}</b></span></div></div>
+      <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(p.sap)} · 📍 ${lmEsc(p.loc)}</div>
+      <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b></span></div>
+      <div class="ph-act"><small>🕒 ${phTime(p.ts)}</small><div>
+        <button class="bin-done-btn" onclick="openPhys(${p.sn})">✎ Edit</button>
+        <button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="clrPhys(${p.sn})">✓ Clear</button>
+      </div></div></div>`;
+  }).join('');
+}
+function phAfterClear() {
+  phSaveLocal(); renderStats(); phPaint();
+  if (notifOpen) { renderTabBadges(); renderPhysList(); }
+}
+function clrPhys(sn) {
+  physList = physList.filter(p => String(p.sn) !== String(sn));
+  physOps[sn] = { type: 'remove', ts: Date.now() };
+  binSend({ action: 'removePhys', sn });
+  phAfterClear();
+  showToast('Cleared ✓', 'green');
+}
+function clrAllPhys() {
+  if (!physList.length) return;
+  physList.forEach(p => {
+    physOps[p.sn] = { type: 'remove', ts: Date.now() };
+    binSend({ action: 'removePhys', sn: p.sn });
+  });
+  physList = [];
+  phAfterClear();
+  showToast('Sab adjustments clear ✓', 'green');
+}
+function downloadPhys() {
+  if (!physList.length) { showToast('No pending physical adjustments 🎉', 'green'); return; }
+  const rows = [["SAP", "Description", "Location", "System Stock", "Physical Stock", "Difference", "Type", "Date"]];
+  physList.forEach(p => rows.push([p.sap, p.name, p.loc, p.sys, p.phys, p.phys - p.sys, p.phys < p.sys ? 'Short' : 'Excess', phTime(p.ts)]));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'physical_adjustments.csv';
+  a.click();
+  showToast('Downloaded: physical_adjustments.csv', 'blue');
+}
+
 function getStockNoLocationItems() {
   return itemMaster.filter(i => {
     const stockVal = parseFloat(i.curr_stock);
@@ -3176,8 +3414,9 @@ function downloadBinList() {
 }
 
 function downloadActiveNotifTab() {
-    if (activeNotifTab === 'stock') downloadPendingFromNotif();
+  if (activeNotifTab === 'stock') downloadPendingFromNotif();
   else if (activeNotifTab === 'alert') downloadStockAlerts();
+  else if (activeNotifTab === 'phys') downloadPhys();
   else downloadBinList();
 }
 
@@ -3187,6 +3426,7 @@ function switchNotifTab(tab) {
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
   document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
   document.getElementById('notifTabAlert').classList.toggle('active', tab === 'alert');
+  document.getElementById('notifTabPhys').classList.toggle('active', tab === 'phys');
   renderActiveNotifTab();
 }
 
@@ -3202,6 +3442,9 @@ function renderTabBadges() {
   const alertCount = getStockAlertItems().length;
   aB.textContent = alertCount;
   aB.classList.toggle('hidden', alertCount === 0);
+  const pB = document.getElementById('notifTabPhysBadge');
+  pB.textContent = physList.length;
+  pB.classList.toggle('hidden', physList.length === 0);
 }
 
 function renderActiveNotifTab() {
@@ -3218,7 +3461,7 @@ function renderActiveNotifTab() {
   iconBadge.classList.toggle('bin', isBin);
   countChip.classList.toggle('bin', isBin);
   dlBtn.classList.toggle('bin', isBin);
-  document.getElementById('saFilter').style.display = activeNotifTab === 'alert' ? 'flex' : 'none';
+  document.getElementById('saFilter').style.display = (activeNotifTab === 'alert' || activeNotifTab === 'phys') ? 'flex' : 'none';
   searchWrap.style.display = activeNotifTab === 'stock' ? '' : 'none';
 
   if (activeNotifTab === 'stock') {
@@ -3229,8 +3472,13 @@ function renderActiveNotifTab() {
   } else if (activeNotifTab === 'alert') {
     iconBadge.textContent = '🚨';
     titleText.textContent = 'STOCK ALERTS';
-    footer.textContent = 'Tap an item to open it — edit or remove its levels';
+        footer.textContent = 'Tap an item to open it — edit or remove its levels';
     renderAlertList();
+  } else if (activeNotifTab === 'phys') {
+    iconBadge.textContent = '⚖️';
+    titleText.textContent = 'PHYSICAL ADJUSTMENTS';
+    footer.textContent = 'Download the list, adjust in SAP, then tap Clear';
+    renderPhysList();
   } else {
     iconBadge.textContent = '🖨️';
     titleText.textContent = 'BIN LISTS TO UPDATE';
@@ -3421,7 +3669,7 @@ function openBinPrintAll() {
   const pages = bpAllLocs.reduce((s, l) => s + Math.max(1, Math.ceil(bpCollect(l).length / BP_ROWS)), 0);
   bpEl('bpTtl').textContent = 'ALL BIN LOCATIONS';
   bpEl('bpLoc').textContent = `${bpAllLocs.length} bins · ${pages} pages`;
-  bpEl('bpDone').textContent = `✓ Printed ho gaya (${bpAllLocs.length} bins clear)`;
+  bpEl('bpDone').textContent = `✓ Mark Printed (${bpAllLocs.length} bins)`;
   bpEl('bpDone').style.display = 'none';
   bpEl('bpQrT').checked = bpShowQR;
   bpZoomed = false;
@@ -3577,7 +3825,7 @@ function renderNotifList() {
     <div class="notif-row" id="nrow-${item.sn}">
       <div class="notif-row-top">
         <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
-        <span class="notif-stock-chip">📦 ${item.curr_stock}</span>
+        <span class="notif-stock-chip ${phChipCls(item.sn)}" onclick="openPhys(${item.sn})">📦 ${phStock(item)} ✎</span>
       </div>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
         <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2);">${highlightNotif(item.sap, notifSearchQuery)}</span>
@@ -4147,7 +4395,7 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
           ${hasLoc
             ? `<div class="info-box green tap" id="locBox" onclick="openLocModal()"><span class="cap">Location</span><span class="v ${String(currentItem.location).length > 12 ? 'sm' : ''}">📍 ${lmEsc(currentItem.location)}<span class="ar">›</span></span></div>`
             : `<div class="info-box red" id="locBox"><span class="cap">Location</span><span class="v sm">❌ Not Assigned</span></div>`}
-          <div class="info-box ${stockOk ? 'green' : 'red'}"><span class="cap">Stock</span><span class="v ${stockOk ? '' : 'sm'}">${hasStock ? '📊 ' + currentItem.curr_stock : 'No Stock'}</span></div>
+            <div class="${phBoxCls(currentItem)}" id="stockBox" onclick="openPhys(${currentItem.sn})">${phBoxInner(currentItem)}</div>
         </div>
         <div class="actions-row">
           <button class="btn btn-primary" onclick="showUpdateForm()">✏️ <span class="btn-full-text">Update Location</span><span class="btn-short-text">Update</span></button>
@@ -5402,6 +5650,7 @@ window.addEventListener('pageshow', e => {
     }
     loadItems();
     loadLevels();
+    loadPhys();
 
     // ─── Silent Background Refresh (cross-device sync) ───
     let silentRefreshInFlight = false;
@@ -5410,6 +5659,7 @@ window.addEventListener('pageshow', e => {
       if (silentRefreshInFlight || document.visibilityState !== 'visible') return;
       silentRefreshInFlight = true;
       if (++lvTick % 2 === 0) loadLevels();
+      loadPhys();
       syncBin();
 
       const prevPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
@@ -5531,7 +5781,8 @@ const WRAP = {
   handleDownload:'dl', handleUpload:'enrich', handleStockUpload:'stock',
   openBinPrint:'binprint', openBinPrintAll:'binprint',
   markBinDone:'binprint', clearPrintedBins:'binprint',
-  addToolLink:'tools', deleteToolLink:'tools', toggleAddForm:'tools'
+  addToolLink:'tools', deleteToolLink:'tools', toggleAddForm:'tools',
+  openPhys:'loc', savePhys:'loc', clrPhys:'loc', clrAllPhys:'loc'
 };
 Object.entries(WRAP).forEach(([fn, perm]) => {
   const orig = window[fn];
@@ -5571,7 +5822,7 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
   const gear = document.createElement('button');
   gear.id = 'adminBtn';
   gear.setAttribute('aria-label', 'Admin control');
-  gear.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    gear.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>';
   gear.onclick = openAdmin;
   document.querySelector('.user-area').prepend(gear);
 }
