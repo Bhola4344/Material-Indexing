@@ -360,7 +360,7 @@ tbody tr:last-child td{border-bottom:none}
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') throw new Error('Not admin');
 const API="https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
-const ITEMS_API="https://script.google.com/macros/s/AKfycbxBtyqwHSHt_GjEvgb0wx_snq1jvklIpk66qY1ct6q8waG7CNLJnmIRXSXpjmGQ95ok/exec";
+const ITEMS_API="https://script.google.com/macros/s/AKfycbzTgYUwe7Jcv_qV_k3tQTNCCVZDFur7VrZPiMJQAB543FMRnQ6ANSrB_q2yVr4lHcZu/exec";
 const PERMS=[['view','View items and stock'],['scan','Scan SAP / location'],['loc','Update location'],['add','Add new item'],['stock','Stock upload'],['enrich','Upload and Enrich'],['dl','Download CSV'],['binview','View bin lists'],['binprint','Print / clear bin lists'],['tools','Edit Quick Tools'],['admin','Open Admin Control']];
 const ALLP=PERMS.map(p=>p[0]),PN=Object.fromEntries(PERMS);
 const ROLES=[{id:'admin',n:'Admin',s:'Admin',d:'Full control, manages users'},{id:'editor',n:'Editor',s:'Editor',d:'Locations, items, bin lists'},{id:'stock',n:'Stock Keeper',s:'Stock',d:'Uploads stock, downloads'},{id:'viewer',n:'Read only',s:'Read',d:'Search and view only'}];
