@@ -1753,24 +1753,25 @@ body.loading .header-stripe::before {
 
 #notifPanel {
   position: fixed; width: 100%; max-width: 600px;
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--surface); border: 1px solid var(--border);
-  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.2); z-index: 500;
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.25); z-index: 500;
   opacity: 0; overflow: hidden;
   display: flex; flex-direction: column;
   max-height: 0;
-  transform: translateY(-8px) scale(0.97); transform-origin: top right;
+  transform: translateY(-10px) scale(0.98); transform-origin: top center;
   transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, transform 0.24s cubic-bezier(0.4,0,0.2,1);
   pointer-events: none;
 }
 #notifPanel.open {
-  max-height: 80vh;
+  max-height: 100vh;
+  height: var(--np-h, 80vh);
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
-.notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 13px; flex-shrink: 0; }
+.notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 18px; flex-shrink: 0; }
 .notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px; }
 .notif-list::-webkit-scrollbar { width: 4px; }
 .notif-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -1790,7 +1791,7 @@ body.loading .header-stripe::before {
 .notif-save-btn.saved { background: var(--green); }
 .notif-empty { padding: 34px 16px; text-align: center; color: var(--muted); font-size: 12.5px; }
 .notif-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); text-align: center; background: var(--surface2); }
-#notifBackdrop { display: none; position: fixed; inset: 0; background: transparent; z-index: 490; }
+#notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.35); z-index: 490; }
 #notifBackdrop.open { display: block; }
 
 .notif-photo-btn {
@@ -2232,7 +2233,7 @@ body.loading .upload-zone { opacity: 0.45; }
 </head>
 
 <body class="loading">
-<div id="notifBackdrop"></div>
+<div id="notifBackdrop" onclick="closeNotif()"></div>
 
   <!-- Toast -->
   <div id="toastEl">
@@ -2706,13 +2707,13 @@ function itemsEqual(a, b) {
 
 function positionNotifPanel() {
   const shell = document.querySelector('.app-shell');
-  const btn = document.getElementById('bellBtn');
   const panel = document.getElementById('notifPanel');
   const shellRect = shell.getBoundingClientRect();
-  const btnRect = btn.getBoundingClientRect();
+  const top = Math.max(10, shellRect.top);
   panel.style.width = shellRect.width + 'px';
   panel.style.left = shellRect.left + 'px';
-  panel.style.top = (btnRect.bottom + 8) + 'px';
+  panel.style.top = top + 'px';
+  panel.style.setProperty('--np-h', (window.innerHeight - top - 10) + 'px');
 }
 
 window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); });
@@ -3753,6 +3754,8 @@ function highlightNotif(text, q) {
 
 function renderNotifList() {
   const myToken = ++notifRenderToken;
+  const list = document.getElementById('notifList');
+  const savedScroll = list.scrollTop;
   buildNotifHighlightRe(notifSearchQuery);
   const allItems = getStockNoLocationItems();
   const totalCount = allItems.length;
@@ -3767,7 +3770,6 @@ function renderNotifList() {
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
     : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
 
-  const list = document.getElementById('notifList');
   if (totalCount === 0) {
     list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
     return;
@@ -3811,14 +3813,28 @@ function renderNotifList() {
 
   const FIRST = 12, CHUNK = 25;
   list.innerHTML = items.slice(0, FIRST).map(rowHTML).join('');
+  list.scrollTop = savedScroll;
   let idx = FIRST;
   const addMore = () => {
     if (myToken !== notifRenderToken || idx >= items.length) return;
     list.insertAdjacentHTML('beforeend', items.slice(idx, idx + CHUNK).map(rowHTML).join(''));
+    if (idx === FIRST) list.scrollTop = savedScroll;
     idx += CHUNK;
     requestAnimationFrame(addMore);
   };
   requestAnimationFrame(addMore);
+}
+
+function updateNotifStockHeader() {
+  const total = getStockNoLocationItems().length;
+  const list = document.getElementById('notifList');
+  document.getElementById('notifCountBadge').textContent = total;
+  document.getElementById('notifSub').textContent = notifSearchQuery
+    ? `Showing ${list.querySelectorAll('.notif-row').length} of ${total} matching "${notifSearchQuery}"`
+    : (total === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
+  if (total === 0) {
+    list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
+  }
 }
 
 function saveNotifItem(sn) {
@@ -3842,9 +3858,13 @@ function saveNotifItem(sn) {
   fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
     .catch(() => showToast("Server sync failed", "red"));
 
-  setTimeout(() => {
+    setTimeout(() => {
     row.classList.add('done');
-    setTimeout(() => { renderTabBadges(); renderActiveNotifTab(); }, 380);
+    setTimeout(() => {
+      row.remove();
+      renderTabBadges();
+      updateNotifStockHeader();
+    }, 380);
   }, 380);
 }
 
