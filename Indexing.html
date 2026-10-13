@@ -2224,6 +2224,9 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-save:disabled{opacity:.45;cursor:not-allowed}
 .ph-save.s{--c:var(--red)}.ph-save.e{--c:var(--accent)}
 #notifPanel > *{flex-shrink:0;}
+.ph-rem{width:100%;border:2px solid var(--border);border-radius:10px;padding:10px 12px;font:500 14px 'Inter',sans-serif;background:var(--surface);color:var(--text);outline:none;margin-bottom:12px;-webkit-appearance:none}
+.ph-rem:focus{border-color:var(--accent)}
+.ph-remtxt{font-size:11.5px;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 9px;margin:6px 0 2px;line-height:1.4;word-break:break-word}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
 </style>
 </head>
@@ -2297,6 +2300,7 @@ body.loading .upload-zone { opacity: 0.45; }
   </div>
   <input type="range" id="phRng" min="0" step="1" oninput="phSet(this.value)" aria-label="Physical quantity">
   <div class="ph-stp"><button onclick="phBump(-1)" aria-label="Minus">−</button><input id="phNum" type="number" step="any" inputmode="decimal" min="0" oninput="phSet(this.value,1)" aria-label="Physical quantity"><button onclick="phBump(1)" aria-label="Plus">+</button></div>
+  <input class="ph-rem" id="phRem" type="text" maxlength="200" placeholder="Remark (optional)" autocomplete="off">
   <div class="ph-res m" id="phRes"></div>
   <button class="ph-save" id="phSv" onclick="savePhys()"></button>
 </div>
@@ -2641,7 +2645,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbzTgYUwe7Jcv_qV_k3tQTNCCVZDFur7VrZPiMJQAB543FMRnQ6ANSrB_q2yVr4lHcZu/exec";
+    const API = "https://script.google.com/macros/s/AKfycbyOgSTo91fvUBu2tFIlGpg2Ma89-APG2sarLq64LdiKGK0r3xe56T34weahvAyoUTGX/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
 let actQ = [], actTimer = null, actBusy = false;
 try { actQ = JSON.parse(localStorage.getItem('actQueue') || '[]'); } catch (e) {}
@@ -2932,7 +2936,7 @@ function renderAlertBox() {
 
     if (alFormOpen) {
     const v = l || { min: '', reorder: '', max: '' };
-    const c = ctMap[String(it.sap).trim()] || {};
+    const c = l || {};
     const f = (id, lb, val) => `<div><label for="${id}">${lb}</label><input id="${id}" type="number" inputmode="numeric" min="0" value="${val}"></div>`;
     body = `<div class="sa-bin"><div class="sa-f3">${f('alMin', 'Min', v.min)}${f('alRe', 'Reorder', v.reorder)}${f('alMax', 'Max', v.max)}</div>
       <div class="clbl">👤 Pur./Vend. Contact</div>
@@ -2950,7 +2954,7 @@ function renderAlertBox() {
   } else if (l) {
     const need = Math.max(0, l.max - q);
     const needTxt = (s.k === 'crit' || s.k === 're') ? `<b style="color:var(--red)">${need}</b>` : `<b style="color:var(--muted)">—</b>`;
-    const sapK = String(it.sap).trim(), c = ctMap[sapK] || {}, t = ctTel(c.mobile);
+    const c = l, t = ctTel(c.mobile);
     body = `<div class="sa-bin">
       <div class="sa-lv"><div class="a"><small>Min</small><b>${l.min}</b></div><div class="b"><small>Reorder</small><b>${l.reorder}</b></div><div class="c"><small>Max</small><b>${l.max}</b></div></div>
       <div class="sa-order"><span>Qty to order</span>${needTxt}</div>
@@ -2984,7 +2988,7 @@ function pushLevels(sap, lv) {
   levelsMap[sap] = lv;
   pendingLevels[sap] = { op: 'set', ts: lv.ts };
   saveLevelsCache();
-  binSend({ action: 'setLevels', sap, min: lv.min, reorder: lv.reorder, max: lv.max, off: lv.off ? '1' : '0', by: userName, ts: lv.ts });
+  binSend({ action: 'setLevels', sap, min: lv.min, reorder: lv.reorder, max: lv.max, off: lv.off ? '1' : '0', mobile: lv.mobile || '', email: lv.email || '', by: userName, ts: lv.ts });
 }
 function afterLevelsChange() { renderAlertBox(); renderStats(); }
 
@@ -3002,11 +3006,8 @@ function saveAlertLevels() {
   if (eml && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eml)) { err.textContent = 'Email looks invalid'; return; }
 
   const sap = String(currentItem.sap).trim();
-  if (mob || eml) ctMap[sap] = { mobile: mob, email: eml }; else delete ctMap[sap];
-  ctSave();
-
   const was = levelsMap[sap];
-  pushLevels(sap, { min: mn, reorder: re, max: mx, off: was ? !!was.off : false, ts: Date.now() });
+  pushLevels(sap, { min: mn, reorder: re, max: mx, off: was ? !!was.off : false, mobile: mob, email: eml, ts: Date.now() });
   alFormOpen = false;
   afterLevelsChange();
   const s = lvState(currentItem);
@@ -3018,7 +3019,7 @@ function toggleAlertOff() {
   if (!currentItem) return;
   const sap = String(currentItem.sap).trim(), l = levelsMap[sap];
   if (!l) return;
-  pushLevels(sap, { min: l.min, reorder: l.reorder, max: l.max, off: !l.off, ts: Date.now() });
+  pushLevels(sap, { min: l.min, reorder: l.reorder, max: l.max, off: !l.off, mobile: l.mobile, email: l.email, ts: Date.now() });
   afterLevelsChange();
   showToast(!l.off ? 'Stock alert OFF — alerts paused for this item' : 'Stock alert ON — alerts active', !l.off ? 'amber' : 'green');
 }
@@ -3027,7 +3028,6 @@ function removeAlertLevels() {
   if (!currentItem) return;
   const sap = String(currentItem.sap).trim();
   delete levelsMap[sap];
-  delete ctMap[sap]; ctSave();
   pendingLevels[sap] = { op: 'remove', ts: Date.now() };
   saveLevelsCache();
   binSend({ action: 'removeLevels', sap });
@@ -3042,7 +3042,7 @@ function loadLevels() {
     .then(rows => {
       if (!Array.isArray(rows)) return;
       const map = {};
-      rows.forEach(r => { map[r.sap] = { min: r.min, reorder: r.reorder, max: r.max, off: !!r.off, ts: r.ts }; });
+      rows.forEach(r => { map[r.sap] = { min: r.min, reorder: r.reorder, max: r.max, off: !!r.off, ts: r.ts, mobile: r.mobile || '', email: r.email || '' }; });
       const now = Date.now();
       Object.keys(pendingLevels).forEach(sap => {
         const p = pendingLevels[sap], s = map[sap], expired = now - p.ts > 120000;
@@ -3065,14 +3065,10 @@ function loadLevels() {
 
 
 // ─── Alert row contacts (call / mail / edit) ───
-const CT_KEY = 'itemContacts';
-let ctMap = {};
-try { ctMap = JSON.parse(localStorage.getItem(CT_KEY)) || {}; } catch (e) { ctMap = {}; }
 const CT_SVG = {
   call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>',
   mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 13"/></svg>',
 };
-function ctSave() { try { localStorage.setItem(CT_KEY, JSON.stringify(ctMap)); } catch (e) {} }
 function ctTel(m) {
   const d = String(m || '').replace(/[^\d+]/g, '');
   return d.replace(/\D/g, '').length >= 8 ? 'tel:' + d : '';
@@ -3093,7 +3089,7 @@ function ctGoEdit(sn) {
   openAlertForm();
 }
 function ctIcons(i) {
-  const sap = String(i.sap).trim(), c = ctMap[sap] || {}, t = ctTel(c.mobile);
+  const c = lvOf(i) || {}, t = ctTel(c.mobile);
   const stop = 'event.stopPropagation();';
   const call = t
     ? `<a class="ct-ic call on" href="${t}" aria-label="Call" onclick="${stop}">${CT_SVG.call}</a>`
@@ -3191,7 +3187,7 @@ function phTime(ts) {
 // server list ke upar local pending changes (120 sec tak)
 function mergePhys(rows) {
   const now = Date.now();
-  let list = rows.map(r => ({ sn: r.sn, sap: r.sap, name: r.name, loc: r.loc, sys: r.sys, phys: r.phys, ts: r.ts }));
+  let list = rows.map(r => ({ sn: r.sn, sap: r.sap, name: r.name, loc: r.loc, sys: r.sys, phys: r.phys, ts: r.ts, remark: r.remark || '' }));
   Object.keys(physOps).forEach(k => {
     const op = physOps[k], s = list.find(x => String(x.sn) === k), exp = now - op.ts > 120000;
     if (op.type === 'remove') {
@@ -3224,6 +3220,7 @@ function openPhys(sn) {
   phEl('phPs').textContent = it.sap;
   phEl('phSys').textContent = PH.sys;
   phEl('phRng').max = Math.max(10, PH.sys * 2, cur);
+  phEl('phRem').value = old ? (old.remark || '') : '';
   phSet(cur);
   phEl('phBk').classList.add('open');
   phEl('phSheet').classList.add('open');
@@ -3264,13 +3261,14 @@ function savePhys() {
   if (!it) return;
   const sys = PH.sys, val = PH.val, ts = Date.now();
   const sap = String(it.sap).trim();
+  const remark = (phEl('phRem').value || '').trim().slice(0, 200);
 
   physList = physList.filter(p => String(p.sn) !== String(it.sn));
   if (val !== sys) {
-    const item = { sn: it.sn, sap, name: it.name, loc: it.location || '—', sys, phys: val, ts };
+    const item = { sn: it.sn, sap, name: it.name, loc: it.location || '—', sys, phys: val, ts, remark };
     physList.unshift(item);
     physOps[it.sn] = { type: 'set', ts, item };
-    binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts });
+    binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts, remark });
   } else {
     physOps[it.sn] = { type: 'remove', ts };
     binSend({ action: 'removePhys', sn: it.sn });
@@ -3299,6 +3297,7 @@ function renderPhysList() {
       <div class="notif-row-top"><div class="notif-name">${lmEsc(p.name)}</div><div class="sa-cap ${s ? 'sh' : 'ex'}"><span class="s">${s ? 'Short' : 'Excess'}</span><span class="o"><b>${s ? '−' : '+'}${d}</b></span></div></div>
       <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(p.sap)} · 📍 ${lmEsc(p.loc)}</div>
       <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b></span></div>
+      ${p.remark ? `<div class="ph-remtxt">💬 ${lmEsc(p.remark)}</div>` : ''}
       <div class="ph-act"><small>🕒 ${phTime(p.ts)}</small><div>
         <button class="bin-done-btn" onclick="openPhys(${p.sn})">✎ Edit</button>
         <button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="clrPhys(${p.sn})">✓ Clear</button>
@@ -3328,8 +3327,8 @@ function clrAllPhys() {
 }
 function downloadPhys() {
   if (!physList.length) { showToast('No pending physical adjustments 🎉', 'green'); return; }
-  const rows = [["SAP", "Description", "Location", "System Stock", "Physical Stock", "Difference", "Type", "Date"]];
-  physList.forEach(p => rows.push([p.sap, p.name, p.loc, p.sys, p.phys, p.phys - p.sys, p.phys < p.sys ? 'Short' : 'Excess', phTime(p.ts)]));
+    const rows = [["SAP", "Description", "Location", "System Stock", "Physical Stock", "Difference", "Type", "Date", "Remark"]];
+  physList.forEach(p => rows.push([p.sap, p.name, p.loc, p.sys, p.phys, p.phys - p.sys, p.phys < p.sys ? 'Short' : 'Excess', phTime(p.ts), p.remark || '']));
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
@@ -4367,8 +4366,12 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
       renderAlertBox();
     }
 
-    function showAddItemForm(prefill) {
+      function showAddItemForm(prefill) {
       addItemMode = true;
+      const pf = String(prefill || '').trim();
+      const isSapPrefill = /^\d+$/.test(pf);          // sirf digits = SAP code
+      const sapPrefill = isSapPrefill ? padSAP(pf) : '';
+      const namePrefill = isSapPrefill ? '' : pf.toUpperCase();
 
       const card = document.getElementById('itemCard');
       card.classList.remove('reveal');
@@ -4380,11 +4383,11 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
           <h3>Add New Item to Sheet</h3>
         </div>
         <label class="form-label">SAP Code <span style="color:var(--red)">*</span></label>
-        <input class="form-input" id="newSap" placeholder="e.g. 1000001234"
-               inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false">
+        <input class="form-input" id="newSap" value="${lmEsc(sapPrefill)}" placeholder="e.g. 1000001234"
+        inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false">
 
         <label class="form-label">Description <span style="color:var(--red)">*</span></label>
-        <input class="form-input-reg" id="newName" value="${prefill ? prefill.toUpperCase() : ''}"
+        <input class="form-input-reg" id="newName" value="${lmEsc(namePrefill)}"
                placeholder="Item description" autocomplete="off" autocorrect="off" spellcheck="false"
                autocapitalize="characters">
 
@@ -4404,9 +4407,9 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
       document.getElementById('aiPanelWrapper').style.display = 'none';
       revealContent();
 
-      setTimeout(() => {
-        const sapInp = document.getElementById('newSap');
-        if (sapInp) sapInp.focus();
+       setTimeout(() => {
+        const target = document.getElementById(isSapPrefill ? 'newName' : 'newSap');
+        if (target) target.focus();
         card.scrollIntoView({behavior: 'smooth', block: 'start'});
       }, 100);
     }
