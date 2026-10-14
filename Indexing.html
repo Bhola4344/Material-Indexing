@@ -5043,6 +5043,7 @@ function openScanner(targetId) {
 }
 
 function closeScanner() {
+  closeScannerSettings();
   document.body.style.overflow = '';
   document.documentElement.style.overflow = '';
   document.getElementById('scannerOverlay').classList.remove('open');
@@ -5159,6 +5160,11 @@ function onScanZoomInput(v) {
   if (html5QrCode) html5QrCode.applyVideoConstraints(advExtras(torchOn)).catch(() => {});
 }
 
+function closeScannerSettings() {
+  document.getElementById('scannerSettingsPopover').classList.remove('open');
+  document.getElementById('scannerSettingsBtn').classList.remove('active');
+}
+
 function toggleScannerSettings() {
   const pop = document.getElementById('scannerSettingsPopover');
   const btn = document.getElementById('scannerSettingsBtn');
@@ -5166,6 +5172,14 @@ function toggleScannerSettings() {
   pop.classList.toggle('open', willOpen);
   btn.classList.toggle('active', willOpen);
 }
+
+// tap anywhere outside the settings popover closes it
+document.addEventListener('pointerdown', e => {
+  const pop = document.getElementById('scannerSettingsPopover');
+  if (!pop.classList.contains('open')) return;
+  if (e.target.closest('#scannerSettingsPopover, #scannerSettingsBtn')) return;
+  closeScannerSettings();
+});
 
 function resetAdaptiveScan() {
   scanZoom = 1;
