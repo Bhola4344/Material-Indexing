@@ -1751,26 +1751,6 @@ body.loading .header-stripe::before {
 }
 .bell-badge.hidden { display: none; }
 
-#notifPanel {
-  position: fixed; width: 100%; max-width: 600px;
-  border-radius: 14px;
-  background: var(--surface); border: 1px solid var(--border);
-  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.25); z-index: 500;
-  opacity: 0; overflow: hidden;
-  display: flex; flex-direction: column;
-  max-height: 0;
-  transform: translateY(-10px) scale(0.98); transform-origin: top center;
-  transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease, transform 0.24s cubic-bezier(0.4,0,0.2,1);
-  pointer-events: none;
-}
-#notifPanel.open {
-  max-height: 100vh;
-  height: var(--np-h, 80vh);
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
 .notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 18px; flex-shrink: 0; }
 .notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px; }
 .notif-list::-webkit-scrollbar { width: 4px; }
@@ -2229,6 +2209,35 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-rem:focus{border-color:var(--accent)}
 .ph-remtxt{font-size:11.5px;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 9px;margin:6px 0 2px;line-height:1.4;word-break:break-word}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
+#notifPanel {
+  position: fixed; width: 100%; max-width: 600px;
+  border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.25); z-index: 500;
+  display: flex; flex-direction: column; overflow: hidden;
+  height: var(--np-h, 80vh);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(-12px) scale(0.98); transform-origin: top center;
+  transition: opacity .2s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s linear .26s;
+  will-change: transform, opacity;
+}
+#notifPanel.open {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: none;
+  transition: opacity .2s ease, transform .26s cubic-bezier(.4,0,.2,1), visibility 0s;
+}
+.notif-list { overscroll-behavior: contain; touch-action: pan-y; }
+
+/* sliding pill */
+.notif-tabs { position: relative; --i: 0; }
+.notif-pill {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: calc((100% - 18px) / 4); border-radius: 10px;
+  background: var(--accent); pointer-events: none;
+  transform: translateX(calc(var(--i) * (100% + 6px)));
+  transition: transform .36s cubic-bezier(.34, 1.3, .64, 1);
+}
+.notif-tab { z-index: 1; transition: color .25s; }
+.notif-tab.active { background: transparent; color: #fff; border-color: transparent; }
 </style>
 </head>
 
@@ -2404,6 +2413,7 @@ body.loading .upload-zone { opacity: 0.45; }
       </div>
     </div>
     <div class="notif-tabs">
+<span class="notif-pill"></span>
       <button class="notif-tab active" id="notifTabStock" onclick="switchNotifTab('stock')"><i>📍</i>Location<span class="tab-badge hidden" id="notifTabStockBadge">0</span></button>
 <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')"><i>🖨️</i>Bins<span class="tab-badge hidden" id="notifTabBinBadge">0</span></button>
 <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')"><i>🚨</i>Alerts<span class="tab-badge hidden" id="notifTabAlertBadge">0</span></button>
@@ -3257,6 +3267,14 @@ function phSet(v, fromInput) {
   }
 }
 
+function phChipUpdate(sn) {
+  const it = itemMaster.find(i => String(i.sn) === String(sn));
+  const c = document.getElementById('nchip-' + sn);
+  if (!it || !c) return;
+  c.className = 'notif-stock-chip ' + phChipCls(sn);
+  c.textContent = '📦 ' + phStock(it) + ' ✎';
+}
+
 function savePhys() {
   const it = itemMaster.find(i => String(i.sn) === String(PH.sn));
   if (!it) return;
@@ -3275,7 +3293,11 @@ function savePhys() {
     binSend({ action: 'removePhys', sn: it.sn });
   }
   phSaveLocal(); closePhys(); phPaint(); renderStats();
-  if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
+  if (notifOpen) {
+    renderTabBadges();
+    if (activeNotifTab === 'stock') phChipUpdate(it.sn);
+    else renderActiveNotifTab();
+  }
   showToast(val < sys ? `Saved ✓ Physical Short ${sys - val}` : val > sys ? `Saved ✓ Physical Excess +${val - sys}` : 'Back to system stock — entry hata di',
             val < sys ? 'red' : val > sys ? 'blue' : 'green');
 }
@@ -3380,10 +3402,13 @@ function downloadActiveNotifTab() {
 
 function switchNotifTab(tab) {
   activeNotifTab = tab;
+  const order = ['stock', 'bin', 'alert', 'phys'];
+  document.querySelector('.notif-tabs').style.setProperty('--i', order.indexOf(tab));
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
   document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
   document.getElementById('notifTabAlert').classList.toggle('active', tab === 'alert');
   document.getElementById('notifTabPhys').classList.toggle('active', tab === 'phys');
+  document.getElementById('notifList').scrollTop = 0;
   renderActiveNotifTab();
 }
 
@@ -3695,19 +3720,19 @@ bpZoomEl.addEventListener('pointercancel', bpEndDrag);
 window.addEventListener('resize', () => { if (bpEl('bpBack').classList.contains('open')) bpFit(); });
 
 function toggleNotif() {
-  notifOpen = !notifOpen;
-  if (notifOpen) positionNotifPanel();
-  document.getElementById('notifPanel').classList.toggle('open', notifOpen);
-  document.getElementById('notifBackdrop').classList.toggle('open', notifOpen);
-  if (notifOpen) {
-    renderTabBadges();
-    requestAnimationFrame(() => setTimeout(() => {
-      if (!notifOpen) return;
-      renderActiveNotifTab();
-      syncBin();
-    }, 0));
-  }
+  if (notifOpen) { closeNotif(); return; }
+  notifOpen = true;
+  positionNotifPanel();
+  renderTabBadges();
+  renderActiveNotifTab();
+  requestAnimationFrame(() => {
+    if (!notifOpen) return;
+    document.getElementById('notifPanel').classList.add('open');
+    document.getElementById('notifBackdrop').classList.add('open');
+    setTimeout(syncBin, 450);
+  });
 }
+
 function closeNotif() {
   notifOpen = false;
   document.getElementById('notifPanel').classList.remove('open');
@@ -3783,7 +3808,7 @@ function renderNotifList() {
     <div class="notif-row" id="nrow-${item.sn}">
       <div class="notif-row-top">
         <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
-        <span class="notif-stock-chip ${phChipCls(item.sn)}" onclick="openPhys(${item.sn})">📦 ${phStock(item)} ✎</span>
+        <span class="notif-stock-chip ${phChipCls(item.sn)}" id="nchip-${item.sn}" onclick="openPhys(${item.sn})">📦 ${phStock(item)} ✎</span>
       </div>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
         <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2);">${highlightNotif(item.sap, notifSearchQuery)}</span>
@@ -3811,18 +3836,18 @@ function renderNotifList() {
     </div>
   `;
 
-  const FIRST = 12, CHUNK = 25;
+    const CHUNK = 25;
+  const FIRST = Math.max(12, Math.ceil((savedScroll + list.clientHeight) / 100) + 2);
   list.innerHTML = items.slice(0, FIRST).map(rowHTML).join('');
   list.scrollTop = savedScroll;
   let idx = FIRST;
   const addMore = () => {
     if (myToken !== notifRenderToken || idx >= items.length) return;
     list.insertAdjacentHTML('beforeend', items.slice(idx, idx + CHUNK).map(rowHTML).join(''));
-    if (idx === FIRST) list.scrollTop = savedScroll;
     idx += CHUNK;
     requestAnimationFrame(addMore);
   };
-  requestAnimationFrame(addMore);
+  setTimeout(() => requestAnimationFrame(addMore), savedScroll ? 0 : 350);
 }
 
 function updateNotifStockHeader() {
@@ -5825,6 +5850,78 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
   gear.onclick = openAdmin;
   document.querySelector('.user-area').prepend(gear);
 }
+
+// ── scroll ruka rahe (Bins / Alerts / Physical) ──
+['renderBinList', 'renderPhysList', 'renderAlertList'].forEach(n => {
+  const orig = window[n];
+  window[n] = function () {
+    const l = document.getElementById('notifList');
+    const s = l.scrollTop;
+    const r = orig.apply(this, arguments);
+    l.scrollTop = s;
+    return r;
+  };
+});
+
+// ── notification tabs: left/right swipe ──
+(function () {
+  const list = document.getElementById('notifList');
+  const ORDER = ['stock', 'bin', 'alert', 'phys'];
+  let x0 = 0, y0 = 0, dx = 0, t0 = 0, mode = null, ok = false;
+
+  list.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    x0 = t.clientX; y0 = t.clientY; dx = 0; t0 = Date.now(); mode = null;
+    ok = !e.target.closest('input,textarea,select');
+    list.style.transition = 'none';
+  }, { passive: true });
+
+  list.addEventListener('touchmove', e => {
+    if (!ok) return;
+    const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
+    if (mode === null) {
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+      mode = Math.abs(mx) > Math.abs(my) * 1.2 ? 'h' : 'v';
+    }
+    if (mode !== 'h') return;
+    dx = mx;
+    const i = ORDER.indexOf(activeNotifTab);
+    const edge = (dx > 0 && i === 0) || (dx < 0 && i === ORDER.length - 1);
+    const pull = edge ? dx * 0.25 : dx;
+    list.style.transform = 'translateX(' + pull + 'px)';
+    list.style.opacity = String(1 - Math.min(Math.abs(pull) / 600, .35));
+  }, { passive: true });
+
+  function end() {
+    if (mode !== 'h') { mode = null; return; }
+    const i = ORDER.indexOf(activeNotifTab), w = list.clientWidth || 320;
+    const dt = Math.max(Date.now() - t0, 1);
+    const go = Math.abs(dx) / dt > 0.45 || Math.abs(dx) > w * 0.25;
+    const left = dx < 0, ni = i + (left ? 1 : -1);
+    mode = null;
+    list.style.transition = 'transform .18s ease, opacity .18s ease';
+    if (go && ni >= 0 && ni < ORDER.length) {
+      list.style.transform = 'translateX(' + (left ? -w : w) + 'px)';
+      list.style.opacity = '0';
+      setTimeout(() => {
+        list.style.transition = 'none';
+        switchNotifTab(ORDER[ni]);
+        list.style.transform = 'translateX(' + (left ? w : -w) + 'px)';
+        list.getBoundingClientRect();
+        list.style.transition = 'transform .22s cubic-bezier(.25,.8,.3,1), opacity .22s';
+        list.style.transform = 'translateX(0)';
+        list.style.opacity = '1';
+      }, 180);
+    } else {
+      list.style.transform = 'translateX(0)';
+      list.style.opacity = '1';
+    }
+    dx = 0;
+  }
+  list.addEventListener('touchend', end, { passive: true });
+  list.addEventListener('touchcancel', end, { passive: true });
+})();
   </script>
 </body>
 
