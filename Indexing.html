@@ -498,7 +498,9 @@ body.loading .header-stripe::before {
   position: absolute;
   top: 56px;
   right: 16px;
-  width: 230px;
+  width: 270px;
+  max-height: 70vh;
+  overflow-y: auto;
   background: #161c28;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
@@ -562,6 +564,24 @@ body.loading .header-stripe::before {
 .scan-switch input:checked + .scan-slider::before {
   transform: translateX(18px);
 }
+    .scan-settings-row + .scan-settings-row,
+    .scan-settings-block {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .scan-settings-sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+    .scan-seg { display: flex; gap: 4px; margin-top: 8px; }
+    .scan-seg button {
+      flex: 1; height: 32px; padding: 0 2px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08); color: #fff;
+      font-size: 11.5px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .scan-seg button.sel { background: var(--accent); border-color: var(--accent); }
+    #scanZoomBlock { display: none; }
+    #scanZoomRange { width: 100%; margin-top: 8px; accent-color: #22d3ee; }
     .scanner-stage {
   flex: 1;
   position: relative;
@@ -2324,12 +2344,50 @@ body.loading .upload-zone { opacity: 0.45; }
     <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
   </div>
   <div id="scannerSettingsPopover">
-    <div class="scan-settings-row">
+        <div class="scan-settings-row">
       <span class="scan-settings-label">Auto-open on login</span>
       <label class="scan-switch">
         <input type="checkbox" id="autoOpenScannerToggle" onchange="onAutoOpenToggleChange(this.checked)">
         <span class="scan-slider"></span>
       </label>
+    </div>
+    <div class="scan-settings-row">
+      <span class="scan-settings-label">Beep &amp; vibrate on scan</span>
+      <label class="scan-switch">
+        <input type="checkbox" id="scanBeepToggle" onchange="setScanSetting('beep', this.checked)">
+        <span class="scan-slider"></span>
+      </label>
+    </div>
+    <div class="scan-settings-row">
+      <span class="scan-settings-label">Torch auto-on</span>
+      <label class="scan-switch">
+        <input type="checkbox" id="scanTorchAutoToggle" onchange="setScanSetting('torchAuto', this.checked)">
+        <span class="scan-slider"></span>
+      </label>
+    </div>
+    <div class="scan-settings-block">
+      <div class="scan-settings-label">Scan mode</div>
+      <div class="scan-settings-sub">OCR uses more battery</div>
+      <div class="scan-seg" id="scanModeSeg">
+        <button type="button" data-v="auto" onclick="setScanSetting('mode','auto')">Auto</button>
+        <button type="button" data-v="qr" onclick="setScanSetting('mode','qr')">QR only</button>
+        <button type="button" data-v="ocr" onclick="setScanSetting('mode','ocr')">OCR only</button>
+      </div>
+    </div>
+    <div class="scan-settings-block" id="scanOcrBlock">
+      <div class="scan-settings-label">OCR speed</div>
+      <div class="scan-seg" id="scanOcrSeg">
+        <button type="button" data-v="400" onclick="setScanSetting('ocrMs',400)">Fast</button>
+        <button type="button" data-v="800" onclick="setScanSetting('ocrMs',800)">Normal</button>
+        <button type="button" data-v="1500" onclick="setScanSetting('ocrMs',1500)">Saver</button>
+      </div>
+    </div>
+    <div class="scan-settings-block" id="scanZoomBlock">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="scan-settings-label">Zoom</span>
+        <span class="scan-settings-sub" id="scanZoomOut">1.0x</span>
+      </div>
+      <input type="range" id="scanZoomRange" min="1" max="4" step="0.1" value="1" oninput="onScanZoomInput(this.value)">
     </div>
   </div>
 </div>
@@ -4217,6 +4275,7 @@ function appendScanCandidates(cands, type) {
   const list = document.getElementById('scanCandidatesList');
   const fresh = cands.filter(c => !scanSeen.has(c.sap || c.location));
   if (!fresh.length) { registerNoNew(); return; }
+  scanFeedback();
   noNewStreak = 0;
 
   if (!scanListItems.length) {
@@ -4840,7 +4899,7 @@ let qrCurrentRes = { width: 1280, height: 720 }; // QR resolution
 function toggleTorch() {
   if (!html5QrCode || !torchSupported) return;
   torchOn = !torchOn;
-  html5QrCode.applyVideoConstraints({ advanced: [{ torch: torchOn }] })
+  html5QrCode.applyVideoConstraints(advExtras(torchOn))
     .then(() => {
       document.getElementById('torchBtn').classList.toggle('on', torchOn);
     })
@@ -4873,6 +4932,7 @@ function extractLocationFromQR(rawText) {
 
 function onScanDecoded(decodedText) {
   if (!html5QrCode) return;   // scanner band ho chuka hai, late callback ignore
+  if (scanSettings.mode === 'ocr') return;   // OCR only mode: ignore QR/barcode
   const target = scanTarget;
   // Location scan: pehle location nikaalo, tabhi reject karo jab location mile hi nahi
   if (target && target !== 'notifSearchBox') {
@@ -4888,6 +4948,7 @@ function onScanDecoded(decodedText) {
     }
   }
   qrFailStart = null; // QR mil gaya, reset
+  scanFeedback();
   closeScanner();
   if (target === 'notifSearchBox') {
     const result = extractSapOrDescription(decodedText);
@@ -4953,17 +5014,23 @@ function openScanner(targetId) {
     setTimeout(() => {
       document.getElementById('scannerOverlay').classList.add('cam-ready');
     }, 250);
-    setTimeout(checkTorchSupport, 500);
+    setTimeout(() => {
+      checkTorchSupport();
+      setupZoom();
+      if (scanSettings.torchAuto && torchSupported && html5QrCode && !torchOn) toggleTorch();
+    }, 500);
   }).catch(err => {
     scannerOpening = false;
     scannerStartPromise = null;
     html5QrCode = null;
     document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
-
   if (autoOcrTimer) clearInterval(autoOcrTimer);
+  let lastOcrTs = Date.now();
   autoOcrTimer = setInterval(() => {
-    if (ocrInProgress) return;
+    if (ocrInProgress || scanSettings.mode === 'qr') return;
+    if (Date.now() - lastOcrTs < scanSettings.ocrMs) return;
+    lastOcrTs = Date.now();
     if (ocrPaused) {
       if (!sceneChanged()) return;   // camera sthir hai to OCR nahi chalega
       ocrPaused = false;
@@ -4972,7 +5039,7 @@ function openScanner(targetId) {
         `${scanListItems.length} mile — scan jaari hai 👇`;
     }
     captureAndReadText();
-  }, 800);
+  }, 200);
 }
 
 function closeScanner() {
@@ -5019,6 +5086,79 @@ function onAutoOpenToggleChange(isOn) {
   localStorage.setItem(AUTO_OPEN_SCANNER_KEY, isOn ? 'true' : 'false');
 }
 
+// ─── Scanner settings ───
+const SCAN_SETTINGS_KEY = 'scannerSettings';
+const SCAN_DEFAULTS = { beep: false, mode: 'auto', ocrMs: 800, torchAuto: false };
+let scanSettings = Object.assign({}, SCAN_DEFAULTS);
+try { Object.assign(scanSettings, JSON.parse(localStorage.getItem(SCAN_SETTINGS_KEY)) || {}); } catch (e) {}
+let scanZoom = 1;   // zoom is per session, not saved
+let zoomSupported = false;
+let audioCtx = null;
+
+function setScanSetting(k, v) {
+  scanSettings[k] = v;
+  try { localStorage.setItem(SCAN_SETTINGS_KEY, JSON.stringify(scanSettings)); } catch (e) {}
+  syncScanSettingsUI();
+  if (k === 'beep' && v) scanFeedback();   // test beep (this tap also unlocks audio)
+}
+
+function syncScanSettingsUI() {
+  const s = scanSettings;
+  document.getElementById('scanBeepToggle').checked = s.beep;
+  document.getElementById('scanTorchAutoToggle').checked = s.torchAuto;
+  document.querySelectorAll('#scanModeSeg button').forEach(b => b.classList.toggle('sel', b.dataset.v === s.mode));
+  document.querySelectorAll('#scanOcrSeg button').forEach(b => b.classList.toggle('sel', +b.dataset.v === s.ocrMs));
+  document.getElementById('scanOcrBlock').style.opacity = s.mode === 'qr' ? '0.4' : '1';
+}
+
+function scanFeedback() {
+  if (!scanSettings.beep) return;
+  try { navigator.vibrate && navigator.vibrate(60); } catch (e) {}
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = 1100; g.gain.value = 0.15;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.12);
+  } catch (e) {}
+}
+
+// torch + zoom are always sent together so one never resets the other
+function advExtras(torch) {
+  const o = {};
+  if (torchSupported) o.torch = torch;
+  if (zoomSupported) o.zoom = scanZoom;
+  return { advanced: [o] };
+}
+
+function setupZoom() {
+  const block = document.getElementById('scanZoomBlock');
+  block.style.display = 'none';
+  scanZoom = 1;
+  zoomSupported = false;
+  if (!html5QrCode) return;
+  try {
+    const cap = html5QrCode.getRunningTrackCapabilities();
+    if (cap && cap.zoom && cap.zoom.max > cap.zoom.min) {
+      const r = document.getElementById('scanZoomRange');
+      r.min = cap.zoom.min;
+      r.max = Math.min(cap.zoom.max, 8);
+      r.step = cap.zoom.step || 0.1;
+      r.value = cap.zoom.min;
+      document.getElementById('scanZoomOut').textContent = '1.0x';
+      block.style.display = 'block';
+      zoomSupported = true;
+    }
+  } catch (e) {}
+}
+
+function onScanZoomInput(v) {
+  scanZoom = Math.round(parseFloat(v) * 10) / 10;
+  document.getElementById('scanZoomOut').textContent = scanZoom.toFixed(1) + 'x';
+  if (html5QrCode) html5QrCode.applyVideoConstraints(advExtras(torchOn)).catch(() => {});
+}
+
 function toggleScannerSettings() {
   const pop = document.getElementById('scannerSettingsPopover');
   const btn = document.getElementById('scannerSettingsBtn');
@@ -5028,6 +5168,8 @@ function toggleScannerSettings() {
 }
 
 function resetAdaptiveScan() {
+  scanZoom = 1;
+  zoomSupported = false;
   currentMaxDim = 480;
   failedAttempts = 0;
   qrFailStart = null;
@@ -5044,7 +5186,7 @@ function onQrScanError(errMsg) {
     qrCurrentRes = { width: 1920, height: 1080 };
     html5QrCode.applyVideoConstraints({
       width: { ideal: 1920 }, height: { ideal: 1080 },
-      ...(torchOn ? { advanced: [{ torch: true }] } : {})
+      ...((torchOn || scanZoom > 1) ? advExtras(torchOn) : {})
     }).catch(() => {});
     qrFailStart = Date.now(); // timer reset taaki dubara 3s baad hi 1920 se aage na jaye
   }
@@ -5104,6 +5246,7 @@ async function captureAndReadText() {
       if (!listStarted && saps.length === 1) {
         scanTarget = null;
         closeScanner();
+        scanFeedback();
         fillNotifSearchField(saps[0].sap);
       } else {
         appendScanCandidates(saps, 'notifsap');
@@ -5118,6 +5261,7 @@ async function captureAndReadText() {
         const target = scanTarget;
         scanTarget = null;
         closeScanner();
+        scanFeedback();
         fillLocationField(target, locs[0].location);
       } else {
         appendScanCandidates(locs, 'loc');
@@ -5129,6 +5273,7 @@ async function captureAndReadText() {
     if (saps.length === 0) { noResult(); return; }
     if (!listStarted && saps.length === 1) {
       closeScanner();
+      scanFeedback();
       searchBox.value = saps[0].sap;
       document.getElementById('clearSearch').classList.add('visible');
       doSearch(saps[0].sap, true);
@@ -5570,6 +5715,7 @@ statsBody.classList.toggle('collapsed', !statsOpen);
       dlBtn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
 
 document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPref();
+syncScanSettingsUI();
 if (getAutoOpenScannerPref()) openScanner();
 renderToolIconRow();
 renderToolLinks();
