@@ -1986,6 +1986,10 @@ body.loading .header-stripe::before {
 .notif-slot > .sa-fch {
   visibility: hidden;
 }
+.notif-slot > .bin-bar { visibility: hidden; margin: 0; }
+.bin-bar .pa-bar { margin: 0; padding: 6px 8px; }
+.bin-bar .pa-btn, .bin-bar .pa-clr { padding: 7px 10px; }
+.bin-bar .pa-txt { white-space: nowrap; }
 /* ─── Notif Tabs & Bin List ─── */
 .notif-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 12px 10px;padding:0;overflow:visible;}
 .notif-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:46px;padding:4px 2px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap;min-width:0;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
@@ -2524,8 +2528,9 @@ body.loading .upload-zone { opacity: 0.45; }
             <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
             <line x1="7" y1="12" x2="17" y2="12"/>
           </svg>
-        </button>
+                </button>
       </div>
+<div class="bin-bar" id="binBar"></div>
        </div>
 <div class="notif-list" id="notifList"></div>
       <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
@@ -3542,6 +3547,7 @@ function renderActiveNotifTab() {
   const showChips = activeNotifTab === 'alert' || activeNotifTab === 'phys';
   document.getElementById('saFilter').style.visibility = showChips ? 'visible' : 'hidden';
   searchWrap.style.visibility = activeNotifTab === 'stock' ? 'visible' : 'hidden';
+  document.getElementById('binBar').style.visibility = isBin ? 'visible' : 'hidden';
 
   if (activeNotifTab === 'stock') {
     iconBadge.textContent = '📊';
@@ -3595,6 +3601,7 @@ function binPrintAllBar() {
 }
 
 function renderBinList() {
+  document.getElementById('binBar').innerHTML = binPrintAllBar();
   document.getElementById('notifCountBadge').textContent = binPending.length;
   document.getElementById('notifSub').textContent = binPending.length === 0
     ? 'Sab up to date'
@@ -3605,7 +3612,7 @@ function renderBinList() {
     list.innerHTML = `<div class="notif-empty">✅ Koi pending bin list nahi hai</div>`;
     return;
   }
-  list.innerHTML = binPrintAllBar() + binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
+  list.innerHTML = binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
     <div class="notif-row" id="brow-${p.loc}">
       <div class="bin-row-top">
         <div>
