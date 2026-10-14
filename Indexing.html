@@ -1790,7 +1790,7 @@ body.loading .header-stripe::before {
 .notif-save-btn { flex: 1 1 0; min-width: 0; background: var(--accent); color: #fff; border: none; border-radius: 8px; height: 36px; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; -webkit-tap-highlight-color: transparent; padding: 0 6px; }
 .notif-save-btn.saved { background: var(--green); }
 .notif-empty { padding: 34px 16px; text-align: center; color: var(--muted); font-size: 12.5px; }
-.notif-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); text-align: center; background: var(--surface2); }
+.notif-footer { padding: 10px 14px; border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); text-align: center; background: var(--surface2); min-height: 50px; display: flex; align-items: center; justify-content: center; }
 #notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.35); z-index: 490; }
 #notifBackdrop.open { display: block; }
 
@@ -1827,13 +1827,24 @@ body.loading .header-stripe::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 14px 16px 12px;
+}
+
+.notif-header-v3 > div:last-child {
+  flex-shrink: 0;
 }
 
 .notif-title-block {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title-block > div:last-child {
+  min-width: 0;
 }
 
 .notif-icon-badge {
@@ -1853,12 +1864,20 @@ body.loading .header-stripe::before {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.2px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .notif-sub-v3 {
   font-size: 11px;
   color: var(--muted);
   margin-top: 1px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .notif-count-chip {
@@ -1949,6 +1968,23 @@ body.loading .header-stripe::before {
   width: 19px;
   height: 19px;
   display: block;
+}
+.notif-slot {
+  display: grid;
+  height: 52px;
+  margin: 0 12px 10px;
+}
+.notif-slot > * {
+  grid-area: 1 / 1;
+  align-self: center;
+  min-width: 0;
+}
+.notif-slot > .sa-fch,
+.notif-slot > .notif-search-wrap {
+  margin: 0;
+}
+.notif-slot > .sa-fch {
+  visibility: hidden;
 }
 /* ─── Notif Tabs & Bin List ─── */
 .notif-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 12px 10px;padding:0;overflow:visible;}
@@ -2477,7 +2513,8 @@ body.loading .upload-zone { opacity: 0.45; }
 <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')"><i>🚨</i>Alerts<span class="tab-badge hidden" id="notifTabAlertBadge">0</span></button>
 <button class="notif-tab" id="notifTabPhys" onclick="switchNotifTab('phys')"><i>⚖️</i>Physical<span class="tab-badge hidden" id="notifTabPhysBadge">0</span></button>
     </div>
-<div class="sa-fch" id="saFilter" style="display:none;"></div>
+<div class="notif-slot">
+<div class="sa-fch" id="saFilter"></div>
         <div class="notif-search-wrap" id="notifSearchWrap">
         <span class="notif-search-icon">🔍</span>
         <input id="notifSearchBox" type="text" placeholder="Search item or SAP code..." autocomplete="off" spellcheck="false" oninput="onNotifSearchInput(this.value)">
@@ -2489,7 +2526,8 @@ body.loading .upload-zone { opacity: 0.45; }
           </svg>
         </button>
       </div>
-       <div class="notif-list" id="notifList"></div>
+       </div>
+<div class="notif-list" id="notifList"></div>
       <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
     </div>
   </div>
@@ -3173,7 +3211,7 @@ function renderAlertList() {
   const all = getStockAlertItems();
   const crit = all.filter(i => lvState(i).k === 'crit').length, re = all.length - crit;
   document.getElementById('notifCountBadge').textContent = all.length;
-  document.getElementById('notifSub').textContent = all.length ? 'Items at or below reorder level' : 'All items are well stocked 🎉';
+  document.getElementById('notifSub').textContent = all.length ? 'At or below reorder' : 'All well stocked 🎉';
   const chip = (k, n, l) => `<button type="button" class="sa-fchip ${k}${alertFilter === k ? ' sel' : ''}" onclick="setAlertFilter('${k}')"><b>${n}</b><span>${l}</span></button>`;
   document.getElementById('saFilter').innerHTML = chip('all', all.length, 'All') + chip('crit', crit, 'Critical') + chip('re', re, 'Reorder');
   const show = all.filter(i => alertFilter === 'all' || lvState(i).k === alertFilter);
@@ -3364,7 +3402,7 @@ function setPhysFilter(f) { physFilter = f; renderPhysList(); }
 function renderPhysList() {
   const all = physList, sh = all.filter(p => p.phys < p.sys).length, ex = all.length - sh;
   document.getElementById('notifCountBadge').textContent = all.length;
-  document.getElementById('notifSub').textContent = all.length ? 'Short / Excess — download and adjust in SAP' : 'No pending adjustments';
+  document.getElementById('notifSub').textContent = all.length ? 'Short / Excess to SAP' : 'No pending';
   const chip = (k, c, n, l) => `<button type="button" class="sa-fchip ${c}${physFilter === k ? ' sel' : ''}" onclick="setPhysFilter('${k}')"><b>${n}</b><span>${l}</span></button>`;
   document.getElementById('saFilter').innerHTML = chip('all', 'all', all.length, 'All') + chip('s', 'crit', sh, 'Short') + chip('e', 'ex', ex, 'Excess');
   const show = all.filter(p => physFilter === 'all' || (physFilter === 's' ? p.phys < p.sys : p.phys > p.sys));
@@ -3501,12 +3539,13 @@ function renderActiveNotifTab() {
   iconBadge.classList.toggle('bin', isBin);
   countChip.classList.toggle('bin', isBin);
   dlBtn.classList.toggle('bin', isBin);
-  document.getElementById('saFilter').style.display = (activeNotifTab === 'alert' || activeNotifTab === 'phys') ? 'flex' : 'none';
-  searchWrap.style.display = activeNotifTab === 'stock' ? '' : 'none';
+  const showChips = activeNotifTab === 'alert' || activeNotifTab === 'phys';
+  document.getElementById('saFilter').style.visibility = showChips ? 'visible' : 'hidden';
+  searchWrap.style.visibility = activeNotifTab === 'stock' ? 'visible' : 'hidden';
 
   if (activeNotifTab === 'stock') {
     iconBadge.textContent = '📊';
-    titleText.textContent = 'IN STOCK, NO LOCATION';
+    titleText.textContent = 'NO LOCATION';
     footer.textContent = 'Tap Save ✓ to assign — list updates live';
     renderNotifList();
   } else if (activeNotifTab === 'alert') {
@@ -3516,12 +3555,12 @@ function renderActiveNotifTab() {
     renderAlertList();
   } else if (activeNotifTab === 'phys') {
     iconBadge.textContent = '⚖️';
-    titleText.textContent = 'PHYSICAL ADJUSTMENTS';
+    titleText.textContent = 'PHYSICAL ADJ.';
     footer.textContent = 'Download the list, adjust in SAP, then tap Clear';
     renderPhysList();
   } else {
     iconBadge.textContent = '🖨️';
-    titleText.textContent = 'BIN LISTS TO UPDATE';
+    titleText.textContent = 'BIN LISTS';
     footer.textContent = "Locations get added here automatically when an item's location changes";
     renderBinList();
   }
@@ -3558,8 +3597,8 @@ function binPrintAllBar() {
 function renderBinList() {
   document.getElementById('notifCountBadge').textContent = binPending.length;
   document.getElementById('notifSub').textContent = binPending.length === 0
-    ? 'Sab bin lists up to date'
-    : 'Print/update the hardcopy';
+    ? 'Sab up to date'
+    : 'Print and update';
 
   const list = document.getElementById('notifList');
   if (!binPending.length) {
@@ -3851,7 +3890,7 @@ function renderNotifList() {
   document.getElementById('notifCountBadge').textContent = totalCount;
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${items.length} of ${totalCount} matching "${notifSearchQuery}"`
-    : (totalCount === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
+    : (totalCount === 0 ? 'Sab located hain 🎉' : 'In stock - assign bin');
 
   if (totalCount === 0) {
     list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
@@ -3914,7 +3953,7 @@ function updateNotifStockHeader() {
   document.getElementById('notifCountBadge').textContent = total;
   document.getElementById('notifSub').textContent = notifSearchQuery
     ? `Showing ${list.querySelectorAll('.notif-row').length} of ${total} matching "${notifSearchQuery}"`
-    : (total === 0 ? 'Sab items located hain 🎉' : 'Assign a location to clear the list');
+    : (total === 0 ? 'Sab located hain 🎉' : 'In stock - assign bin');
   if (total === 0) {
     list.innerHTML = `<div class="notif-empty">✅ Sab in-stock items ko location assign ho gaya hai</div>`;
   }
@@ -4786,15 +4825,16 @@ function lmPick(sn) {
     function showUpdateForm() {
       const form = document.getElementById('updateForm');
       if (!form) return;
-      form.innerHTML = `
-        <div class="form-card">
-          <label class="form-label">Current Location</label>
-          <input class="form-input" value="${currentItem.location || '—'}" disabled>
-          <label class="form-label">
-            New Location
-            ${currentItem.location ? '' : '<span class="ai-badge">✨ Ready</span>'}
-          </label>
-                                <div style="position:relative; display:flex; align-items:center; margin-bottom:12px;">
+      form.innerHTML = `<div class="form-card">
+  ${currentItem.location && currentItem.location.trim() ? `
+    <label class="form-label">Current Location</label>
+    <input class="form-input" value="${lmEsc(currentItem.location)}" disabled>
+  ` : ''}  
+  <label class="form-label">
+    ${currentItem.location && currentItem.location.trim() ? 'New Location' : 'Add Location'}
+    ${currentItem.location && currentItem.location.trim() ? '' : '<span class="ai-badge">✨ Ready</span>'}
+  </label>
+            <div style="position:relative; display:flex; align-items:center; margin-bottom:12px;">
             <input class="form-input" id="updateLocation" value="" placeholder="E.g. A-01-03"
                    autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
                    inputmode="text" style="padding-right:44px; margin-bottom:0;">
