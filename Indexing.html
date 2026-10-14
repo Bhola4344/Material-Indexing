@@ -3596,8 +3596,8 @@ function binPrintAllBar() {
   });
   const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil((cnt[String(p.loc).trim().toUpperCase()] || 0) / BP_ROWS)), 0);
   const printedN = binPending.filter(p => p.printed).length;
-  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear Printed (${printedN})`;
-  return `<div class="pa-bar"><div class="pa-txt">${binPending.length} bins <span>· ${pages} pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
+  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clr Printed (${printedN})`;
+  return `<div class="pa-bar"><div class="pa-txt">${binPending.length} Bins <br/> <span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
 }
 
 function renderBinList() {
