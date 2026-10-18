@@ -215,90 +215,43 @@ body.loading .header-stripe::before {
       opacity: 0;
       transform: translateY(-6px);
     }
-
-    .hstat-chips {
-      display: flex;
-      gap: 6px;
-    }
-
-   .hstat-chip {
+.hstat-chips { display: flex; }
+.hstat-chip {
   flex: 1;
   min-width: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  gap: 2px;
+  padding: 2px;
+  border-left: 1px solid var(--border);
 }
-
-    .hstat-left {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      min-width: 0;
-    }
-
-    .hstat-icon {
-      font-size: 11px;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-
-    .hstat-label {
-      font-size: 9px;
-      color: var(--muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .hstat-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-
-    .hstat-chip.total {
-      border-color: rgba(37, 99, 235, 0.25);
-    }
-
-    .hstat-chip.total .hstat-num {
-      color: var(--accent);
-    }
-
-    .hstat-chip.located {
-      border-color: rgba(5, 150, 105, 0.25);
-    }
-
-    .hstat-chip.located .hstat-num {
-      color: var(--green);
-    }
-
-    .hstat-chip.pending {
-      border-color: rgba(220, 38, 38, 0.25);
-    }
-
-    .hstat-chip.pending .hstat-num {
-      color: var(--red);
-    }
-
-.hstat-chip.stock {
-  border-color: rgba(8, 145, 178, 0.25);
+.hstat-chip:first-child { border-left: 0; }
+.hstat-num {
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.2px;
+  font-variant-numeric: tabular-nums;
 }
-
-.hstat-chip.stock .hstat-num {
-  color: var(--accent2);
+.hstat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
 }
-
-   
+.hstat-label i { font-style: normal; font-size: 10px; letter-spacing: 0; }
+.hstat-chip.total .hstat-num { color: var(--accent); }
+.hstat-chip.stock .hstat-num { color: var(--accent2); }
+.hstat-chip.located .hstat-num { color: var(--green); }
+.hstat-chip.pending .hstat-num { color: var(--red); }
+  
 
     /* ─── Search Box ─── */
     .search-wrap {
@@ -1209,22 +1162,38 @@ body.loading .header-stripe::before {
       border-bottom: 1px solid var(--border);
     }
 
-    .ai-panel-header h3 {
-      font-size: 13px;
-      font-weight: 700;
+
+      .tg-head {
+      cursor: pointer;
+      user-select: none;
+      min-height: 32px;
+      -webkit-tap-highlight-color: transparent;
     }
 
-
-    #aiToggleBtn {
-      margin-left: auto;
-      background: var(--surface2);
+    .tg-chev {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
+      background: var(--surface2);
       color: var(--muted);
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, color 0.2s, border-color 0.2s;
+    }
+
+    .tg-chev svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .tg-head.tg-open .tg-chev {
+      transform: rotate(180deg);
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent);
+      border-color: rgba(37, 99, 235, 0.3);
     }
 
     #aiPanelBody {
@@ -1267,24 +1236,22 @@ body.loading .header-stripe::before {
 .sx-sug-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .sx-sug-ar{font-size:20px;font-weight:700;color:var(--green);opacity:.8}
 .sx-list{display:flex;flex-direction:column;gap:10px}
-.sx-row{display:flex;gap:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
+.sx-row{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
 .sx-row:active{background:var(--surface2);border-color:var(--accent)}
 .sx-row.hi{--tc:var(--green)}.sx-row.md{--tc:var(--accent)}.sx-row.lo{--tc:var(--amber)}
-.sx-l{flex:1;min-width:0}
-.sx-name{font-size:12px;font-weight:500;line-height:1.35}
-.sx-sapline{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px}
+.sx-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.sx-loc{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);border:1.5px solid #C5EBD9;border-radius:8px;padding:3px 9px;white-space:nowrap}
+.sx-pct{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--tc);white-space:nowrap}
+.sx-name{font-size:13px;font-weight:500;line-height:1.4;word-break:break-word}
+.sx-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px dashed var(--border)}
+.sx-sapline{display:flex;align-items:center;gap:8px}
 .sx-sap{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);white-space:nowrap}
 .sx-stk{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 6px;border-radius:6px;white-space:nowrap;font-weight:700}
 .sx-stk .sx-ic{font-size:8px;line-height:1}
 .sx-stk.has{background:rgba(8,145,178,.1);color:var(--accent2)}
 .sx-stk.no{background:rgba(220,38,38,.1);color:var(--red)}
-.sx-bin{font-size:10.5px;color:var(--muted);font-weight:500;margin-top:6px}
+.sx-bin{font-size:11px;color:var(--muted);font-weight:500}
 .sx-bin b{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--text)}
-.sx-r{display:flex;flex-direction:column;align-items:stretch;gap:12px;flex-shrink:0}
-.sx-loc{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--green);border:1.5px solid #C5EBD9;border-radius:8px;padding:4px 8px;white-space:nowrap;text-align:center}
-.sx-pct{display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--tc);text-align:center;line-height:1}
-.sx-bar{display:block;width:100%;height:7px;border-radius:7px;background:var(--border);overflow:hidden}
-.sx-bar i{display:block;height:100%;border-radius:7px;background:var(--tc)}
 
     /* ─── Download Bar ─── */
     .download-bar {
@@ -1307,29 +1274,7 @@ body.loading .header-stripe::before {
       justify-content: space-between;
     }
 
-    .dlbar-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--muted);
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    #dlToggleBtn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    #dlBarBody {
+      #dlBarBody {
       display: grid;
       grid-template-rows: 1fr;
       transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1693,20 +1638,7 @@ body.loading .header-stripe::before {
     margin: 0;           
   padding: 8px 14px 0;
   }
-  .hstat-chips {
-    gap: 6px;
-  }
-  .hstat-chip {
-    justify-content: center;
-  }
-  .hstat-icon,
-  .hstat-label {
-    display: none;
-  }
-  .hstat-num {
-    font-size: 16px;
-  }
-  .logo-text {
+   .logo-text {
     white-space: nowrap;
   }
   .logo-full {
@@ -1819,7 +1751,7 @@ body.loading .header-stripe::before {
 
 .notif-stripe {
   height: 5px;
-  background: linear-gradient(90deg, var(--red), #f59e0b);
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
   flex-shrink: 0;
 }
 
@@ -1851,11 +1783,11 @@ body.loading .header-stripe::before {
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: linear-gradient(135deg, var(--red), #f59e0b);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(220,38,38,0.28);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.28);
   flex-shrink: 0;
   font-size: 15px;
 }
@@ -1887,14 +1819,14 @@ body.loading .header-stripe::before {
   padding: 4px 7px 4px 9px;
   border-radius: 7px;
   background: var(--surface2);
-  border: 1px solid rgba(220,38,38,0.25);
+  border: 1px solid rgba(37,99,235,0.25);
 }
 
 .notif-count-chip .num {
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   font-weight: 700;
-  color: var(--red);
+  color: var(--accent);
   line-height: 1.1;
 }
 
@@ -1913,7 +1845,7 @@ body.loading .header-stripe::before {
   border-radius: 5px;
   border: none;
   color: #fff;
-  background: var(--red);
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1921,7 +1853,7 @@ body.loading .header-stripe::before {
   flex-shrink: 0;
   transition: transform 0.15s, background 0.15s;
 }
-.notif-dl-btn:active { transform: scale(0.88); background: #b91c1c; }
+.notif-dl-btn:active { transform: scale(0.88); background: #1d4ed8; }
 .notif-dl-btn svg { width: 11px; height: 11px; }
 
 .notif-search-wrap {
@@ -1930,8 +1862,8 @@ body.loading .header-stripe::before {
   padding: 9px 10px 9px 12px; transition: border-color .2s, box-shadow .2s, background .2s;
 }
 .notif-search-wrap:focus-within {
-  border-color: var(--amber); background: var(--surface);
-  box-shadow: 0 0 0 3px rgba(180,83,9,0.12);
+  border-color: var(--accent); background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 .notif-search-icon { font-size: 14px; color: var(--muted); flex-shrink: 0; }
 #notifSearchBox {
@@ -1989,7 +1921,11 @@ body.loading .header-stripe::before {
 .notif-slot > .bin-bar { visibility: hidden; margin: 0; }
 .bin-bar .pa-bar { margin: 0; padding: 6px 8px; }
 .bin-bar .pa-btn, .bin-bar .pa-clr { padding: 7px 10px; }
-.bin-bar .pa-txt { white-space: nowrap; }
+.bin-bar .pa-txt { white-space: nowrap; line-height: 1.25; flex-shrink: 0; }
+.bin-bar .pa-txt b { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+.bin-bar .pa-txt span { font-size: 11px; }
+.bin-bar .pa-grp { min-width: 0; }
+.bin-bar .pa-btn, .bin-bar .pa-clr { font-size: 11.5px; padding: 7px 9px; }
 /* ─── Notif Tabs & Bin List ─── */
 .notif-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 12px 10px;padding:0;overflow:visible;}
 .notif-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:46px;padding:4px 2px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap;min-width:0;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
@@ -1998,11 +1934,8 @@ body.loading .header-stripe::before {
 .notif-tab.active .tab-badge{border-color:var(--accent);}
 .notif-tab .tab-badge.hidden{display:none;}
 
-.notif-stripe.bin{background:linear-gradient(90deg,var(--amber),#f59e0b);}
-.notif-icon-badge.bin{background:linear-gradient(135deg,var(--amber),#f59e0b);box-shadow:0 4px 10px rgba(180,83,9,0.28);}
-.notif-count-chip.bin{border-color:rgba(180,83,9,0.25);}
-.notif-count-chip.bin .num{color:var(--amber);}
-.notif-dl-btn.bin{background:var(--amber);}
+.notif-stripe.bin{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.notif-icon-badge.bin{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 4px 10px rgba(37,99,235,0.28);}
 
 .bin-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .bin-loc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
@@ -2272,7 +2205,7 @@ body.loading .upload-zone { opacity: 0.45; }
 #notifPanel {
   position: fixed; width: 100%; max-width: 600px;
   border-radius: 14px;
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--surface); border: 0;
   box-shadow: 0 16px 44px rgba(15, 23, 42, 0.25); z-index: 500;
   display: flex; flex-direction: column; overflow: hidden;
   height: var(--np-h, 80vh);
@@ -2545,25 +2478,22 @@ body.loading .upload-zone { opacity: 0.45; }
         
         <div id="statsBody">
           <div class="stats-inner">
-            <div class="hstat-chips">
+<div class="hstat-chips">
   <div class="hstat-chip total">
-    <span class="hstat-left"><span class="hstat-icon">📦</span><span class="hstat-label">Total</span></span>
     <span class="hstat-num" id="statTotal">0</span>
+    <span class="hstat-label"><i>📦</i>Total</span>
   </div>
-<div class="hstat-chip stock">
-    <span class="hstat-left"><span class="hstat-icon">📊</span><span
-        class="hstat-label">In Stock</span></span>
+  <div class="hstat-chip stock">
     <span class="hstat-num" id="statStock">0</span>
+    <span class="hstat-label"><i>📊</i>In Stock</span>
   </div>
   <div class="hstat-chip located">
-    <span class="hstat-left"><span class="hstat-icon">📍</span><span
-        class="hstat-label">Located</span></span>
     <span class="hstat-num" id="statLocated">0</span>
+    <span class="hstat-label"><i>📍</i>Located</span>
   </div>
   <div class="hstat-chip pending">
-    <span class="hstat-left"><span class="hstat-icon">⏳</span><span
-        class="hstat-label">Pending</span></span>
     <span class="hstat-num" id="statPending">0</span>
+    <span class="hstat-label"><i>⏳</i>Pending</span>
   </div>
 </div>
             
@@ -2600,9 +2530,9 @@ body.loading .upload-zone { opacity: 0.45; }
 
         <!-- AI Panel (collapsible) -->
         <div class="ai-panel" id="aiPanelWrapper">
-          <div class="ai-panel-header">
-            <span style="font-size:14px;">🧩 SIMILAR ITEMS</span>
-            <button id="aiToggleBtn" onclick="toggleAI()">Show ▾</button>
+           <div class="ai-panel-header tg-head" id="aiHead" onclick="toggleAI()" role="button" aria-expanded="false">
+            <span style="font-size:14px; flex:1;">🧩 SIMILAR ITEMS</span>
+            <span class="tg-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
           </div>
           <div id="aiPanelBody">
             <div class="ai-inner">
@@ -2618,9 +2548,9 @@ body.loading .upload-zone { opacity: 0.45; }
 
     <!-- Download Bar -->
     <div class="download-bar" id="downloadBar">
-      <div class="dlbar-toggle-row">
+      <div class="dlbar-toggle-row tg-head tg-open" id="dlHead" onclick="toggleDlBar()" role="button" aria-expanded="true">
         <span style="font-size:14px;">📥 DOWNLOAD & UPLOAD</span>
-        <button id="dlToggleBtn" onclick="toggleDlBar()">Hide ▴</button>
+        <span class="tg-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
       </div>
 
       <div id="dlBarBody">
@@ -2845,10 +2775,10 @@ window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); }
     // ─── AI Panel Toggle ───
     function toggleAI() {
       aiPanelOpen = !aiPanelOpen;
-      const body = document.getElementById('aiPanelBody');
-      const btn = document.getElementById('aiToggleBtn');
-      body.classList.toggle('open', aiPanelOpen);
-      btn.textContent = aiPanelOpen ? 'Hide ▴' : 'Show ▾';
+      document.getElementById('aiPanelBody').classList.toggle('open', aiPanelOpen);
+      const h = document.getElementById('aiHead');
+      h.classList.toggle('tg-open', aiPanelOpen);
+      h.setAttribute('aria-expanded', aiPanelOpen);
     }
 
     // ─── Header Stats ───
@@ -3503,6 +3433,7 @@ function downloadActiveNotifTab() {
 
 function switchNotifTab(tab) {
   activeNotifTab = tab;
+  notifRenderToken++;
   const order = ['stock', 'bin', 'alert', 'phys'];
   document.querySelector('.notif-tabs').style.setProperty('--i', order.indexOf(tab));
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
@@ -3596,8 +3527,8 @@ function binPrintAllBar() {
   });
   const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil((cnt[String(p.loc).trim().toUpperCase()] || 0) / BP_ROWS)), 0);
   const printedN = binPending.filter(p => p.printed).length;
-  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear Printed (${printedN})`;
-  return `<div class="pa-bar"><div class="pa-txt">${binPending.length} Bins <br/> <span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
+  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear (${printedN})`;
+  return `<div class="pa-bar"><div class="pa-txt"><b>${binPending.length}</b> Bins<br/><span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
 }
 
 function renderBinList() {
@@ -3882,6 +3813,7 @@ function highlightNotif(text, q) {
 }
 
 function renderNotifList() {
+  if (activeNotifTab !== 'stock') return;
   const myToken = ++notifRenderToken;
   const list = document.getElementById('notifList');
   const savedScroll = list.scrollTop;
@@ -3946,7 +3878,7 @@ function renderNotifList() {
   list.scrollTop = savedScroll;
   let idx = FIRST;
   const addMore = () => {
-    if (myToken !== notifRenderToken || idx >= items.length) return;
+    if (myToken !== notifRenderToken || activeNotifTab !== 'stock' || idx >= items.length) return;
     list.insertAdjacentHTML('beforeend', items.slice(idx, idx + CHUNK).map(rowHTML).join(''));
     idx += CHUNK;
     requestAnimationFrame(addMore);
@@ -3955,6 +3887,7 @@ function renderNotifList() {
 }
 
 function updateNotifStockHeader() {
+  if (activeNotifTab !== 'stock') return;
   const total = getStockNoLocationItems().length;
   const list = document.getElementById('notifList');
   document.getElementById('notifCountBadge').textContent = total;
@@ -4731,14 +4664,14 @@ function simStk(it) {
           ${scored.map(({item, score}) => {
             const p = Math.min(100, Math.round(score / selfScore * 100)), b = simBin(item.location);
             return `<div class="sx-row ${simTier(p)}" ontouchstart="" onclick="applySuggestion('${item.location}')">
-              <div class="sx-l">
-                <div class="sx-name">${lmEsc(item.name)}</div>
-                <div class="sx-sapline"><span class="sx-sap">${lmEsc(item.sap)}</span>${simStk(item)}</div>
-                <div class="sx-bin"><b>${b.inStock}</b> of <b>${b.total}</b> items have stock</div>
-              </div>
-              <div class="sx-r">
+              <div class="sx-top">
                 <span class="sx-loc">📍 ${item.location}</span>
-                <div class="sx-pct"><span class="sx-bar"><i style="width:${p}%"></i></span><span>${p}%</span></div>
+                <span class="sx-pct">${p}% match</span>
+              </div>
+              <div class="sx-name">${lmEsc(item.name)}</div>
+              <div class="sx-foot">
+                <div class="sx-sapline"><span class="sx-sap">${lmEsc(item.sap)}</span>${simStk(item)}</div>
+                <span class="sx-bin"><b>${b.inStock}</b> of <b>${b.total}</b> in stock</span>
               </div>
             </div>`;
           }).join('')}
@@ -5231,7 +5164,7 @@ document.addEventListener('pointerdown', e => {
 function resetAdaptiveScan() {
   scanZoom = 1;
   zoomSupported = false;
-  currentMaxDim = 480;
+  currentMaxDim = OCR_ENHANCE ? 520 : 480;
   failedAttempts = 0;
   qrFailStart = null;
   qrCurrentRes = { width: 1280, height: 720 };
@@ -5254,12 +5187,72 @@ function onQrScanError(errMsg) {
 }
 
 function bumpMaxDimIfNeeded() {
+  if (OCR_ENHANCE) {
+    if (failedAttempts === 2 && currentMaxDim < 720) currentMaxDim = 720;
+    else if (failedAttempts === 5 && currentMaxDim < 900) currentMaxDim = 900;
+    return;
+  }
   if (failedAttempts === 4 && currentMaxDim < 600) currentMaxDim = 600;
   else if (failedAttempts === 8 && currentMaxDim < 750) currentMaxDim = 750;
 }
 
 // ─── OCR (plain text) capture ───
 let ocrInProgress = false;
+
+const OCR_ENHANCE = true;      // false = purana behaviour
+const BLUR_MIN = 2;            // sharpness limit
+
+// halka grayscale + contrast stretch (threshold nahi)
+function ocrEnhance(ctx, w, h) {
+  const img = ctx.getImageData(0, 0, w, h), d = img.data;
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < d.length; i += 4) {
+    const g = (d[i] * 77 + d[i+1] * 150 + d[i+2] * 29) >> 8;
+    d[i] = g; hist[g]++;
+  }
+  const total = d.length / 4;
+  let acc = 0, lo = 0, hi = 255;
+  for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc >= total * 0.01) { lo = v; break; } }
+  acc = 0;
+  for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc >= total * 0.01) { hi = v; break; } }
+  if (hi - lo < 20) return;
+  const k = 255 / (hi - lo);
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.max(0, Math.min(255, (d[i] - lo) * k));
+    d[i] = d[i+1] = d[i+2] = v;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// bahut blur frame par OCR skip (lagatar max 2 baar)
+let blurCv = null, blurCx = null, blurSkips = 0;
+function isBlurry(v) {
+  if (!v.videoWidth) return false;
+  if (!blurCv) {
+    blurCv = document.createElement('canvas');
+    blurCv.width = 96; blurCv.height = 72;
+    blurCx = blurCv.getContext('2d', { willReadFrequently: true });
+  }
+  blurCx.drawImage(v, 0, 0, 96, 72);
+  const d = blurCx.getImageData(0, 0, 96, 72).data;
+  let s = 0, n = 0;
+  for (let y = 0; y < 72; y++) for (let x = 0; x < 95; x++) {
+    const i = (y * 96 + x) * 4;
+    s += Math.abs(d[i] - d[i + 4]); n++;
+  }
+  if (s / n < BLUR_MIN && blurSkips < 2) { blurSkips++; return true; }
+  blurSkips = 0;
+  return false;
+}
+
+// SAP token me O/I/S/B ko digit banao (sirf 9-11 char, kam se kam 6 digit)
+function fixSapTokens(t) {
+  if (!OCR_ENHANCE) return t;
+  return String(t).replace(/[0-9OISB]{9,11}/g, m =>
+    (m.match(/\d/g) || []).length >= 6
+      ? m.replace(/O/g, '0').replace(/I/g, '1').replace(/S/g, '5').replace(/B/g, '8')
+      : m);
+}
 
 async function captureAndReadText() {
   if (ocrInProgress) return;
@@ -5271,6 +5264,7 @@ async function captureAndReadText() {
   const mySession = scanSession;
 
     try {
+if (OCR_ENHANCE && isBlurry(videoEl)) { ocrInProgress = false; return; }
     const MAX_DIM = currentMaxDim;
     let targetW = videoEl.videoWidth;
     let targetH = videoEl.videoHeight;
@@ -5286,7 +5280,9 @@ async function captureAndReadText() {
     const canvas = ocrCanvas;
     canvas.width = targetW;
     canvas.height = targetH;
-    ocrCtx.drawImage(videoEl, 0, 0, targetW, targetH);
+    ocrCtx.imageSmoothingQuality = 'high';
+ocrCtx.drawImage(videoEl, 0, 0, targetW, targetH);
+if (OCR_ENHANCE) ocrEnhance(ocrCtx, targetW, targetH);
     if (!ocrWorker) { ocrInProgress = false; return; }
     const { data: { text } } = await ocrWorker.recognize(canvas);
     const cleaned = text.trim();
@@ -5302,7 +5298,7 @@ async function captureAndReadText() {
     if (!cleaned) { noResult(); return; }
 
     if (scanTarget === 'notifSearchBox') {
-      const saps = extractAllSapCandidates(cleaned);
+      const saps = extractAllSapCandidates(fixSapTokens(cleaned));
       if (saps.length === 0) { noResult(); return; }
       if (!listStarted && saps.length === 1) {
         scanTarget = null;
@@ -5330,7 +5326,7 @@ async function captureAndReadText() {
       return;
     }
 
-    const saps = extractAllSapCandidates(cleaned);
+    const saps = extractAllSapCandidates(fixSapTokens(cleaned));
     if (saps.length === 0) { noResult(); return; }
     if (!listStarted && saps.length === 1) {
       closeScanner();
@@ -5352,12 +5348,13 @@ async function captureAndReadText() {
 let ocrWorkerPromise = null;
 function preloadOcrWorker() {
   if (ocrWorkerPromise) return ocrWorkerPromise;
-  ocrWorkerPromise = (async () => {
-    const w = await Tesseract.createWorker('eng', 1);
-    await w.setParameters({
-      tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/ ',
-      tessedit_pageseg_mode: '6'
-    });
+  ocrWorkerPromise = (async () => {const w = await Tesseract.createWorker('eng', 1, {}, OCR_ENHANCE ? { load_system_dawg: '0', load_freq_dawg: '0' } : {});
+await w.setParameters({
+  tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.-/: ',
+  tessedit_pageseg_mode: '6',
+  preserve_interword_spaces: '1',
+  user_defined_dpi: '300'
+});
     ocrWorker = w; // ready hone ke baad hi set
   })().catch(() => { ocrWorkerPromise = null; });
   return ocrWorkerPromise;
@@ -5770,10 +5767,10 @@ itemMaster.forEach(i =>
       const statsBody = document.getElementById('statsBody');
 statsBody.classList.toggle('collapsed', !statsOpen);
 
-      const dlBody = document.getElementById('dlBarBody');
-      const dlBtn = document.getElementById('dlToggleBtn');
-      dlBody.classList.toggle('collapsed', !dlOpen);
-      dlBtn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
+      document.getElementById('dlBarBody').classList.toggle('collapsed', !dlOpen);
+      const dlHead = document.getElementById('dlHead');
+      dlHead.classList.toggle('tg-open', dlOpen);
+      dlHead.setAttribute('aria-expanded', dlOpen);
 
 document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPref();
 syncScanSettingsUI();
@@ -5974,10 +5971,10 @@ const formOpen = document.getElementById('updateLocation') || document.getElemen
     let dlOpen = localStorage.getItem('dlBarCollapsed') !== 'true';
     function toggleDlBar() {
       dlOpen = !dlOpen;
-      const body = document.getElementById('dlBarBody');
-      const btn = document.getElementById('dlToggleBtn');
-      body.classList.toggle('collapsed', !dlOpen);
-      btn.textContent = dlOpen ? 'Hide ▴' : 'Show ▾';
+      document.getElementById('dlBarBody').classList.toggle('collapsed', !dlOpen);
+      const h = document.getElementById('dlHead');
+      h.classList.toggle('tg-open', dlOpen);
+      h.setAttribute('aria-expanded', dlOpen);
       localStorage.setItem('dlBarCollapsed', (!dlOpen).toString());
     }
 
