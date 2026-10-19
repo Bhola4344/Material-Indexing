@@ -4243,7 +4243,12 @@ function resetScanList() {
   scanListType = null;
   noNewStreak = 0;
   ocrPaused = false;
-  lastThumb = null;
+    lastThumb = null;
+  scanIdleStopped = false;
+  lastNewScanTs = 0;
+  const idleSt = document.getElementById('scannerStatus');
+  idleSt.style.pointerEvents = '';
+  idleSt.style.cursor = '';
   const list = document.getElementById('scanCandidatesList');
   list.innerHTML = '';
   list.style.display = 'none';
@@ -4287,6 +4292,28 @@ function onBulkToggle(on) {
   updateBulkSummary();
 }
 
+function stopScanIdle() {
+  scanIdleStopped = true;
+  try { if (html5QrCode && html5QrCode.getState() === 2) html5QrCode.pause(false); } catch (e) {}
+  const st = document.getElementById('scannerStatus');
+  st.textContent = `⏸ ${scanListItems.length} mile — scan band. Dobara chalane ke liye yahan tap karo`;
+  st.style.pointerEvents = 'auto';
+  st.style.cursor = 'pointer';
+}
+function resumeScanIdle() {
+  if (!scanIdleStopped || !html5QrCode) return;
+  scanIdleStopped = false;
+  lastNewScanTs = Date.now();
+  noNewStreak = 0;
+  ocrPaused = false;
+  applyScanMode();
+  const st = document.getElementById('scannerStatus');
+  st.style.pointerEvents = '';
+  st.style.cursor = '';
+  st.textContent = `${scanListItems.length} mile — scan jaari hai 👇`;
+}
+document.getElementById('scannerStatus').addEventListener('click', resumeScanIdle);
+
 function registerNoNew() {
   noNewStreak++;
   if (noNewStreak >= 3) {
@@ -4318,9 +4345,10 @@ function sceneChanged() {
 function appendScanCandidates(cands, type) {
   const list = document.getElementById('scanCandidatesList');
   const fresh = cands.filter(c => !scanSeen.has(c.sap || c.location));
-  if (!fresh.length) { registerNoNew(); return; }
+   if (!fresh.length) { registerNoNew(); return; }
   scanFeedback();
   noNewStreak = 0;
+  lastNewScanTs = Date.now();
 
   if (!scanListItems.length) {
     scanListType = type;
@@ -4927,6 +4955,9 @@ let scannerOpening = false;
 let scannerStartPromise = null;
 let scanSession = 0;
 let lastSapRejectTs = 0;
+let scanIdleStopped = false;
+let lastNewScanTs = 0;
+const SCAN_IDLE_MS = 8000;
 
 // Ye text SAP code jaisa dikhta hai? ("sap-10000000012", "SAP CODE: 1000001234", pure 9-10 digit)
 function looksLikeSap(text) {
@@ -5023,6 +5054,7 @@ function applyScanMode() {
     if (scanSettings.mode === 'ocr') { if (st === 2) html5QrCode.pause(false); }
     else if (st === 3) html5QrCode.resume();
   } catch (e) {}
+  if (scanSettings.mode !== 'qr' && !ocrWorker) preloadOcrWorker();
 }
 
 function openScanner(targetId) {
@@ -5032,7 +5064,7 @@ function openScanner(targetId) {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
-  if (!ocrWorker) setTimeout(preloadOcrWorker, 1500);
+  if (!ocrWorker && scanSettings.mode !== 'qr') setTimeout(preloadOcrWorker, 1500);
 
   const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
@@ -5048,7 +5080,11 @@ function openScanner(targetId) {
   document.getElementById('scannerStatus').textContent = '';
   resetAdaptiveScan(); // fresh scan = fresh resolution
   resetScanList();
-  html5QrCode = new Html5Qrcode("scannerReader");
+  html5QrCode = new Html5Qrcode("scannerReader", {
+    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+    verbose: false
+  });
 
   // seedha environment camera se start — deviceId lookup ka wait nahi
   scannerStartPromise = html5QrCode.start(
@@ -5086,6 +5122,9 @@ function openScanner(targetId) {
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   let lastOcrTs = Date.now();
   autoOcrTimer = setInterval(() => {
+    if (scanListItems.length && !scanIdleStopped &&
+    Date.now() - Math.max(lastNewScanTs, listTouchTs) > SCAN_IDLE_MS) stopScanIdle();
+    if (scanIdleStopped) return;
     if (ocrInProgress || scanSettings.mode === 'qr') return;
     if (Date.now() - listTouchTs < 1200) return;   // list is being scrolled, pause OCR
     if (Date.now() - lastOcrTs < scanSettings.ocrMs) return;
@@ -5219,6 +5258,36 @@ function onScanZoomInput(v) {
   document.getElementById('scanZoomOut').textContent = scanZoom.toFixed(1) + 'x';
   if (html5QrCode) html5QrCode.applyVideoConstraints(advExtras(torchOn)).catch(() => {});
 }
+
+// ─── Pinch to zoom (two fingers) ───
+(function () {
+  const ov = document.getElementById('scannerOverlay');
+  let d0 = 0, z0 = 1, lastTs = 0;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  const blocked = e => e.target.closest('#scanCandidatesList, #scannerSettingsPopover, #scanBulkBar');
+
+  ov.addEventListener('touchstart', e => {
+    if (e.touches.length !== 2 || !zoomSupported || blocked(e)) { d0 = 0; return; }
+    d0 = dist(e.touches);
+    z0 = scanZoom;
+  }, { passive: true });
+
+  ov.addEventListener('touchmove', e => {
+    if (!d0 || e.touches.length !== 2 || !zoomSupported) return;
+    e.preventDefault();
+    const now = Date.now();
+    if (now - lastTs < 50) return;
+    lastTs = now;
+    const r = document.getElementById('scanZoomRange');
+    const v = Math.min(+r.max, Math.max(+r.min, z0 * dist(e.touches) / d0));
+    r.value = v;
+    onScanZoomInput(v);
+    lastNewScanTs = Date.now();
+  }, { passive: false });
+
+  ov.addEventListener('touchend', e => { if (e.touches.length < 2) d0 = 0; }, { passive: true });
+  ov.addEventListener('touchcancel', () => { d0 = 0; }, { passive: true });
+})();
 
 function closeScannerSettings() {
   document.getElementById('scannerSettingsPopover').classList.remove('open');
