@@ -5015,6 +5015,16 @@ function onScanDecoded(decodedText) {
   showToast(result.type === 'sap' ? `SAP code mila: ${result.value}` : `Description se search kiya`, 'green');
 }
 
+// OCR only mode: stop the QR decoder (video keeps running for OCR). Other modes: resume it.
+function applyScanMode() {
+  if (!html5QrCode) return;
+  try {
+    const st = html5QrCode.getState();   // 2 = scanning, 3 = paused
+    if (scanSettings.mode === 'ocr') { if (st === 2) html5QrCode.pause(false); }
+    else if (st === 3) html5QrCode.resume();
+  } catch (e) {}
+}
+
 function openScanner(targetId) {
   if (scannerOpening || html5QrCode) return;
   scannerOpening = true;
@@ -5058,6 +5068,7 @@ function openScanner(targetId) {
     scannerOpening = false;
     scannerStartPromise = null;
     if (!html5QrCode) return; // beech mein close ho chuka tha
+    applyScanMode();
     setTimeout(() => {
       document.getElementById('scannerOverlay').classList.add('cam-ready');
     }, 250);
@@ -5148,6 +5159,7 @@ function setScanSetting(k, v) {
   scanSettings[k] = v;
   try { localStorage.setItem(SCAN_SETTINGS_KEY, JSON.stringify(scanSettings)); } catch (e) {}
   syncScanSettingsUI();
+  if (k === 'mode') applyScanMode();
   if (k === 'beep' && v) scanFeedback();   // test beep (this tap also unlocks audio)
 }
 
