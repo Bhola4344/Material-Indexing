@@ -642,7 +642,7 @@ body.loading .header-stripe::before {
       color: rgba(255,255,255,0.6);
       margin-top: 2px;
     }
-#scanCandidatesList { max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; }
+#scanCandidatesList { max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; overscroll-behavior: contain; }
 @keyframes candIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 #scanBulkBar{display:none;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 6px;min-height:44px;flex-shrink:0;color:#fff}
 .bulk-sum{display:flex;gap:6px;flex-wrap:wrap}
@@ -4336,7 +4336,7 @@ function appendScanCandidates(cands, type) {
   });
 
   updateBulkSummary();
-  list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  list.scrollTop = list.scrollHeight;
   document.getElementById('scannerStatus').textContent =
     `${scanListItems.length} mile — scan jaari hai, select kar sakte ho 👇`;
 }
@@ -5255,6 +5255,20 @@ function bumpMaxDimIfNeeded() {
 // ─── OCR (plain text) capture ───
 let ocrInProgress = false;
 
+const OCR_CROP_X = 0.08;
+const OCR_CROP_Y = 0.20;
+function getOcrCrop(v) {
+  const rv = v.getBoundingClientRect();
+  const vw = v.videoWidth, vh = v.videoHeight;
+  const s = Math.max(rv.width / vw, rv.height / vh);
+  const ox = (vw * s - rv.width) / 2, oy = (vh * s - rv.height) / 2;
+  const x = (rv.width * OCR_CROP_X + ox) / s;
+  const y = (rv.height * OCR_CROP_Y + oy) / s;
+  const w = (rv.width * (1 - 2 * OCR_CROP_X)) / s;
+  const h = (rv.height * (1 - 2 * OCR_CROP_Y)) / s;
+  return { x, y, w, h };
+}
+
 const OCR_ENHANCE = true;      // false = purana behaviour
 const BLUR_MIN = 2;            // sharpness limit
 
@@ -5322,12 +5336,13 @@ async function captureAndReadText() {
     try {
 if (OCR_ENHANCE && isBlurry(videoEl)) { ocrInProgress = false; return; }
     const MAX_DIM = currentMaxDim;
-    let targetW = videoEl.videoWidth;
-    let targetH = videoEl.videoHeight;
+    const crop = getOcrCrop(videoEl);
+    let targetW = Math.round(crop.w);
+    let targetH = Math.round(crop.h);
     if (targetW > MAX_DIM) {
       const scale = MAX_DIM / targetW;
       targetW = MAX_DIM;
-      targetH = Math.round(videoEl.videoHeight * scale);
+      targetH = Math.round(crop.h * scale);
     }
         if (!ocrCanvas) {
       ocrCanvas = document.createElement('canvas');
@@ -5337,7 +5352,7 @@ if (OCR_ENHANCE && isBlurry(videoEl)) { ocrInProgress = false; return; }
     canvas.width = targetW;
     canvas.height = targetH;
     ocrCtx.imageSmoothingQuality = 'high';
-ocrCtx.drawImage(videoEl, 0, 0, targetW, targetH);
+ocrCtx.drawImage(videoEl, crop.x, crop.y, crop.w, crop.h, 0, 0, targetW, targetH);
 if (OCR_ENHANCE) ocrEnhance(ocrCtx, targetW, targetH);
     if (!ocrWorker) { ocrInProgress = false; return; }
     const { data: { text } } = await ocrWorker.recognize(canvas);
