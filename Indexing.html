@@ -1171,29 +1171,28 @@ body.loading .header-stripe::before {
     }
 
     .tg-chev {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--muted);
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, color 0.2s, border-color 0.2s;
-    }
-
-    .tg-chev svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .tg-head.tg-open .tg-chev {
-      transform: rotate(180deg);
-      background: rgba(37, 99, 235, 0.1);
       color: var(--accent);
-      border-color: rgba(37, 99, 235, 0.3);
+    }
+
+    .tg-chev::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid currentColor;
+      transform: rotate(-90deg);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tg-head.tg-open .tg-chev::before {
+      transform: none;
     }
 
     #aiPanelBody {
@@ -2394,6 +2393,13 @@ body.loading .upload-zone { opacity: 0.45; }
         <span class="scan-slider"></span>
       </label>
     </div>
+    <div class="scan-settings-row">
+      <span class="scan-settings-label">Auto torch in dark</span>
+      <label class="scan-switch">
+        <input type="checkbox" id="scanDarkTorchToggle" onchange="setScanSetting('darkTorch', this.checked)">
+        <span class="scan-slider"></span>
+      </label>
+    </div>
     <div class="scan-settings-block">
       <div class="scan-settings-label">Scan mode</div>
       <div class="scan-settings-sub">OCR uses more battery</div>
@@ -2588,7 +2594,7 @@ body.loading .upload-zone { opacity: 0.45; }
         <div class="ai-panel" id="aiPanelWrapper">
            <div class="ai-panel-header tg-head" id="aiHead" onclick="toggleAI()" role="button" aria-expanded="false">
             <span style="font-size:14px; flex:1;">🧩 SIMILAR ITEMS</span>
-            <span class="tg-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            <span class="tg-chev"></span>
           </div>
           <div id="aiPanelBody">
             <div class="ai-inner">
@@ -2606,7 +2612,7 @@ body.loading .upload-zone { opacity: 0.45; }
     <div class="download-bar" id="downloadBar">
       <div class="dlbar-toggle-row tg-head tg-open" id="dlHead" onclick="toggleDlBar()" role="button" aria-expanded="true">
         <span style="font-size:14px;">📥 DOWNLOAD & UPLOAD</span>
-        <span class="tg-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        <span class="tg-chev"></span>
       </div>
 
       <div id="dlBarBody">
@@ -4125,17 +4131,26 @@ function extractAllSapCandidates(rawText) {
   lines.forEach(line => {
     const matches = line.match(/(?<!\d)[1-9]\d{9}(?!\d)/g);
     if (!matches) return;
+    const hasSapWord = /\bSAP\b/i.test(line);
     matches.forEach(m => {
       const sap = padSAP(m);
       if (seen.has(sap)) return;
       seen.add(sap);
       const desc = line.replace(m, '').replace(/[-:\s]+/g, ' ').trim().slice(0, 60);
-      results.push({ sap, context: desc });
+      results.push({ sap, context: desc, hasSapWord });
     });
-    });
+  });
+
   const known = new Set(itemMaster.map(i => String(i.sap).trim()));
   const inMaster = results.filter(r => known.has(r.sap));
-  return inMaster.length ? inMaster : results;
+  if (inMaster.length) return inMaster;          // pehle jaisa
+  if (!known.size) return results;               // data load nahi hua to pehle jaisa
+
+  // Master se bahar ke codes: confirm hone par hi dikhao
+  return results.filter(r => {
+    unknownSeen[r.sap] = (unknownSeen[r.sap] || 0) + 1;
+    return r.hasSapWord || unknownSeen[r.sap] >= 2;
+  });
 }
 
 // ─── Extract SAP code or Description from scanned sticker text ───
@@ -4220,6 +4235,7 @@ function fillNotifSearchField(val) {
 }
 
 // ─── Live scan list ───
+let unknownSeen = {};   // master se bahar ke codes ki confirmation count
 let scanSeen = new Set();
 let scanListItems = [];
 let scanListType = null;
@@ -4239,6 +4255,7 @@ let listTouchTs = 0;
 
 function resetScanList() {
   scanSeen = new Set();
+  unknownSeen = {};
   scanListItems = [];
   scanListType = null;
   noNewStreak = 0;
@@ -4294,12 +4311,15 @@ function onBulkToggle(on) {
 
 function stopScanIdle() {
   scanIdleStopped = true;
+  torchWasOn = torchOn;      // NEW
+  setTorchState(false);      // NEW
   try { if (html5QrCode && html5QrCode.getState() === 2) html5QrCode.pause(false); } catch (e) {}
   const st = document.getElementById('scannerStatus');
   st.textContent = `⏸ ${scanListItems.length} mile — scan band. Dobara chalane ke liye yahan tap karo`;
   st.style.pointerEvents = 'auto';
   st.style.cursor = 'pointer';
 }
+
 function resumeScanIdle() {
   if (!scanIdleStopped || !html5QrCode) return;
   scanIdleStopped = false;
@@ -4307,6 +4327,7 @@ function resumeScanIdle() {
   noNewStreak = 0;
   ocrPaused = false;
   applyScanMode();
+  if (torchWasOn) { setTorchState(true); torchWasOn = false; }
   const st = document.getElementById('scannerStatus');
   st.style.pointerEvents = '';
   st.style.cursor = '';
@@ -4974,9 +4995,45 @@ let failedAttempts = 0;       // OCR fail counter
 let qrFailStart = null;       // QR continuous-fail timer
 let qrCurrentRes = { width: 1280, height: 720 }; // QR resolution
 
+// ── Auto torch in dark ──
+let darkCv = null, darkCx = null, darkTimer = null, darkCount = 0, darkManualOff = false;
+const DARK_LUMA = 60;
+
+function checkDark() {
+  if (!scanSettings.darkTorch || !html5QrCode || !torchSupported || torchOn || darkManualOff || scanIdleStopped) return;
+  const v = document.querySelector('#scannerReader video');
+  if (!v || !v.videoWidth) return;
+  if (!darkCv) {
+    darkCv = document.createElement('canvas');
+    darkCv.width = 32; darkCv.height = 24;
+    darkCx = darkCv.getContext('2d', { willReadFrequently: true });
+  }
+  darkCx.drawImage(v, 0, 0, 32, 24);
+  const d = darkCx.getImageData(0, 0, 32, 24).data;
+  let sum = 0;
+  for (let i = 0; i < d.length; i += 4) sum += (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+  if (sum / (d.length / 4) < DARK_LUMA) {
+    if (++darkCount >= 2) { darkCount = 0; setTorchState(true); }
+  } else {
+    darkCount = 0;
+  }
+}
+
+let torchWasOn = false;   // idle-stop se pehle torch on tha ya nahi
+
+// torch ko seedha on/off karo (manual-off flag ko nahi chhedta)
+function setTorchState(on) {
+  if (!html5QrCode || !torchSupported || torchOn === on) return;
+  torchOn = on;
+  html5QrCode.applyVideoConstraints(advExtras(on))
+    .then(() => { document.getElementById('torchBtn').classList.toggle('on', torchOn); })
+    .catch(() => {});
+}
+
 function toggleTorch() {
   if (!html5QrCode || !torchSupported) return;
   torchOn = !torchOn;
+  if (!torchOn) darkManualOff = true;
   html5QrCode.applyVideoConstraints(advExtras(torchOn))
     .then(() => {
       document.getElementById('torchBtn').classList.toggle('on', torchOn);
@@ -5119,6 +5176,10 @@ function openScanner(targetId) {
     html5QrCode = null;
     document.getElementById('scannerStatus').textContent = 'Camera access failed';
   });
+  darkManualOff = false;
+  darkCount = 0;
+  if (darkTimer) clearInterval(darkTimer);
+  darkTimer = setInterval(checkDark, 700);
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   let lastOcrTs = Date.now();
   autoOcrTimer = setInterval(() => {
@@ -5166,6 +5227,8 @@ function closeScanner() {
     }
   }
   torchOn = false;
+  torchWasOn = false;
+  if (darkTimer) { clearInterval(darkTimer); darkTimer = null; }
   torchSupported = false;
   const tb = document.getElementById('torchBtn');
   tb.style.visibility = 'hidden';
@@ -5187,7 +5250,7 @@ function onAutoOpenToggleChange(isOn) {
 
 // ─── Scanner settings ───
 const SCAN_SETTINGS_KEY = 'scannerSettings';
-const SCAN_DEFAULTS = { beep: false, mode: 'auto', ocrMs: 800, torchAuto: false };
+const SCAN_DEFAULTS = { beep: false, mode: 'auto', ocrMs: 800, torchAuto: false, darkTorch: false };
 let scanSettings = Object.assign({}, SCAN_DEFAULTS);
 try { Object.assign(scanSettings, JSON.parse(localStorage.getItem(SCAN_SETTINGS_KEY)) || {}); } catch (e) {}
 let scanZoom = 1;   // zoom is per session, not saved
@@ -5206,6 +5269,7 @@ function syncScanSettingsUI() {
   const s = scanSettings;
   document.getElementById('scanBeepToggle').checked = s.beep;
   document.getElementById('scanTorchAutoToggle').checked = s.torchAuto;
+  document.getElementById('scanDarkTorchToggle').checked = s.darkTorch;
   document.querySelectorAll('#scanModeSeg button').forEach(b => b.classList.toggle('sel', b.dataset.v === s.mode));
   document.querySelectorAll('#scanOcrSeg button').forEach(b => b.classList.toggle('sel', +b.dataset.v === s.ocrMs));
   document.getElementById('scanOcrBlock').style.opacity = s.mode === 'qr' ? '0.4' : '1';
