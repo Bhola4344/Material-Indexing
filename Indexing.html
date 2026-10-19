@@ -642,7 +642,7 @@ body.loading .header-stripe::before {
       color: rgba(255,255,255,0.6);
       margin-top: 2px;
     }
-#scanCandidatesList { max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; overscroll-behavior: contain; }
+#scanCandidatesList { max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch; flex-shrink: 0; overscroll-behavior: contain; touch-action: pan-y; will-change: scroll-position; transform: translateZ(0); }
 @keyframes candIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 #scanBulkBar{display:none;align-items:center;justify-content:space-between;gap:10px;margin:0 12px 6px;min-height:44px;flex-shrink:0;color:#fff}
 .bulk-sum{display:flex;gap:6px;flex-wrap:wrap}
@@ -4228,6 +4228,15 @@ let ocrPaused = false;
 let lastThumb = null;
 let thumbCanvas = null, thumbCtx = null;
 
+// tracks when the user last touched/scrolled the scan list
+let listTouchTs = 0;
+(function () {
+  const l = document.getElementById('scanCandidatesList');
+  const mark = () => { listTouchTs = Date.now(); };
+  ['touchstart', 'touchmove', 'touchend', 'wheel'].forEach(ev =>
+    l.addEventListener(ev, mark, { passive: true }));
+})();
+
 function resetScanList() {
   scanSeen = new Set();
   scanListItems = [];
@@ -4320,6 +4329,8 @@ function appendScanCandidates(cands, type) {
     document.getElementById('scanBulkBar').style.display = type === 'loc' ? 'none' : 'flex';
   }
 
+  // auto-scroll only if the user is already at the bottom and not touching the list
+  const stick = (list.scrollHeight - list.scrollTop - list.clientHeight < 60) && (Date.now() - listTouchTs > 1200);
   fresh.forEach(c => {
     scanSeen.add(c.sap || c.location);
     const idx = scanListItems.push(c) - 1;
@@ -4336,7 +4347,7 @@ function appendScanCandidates(cands, type) {
   });
 
   updateBulkSummary();
-  list.scrollTop = list.scrollHeight;
+  if (stick) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
   document.getElementById('scannerStatus').textContent =
     `${scanListItems.length} mile — scan jaari hai, select kar sakte ho 👇`;
 }
@@ -5065,6 +5076,7 @@ function openScanner(targetId) {
   let lastOcrTs = Date.now();
   autoOcrTimer = setInterval(() => {
     if (ocrInProgress || scanSettings.mode === 'qr') return;
+    if (Date.now() - listTouchTs < 1200) return;   // list is being scrolled, pause OCR
     if (Date.now() - lastOcrTs < scanSettings.ocrMs) return;
     lastOcrTs = Date.now();
     if (ocrPaused) {
