@@ -410,14 +410,23 @@ body.loading .header-stripe::before {
       padding: 16px;
       padding-top: calc(16px + env(safe-area-inset-top, 0px));
       color: #fff;
+    }    .scanner-header { gap: 10px; }
+    .sh-ic {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 4px 10px rgba(37,99,235,.35);
+      display: flex; align-items: center; justify-content: center;
     }
-    .scanner-header h3 {
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .sh-ic svg { width: 19px; height: 19px; }
+    .sh-tx { flex: 1; text-align: left; min-width: 0; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+    .sh-t1 { font-size: 14px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; line-height: 1.2; }
+    .sh-t2 {
+      display: flex; align-items: center; justify-content: flex-start; gap: 6px;
+      font-size: 10.5px; font-weight: 500; letter-spacing: .4px; text-transform: uppercase;
+      color: rgba(255,255,255,.7); margin-top: 3px; white-space: nowrap;
     }
+    .sh-t2 em { width: 4px; height: 4px; border-radius: 50%; background: var(--c2, #22d3ee); display: inline-block; flex-shrink: 0; }
+
     #scannerCloseBtn {
       background: rgba(255, 255, 255, 0.15);
       border: none;
@@ -1308,7 +1317,7 @@ body.loading .header-stripe::before {
       align-items: center;
       gap: 6px;
       position: relative;
-      padding: 4px 5px 4px 10px;
+      padding: 5px 6px 5px 12px;
       border-radius: 20px;
       background: rgba(37, 99, 235, 0.06);
       border: 1px solid rgba(37, 99, 235, 0.25);
@@ -1331,11 +1340,11 @@ body.loading .header-stripe::before {
       height: 0;
     }
 
-    /* toggle track */
+        /* toggle track */
     .radio-label::after {
       content: '';
-      width: 32px;
-      height: 18px;
+      width: 34px;
+      height: 20px;
       flex-shrink: 0;
       border-radius: 20px;
       background: rgba(37, 99, 235, 0.3);
@@ -1347,9 +1356,9 @@ body.loading .header-stripe::before {
       content: '';
       position: absolute;
       top: 50%;
-      right: 22px;
-      width: 12px;
-      height: 12px;
+      right: 24px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: #fff;
       transform: translateY(-50%);
@@ -1366,7 +1375,7 @@ body.loading .header-stripe::before {
       background: var(--green);
     }
     .radio-label:has(input:checked)::before {
-      right: 8px;
+      right: 9px;
     }
 
     .btn-dl {
@@ -1439,12 +1448,12 @@ body.loading .header-stripe::before {
       gap: 6px;
       margin-bottom: 12px;
     }
-
     .dl-tab {
       flex: 1;
-      padding: 9px 8px;
+      min-width: 0;
+      padding: 9px 4px;
       border-radius: 10px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       border: 1px solid var(--border);
       background: var(--surface2);
@@ -1540,7 +1549,7 @@ body.loading .header-stripe::before {
   border: 1px solid rgba(37, 99, 235, 0.25);
   transition: background 0.2s, border-color 0.2s;
   border-radius: 20px;
-  padding: 4px 6px 4px 12px;
+  padding: 5px 6px 5px 12px;
   margin: 0 0 8px 0;
   cursor: pointer;
   user-select: none;
@@ -1557,8 +1566,8 @@ body.loading .header-stripe::before {
 }
 .zcap-sw {
   position: relative;
-  width: 32px;
-  height: 18px;
+  width: 34px;
+  height: 20px;
   flex-shrink: 0;
 }
 .zcap-sw input {
@@ -1577,8 +1586,8 @@ body.loading .header-stripe::before {
 .zcap-sl::before {
   content: '';
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   left: 3px;
   top: 3px;
   background: #fff;
@@ -1594,6 +1603,23 @@ body.loading .header-stripe::before {
 .zcap-pill:has(input:checked) .zcap-text {
   color: #047857;
 }
+
+    /* ─── Ledger settings ─── */
+    .lg-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface2); padding: 10px 12px; margin-bottom: 12px; }
+    .lg-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; }
+    #lgBody { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    #lgBody.collapsed { grid-template-rows: 0fr; }
+    #lgBody > .lg-in { overflow: hidden; min-height: 0; padding-top: 10px; }
+    #lgBody.collapsed > .lg-in { padding-top: 0; }
+    .lg-thr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .lg-thr > div { background: var(--surface); border: 1.5px solid var(--lc); border-radius: 10px; padding: 8px; text-align: center; }
+    .lg-thr .a { --lc: rgba(180, 83, 9, 0.5); --lt: var(--amber); }
+    .lg-thr .b { --lc: rgba(234, 88, 12, 0.5); --lt: #ea580c; }
+    .lg-thr .c { --lc: rgba(220, 38, 38, 0.5); --lt: var(--red); }
+    .lg-thr small { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; color: var(--lt); }
+    .lg-thr input { width: 100%; border: 2px solid var(--border); border-radius: 8px; padding: 7px 4px; font: 700 15px 'JetBrains Mono', monospace; text-align: center; background: var(--surface); color: var(--text); outline: none; -webkit-appearance: none; }
+    .lg-thr input:focus { border-color: var(--accent); }
+    .lg-thr span { font-size: 10px; color: var(--muted); }
 
     /* ─── Upload Zone ─── */
     .upload-zone {
@@ -2366,7 +2392,11 @@ body.loading .upload-zone { opacity: 0.45; }
     <!-- Scanner Overlay -->
   <div id="scannerOverlay">
 <div class="scanner-header" style="position:relative;">
-  <h3 id="scannerTitleText">📷 Scan Item Code</h3>
+  <span class="sh-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></span>
+  <div class="sh-tx">
+    <div class="sh-t1" id="scannerTitleText">SCAN SAP CODE</div>
+    <div class="sh-t2" id="scannerModeLabel"></div>
+  </div>
   <div style="display:flex; align-items:center; gap:8px;">
     <button id="scannerSettingsBtn" onclick="toggleScannerSettings()" aria-label="Scanner settings">⚙️</button>
     <button id="scannerCloseBtn" onclick="closeScanner()">✕</button>
@@ -2454,7 +2484,6 @@ body.loading .upload-zone { opacity: 0.45; }
   </label>
 </div>
 <div id="scanCandidatesList" style="display:none;"></div>
-    <div class="scanner-hint" id="scannerHint">📷 Align the sticker in frame — auto-detects</div>
   </div>
 
   <div class="app-shell">
@@ -2619,8 +2648,9 @@ body.loading .upload-zone { opacity: 0.45; }
         <div class="dlbar-inner">
           <div class="dl-tabs">
             <button class="dl-tab active" id="tabNormal" onclick="switchTab('normal')">📥 Download</button>
-            <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">📤 Upload & Enrich</button>
-	    <button class="dl-tab" id="tabStock" onclick="switchTab('stock')">📊 Stock Upload</button>
+            <button class="dl-tab" id="tabUpload" onclick="switchTab('upload')">✨ Enrich</button>
+	    <button class="dl-tab" id="tabStock" onclick="switchTab('stock')">📊 Upload</button>
+            <button class="dl-tab" id="tabLedger" onclick="switchTab('ledger')">📒 Ledger</button>
           </div>
 
           <!-- Normal download -->
@@ -2715,6 +2745,36 @@ body.loading .upload-zone { opacity: 0.45; }
       <button class="btn btn-ghost" style="width:100%;" onclick="resetStockUpload()">↺ Upload Another File</button>
         </div>
   </div>
+</div>
+
+<div id="panelLedger" style="display:none;">
+  <div class="lg-card">
+    <div class="dlbar-toggle-row tg-head tg-open" id="lgHead" onclick="toggleLgSet()" role="button" aria-expanded="true">
+      <span class="lg-title">⚙️ Category settings (days since last issue)</span>
+      <span class="tg-chev"></span>
+    </div>
+    <div id="lgBody">
+      <div class="lg-in">
+        <div class="lg-thr">
+          <div class="a"><small>Slow</small><input type="number" id="lgSlow" value="90" min="1" inputmode="numeric"><span>days over</span></div>
+          <div class="b"><small>Non Moving</small><input type="number" id="lgNon" value="180" min="1" inputmode="numeric"><span>days over</span></div>
+          <div class="c"><small>Dead</small><input type="number" id="lgDead" value="365" min="1" inputmode="numeric"><span>days over</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <label class="upload-zone" id="ledgerUploadZone">
+    <input type="file" id="ledgerUploadFile" accept=".csv,.xlsx,.xls" style="display:none;">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+      <line x1="8" y1="17" x2="16" y2="17" />
+    </svg>
+    <span>Select Ledger CSV or Excel file</span>
+    <span style="font-size:11px;color:var(--muted);margin-top:2px;">SAP, Description, Issue Qty, Issue Date — auto-detect</span>
+  </label>
 </div>
 
 <div class="tools-section">
@@ -3291,7 +3351,7 @@ function phTime(ts) {
 // server list ke upar local pending changes (120 sec tak)
 function mergePhys(rows) {
   const now = Date.now();
-  let list = rows.map(r => ({ sn: r.sn, sap: r.sap, name: r.name, loc: r.loc, sys: r.sys, phys: r.phys, ts: r.ts, remark: r.remark || '' }));
+  let list = rows.map(r => ({ sn: r.sn, sap: r.sap, name: r.name, loc: (r.loc === '—' ? 'No Loc' : r.loc), sys: r.sys, phys: r.phys, ts: r.ts, remark: r.remark || '' }));
   Object.keys(physOps).forEach(k => {
     const op = physOps[k], s = list.find(x => String(x.sn) === k), exp = now - op.ts > 120000;
     if (op.type === 'remove') {
@@ -3377,7 +3437,7 @@ function savePhys() {
 
   physList = physList.filter(p => String(p.sn) !== String(it.sn));
   if (val !== sys) {
-    const item = { sn: it.sn, sap, name: it.name, loc: it.location || '—', sys, phys: val, ts, remark };
+    const item = { sn: it.sn, sap, name: it.name, loc: it.location || 'No Loc', sys, phys: val, ts, remark };
     physList.unshift(item);
     physOps[it.sn] = { type: 'set', ts, item };
     binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts, remark });
@@ -3444,7 +3504,7 @@ function clrAllPhys() {
 function downloadPhys() {
   if (!physList.length) { showToast('No pending physical adjustments 🎉', 'green'); return; }
     const rows = [["SAP", "Description", "Location", "System Stock", "Physical Stock", "Difference", "Type", "Date", "Remark"]];
-  physList.forEach(p => rows.push([p.sap, p.name, p.loc, p.sys, p.phys, p.phys - p.sys, p.phys < p.sys ? 'Short' : 'Excess', phTime(p.ts), p.remark || '']));
+  physList.forEach(p => rows.push([p.sap, p.name, (p.loc === 'No Loc' ? '' : p.loc), p.sys, p.phys, p.phys - p.sys, p.phys < p.sys ? 'Short' : 'Excess', phTime(p.ts), p.remark || '']));
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
@@ -4236,6 +4296,57 @@ function fillNotifSearchField(val) {
 
 // ─── Live scan list ───
 let unknownSeen = {};   // master se bahar ke codes ki confirmation count
+let ocrConfirm = {};    // OCR code kitne frames me dikha
+let scanRows = new Map(); // key -> list row
+const OCR_CONFIRM = 2;  // itne frames me dikhe tabhi list me aaye
+
+// Is frame me jo codes nahi dikhe unhe check karo, galat padhe hue auto hata do
+function pruneScanRows(frame) {
+  const now = new Set(frame.map(c => c.sap));
+
+  // confirmation lagatar frames me ho, beech me tootne par counter reset
+  Object.keys(ocrConfirm).forEach(k => {
+    if (!now.has(k) && !scanSeen.has(k)) delete ocrConfirm[k];
+  });
+
+  let removed = false;
+  scanRows.forEach((row, k) => {
+    const c = row._c;
+    if (!c || !c.sap) return;
+    if (now.has(k)) {
+      row._hits = (row._hits || OCR_CONFIRM) + 1;
+      row._miss = 0;
+      return;
+    }
+    row._miss = (row._miss || 0) + 1;
+    if ((row._hits || OCR_CONFIRM) < OCR_CONFIRM + 1 && row._miss >= 2) {
+      scanListItems = scanListItems.filter(x => x !== c);
+      scanRows.delete(k);
+      scanSeen.delete(k);
+      delete ocrConfirm[k];
+      row.remove();
+      removed = true;
+    }
+  });
+
+  if (removed) {
+    updateBulkSummary();
+    if (!scanListItems.length) {
+      document.getElementById('scanCandidatesList').style.display = 'none';
+      document.getElementById('scanBulkBar').style.display = 'none';
+      scanListType = null;
+    }
+  }
+}
+
+function confirmOcrCands(cands) {
+  return cands.filter(c => {
+    const k = c.sap;
+    if (scanSeen.has(k)) return true;   // list me pehle se hai (kram ke liye chahiye)
+    ocrConfirm[k] = (ocrConfirm[k] || 0) + 1;
+    return ocrConfirm[k] >= OCR_CONFIRM;
+  });
+}
 let scanSeen = new Set();
 let scanListItems = [];
 let scanListType = null;
@@ -4256,6 +4367,8 @@ let listTouchTs = 0;
 function resetScanList() {
   scanSeen = new Set();
   unknownSeen = {};
+  ocrConfirm = {};
+  scanRows = new Map();
   scanListItems = [];
   scanListType = null;
   noNewStreak = 0;
@@ -4366,7 +4479,7 @@ function sceneChanged() {
 function appendScanCandidates(cands, type) {
   const list = document.getElementById('scanCandidatesList');
   const fresh = cands.filter(c => !scanSeen.has(c.sap || c.location));
-   if (!fresh.length) { registerNoNew(); return; }
+  if (!fresh.length) { registerNoNew(); return; }
   scanFeedback();
   noNewStreak = 0;
   lastNewScanTs = Date.now();
@@ -4374,29 +4487,45 @@ function appendScanCandidates(cands, type) {
   if (!scanListItems.length) {
     scanListType = type;
     list.innerHTML = '';
+    scanRows = new Map();
     list.style.display = 'block';
     document.getElementById('scanBulkBar').style.display = type === 'loc' ? 'none' : 'flex';
   }
 
-  // auto-scroll only if the user is already at the bottom and not touching the list
+  const keyOf = c => c.sap || c.location;
+  const liveRow = c => { const r = scanRows.get(keyOf(c)); return r && r.isConnected ? r : null; };
+
   const stick = (list.scrollHeight - list.scrollTop - list.clientHeight < 60) && (Date.now() - listTouchTs > 1200);
+  let appendedAtEnd = false;
   fresh.forEach(c => {
-    scanSeen.add(c.sap || c.location);
-    const idx = scanListItems.push(c) - 1;
-    const row = document.createElement('div');
+    scanSeen.add(keyOf(c));
     const hasLoc = c.sap ? bulkHasLoc(bulkFind(c.sap)) : true;
+    const row = document.createElement('div');
     row.className = 'cand-row cand-new' + (c.sap ? (hasLoc ? ' cand-ok' : ' cand-no') : '');
-    row.dataset.i = idx;
+    row._c = c;
     row.innerHTML = `<div class="cand-main">
       <div class="cand-sap">${c.sap || c.location}</div>
       ${c.context ? `<div class="cand-ctx">${c.context}</div>` : ''}
       ${c.sap ? bulkMetaHTML(c.sap) : ''}
     </div>${c.sap ? bulkStockHTML(c.sap) : ''}`;
-    list.appendChild(row);
+
+    // frame ke kram ke hisaab se jagah dhundo
+    const pos = cands.indexOf(c);
+    let placed = false;
+    for (let p = pos - 1; p >= 0 && !placed; p--) {
+      const r = liveRow(cands[p]);
+      if (r) { r.after(row); scanListItems.splice(scanListItems.indexOf(r._c) + 1, 0, c); placed = true; }
+    }
+    for (let p = pos + 1; p < cands.length && !placed; p++) {
+      const r = liveRow(cands[p]);
+      if (r) { r.before(row); scanListItems.splice(scanListItems.indexOf(r._c), 0, c); placed = true; }
+    }
+    if (!placed) { list.appendChild(row); scanListItems.push(c); appendedAtEnd = true; }
+    scanRows.set(keyOf(c), row);
   });
 
   updateBulkSummary();
-  if (stick) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+  if (stick && appendedAtEnd) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
   document.getElementById('scannerStatus').textContent =
     `${scanListItems.length} mile — scan jaari hai, select kar sakte ho 👇`;
 }
@@ -4404,7 +4533,7 @@ function appendScanCandidates(cands, type) {
 document.getElementById('scanCandidatesList').addEventListener('click', e => {
   const row = e.target.closest('.cand-row');
   if (!row) return;
-  const c = scanListItems[+row.dataset.i];
+  const c = row._c;
   const type = scanListType;
   const target = scanTarget;
   scanTarget = null;
@@ -5125,11 +5254,8 @@ function openScanner(targetId) {
 
   const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
-    ? '📷 Scan Location'
-    : '📷 Scan Item Code';
-  document.getElementById('scannerHint').textContent = isLocationScan
-  ? '📷 Align the location sticker in frame'
-  : '📷 Align the SAP code sticker in frame';
+    ? 'SCAN LOCATION'
+    : 'SCAN SAP CODE';
 
   document.getElementById('scannerOverlay').classList.add('open');
   document.getElementById('scannerOverlay').classList.remove('cam-ready');
@@ -5265,8 +5391,19 @@ function setScanSetting(k, v) {
   if (k === 'beep' && v) scanFeedback();   // test beep (this tap also unlocks audio)
 }
 
+
+function updateScannerModeLabel() {
+  const el = document.getElementById('scannerModeLabel');
+  if (!el) return;
+  const m = scanSettings.mode;
+  el.innerHTML = m === 'qr' ? 'QR MODE'
+    : m === 'ocr' ? 'OCR MODE'
+    : 'QR Code<em></em>PLAIN TEXT';
+}
+
 function syncScanSettingsUI() {
   const s = scanSettings;
+  updateScannerModeLabel();
   document.getElementById('scanBeepToggle').checked = s.beep;
   document.getElementById('scanTorchAutoToggle').checked = s.torchAuto;
   document.getElementById('scanDarkTorchToggle').checked = s.darkTorch;
@@ -5526,7 +5663,9 @@ if (OCR_ENHANCE) ocrEnhance(ocrCtx, targetW, targetH);
     if (!cleaned) { noResult(); return; }
 
     if (scanTarget === 'notifSearchBox') {
-      const saps = extractAllSapCandidates(fixSapTokens(cleaned));
+      const rawSaps = extractAllSapCandidates(fixSapTokens(cleaned));
+pruneScanRows(rawSaps);
+const saps = confirmOcrCands(rawSaps);
       if (saps.length === 0) { noResult(); return; }
       if (!listStarted && saps.length === 1) {
         scanTarget = null;
@@ -5554,7 +5693,9 @@ if (OCR_ENHANCE) ocrEnhance(ocrCtx, targetW, targetH);
       return;
     }
 
-    const saps = extractAllSapCandidates(fixSapTokens(cleaned));
+    const rawSaps = extractAllSapCandidates(fixSapTokens(cleaned));
+pruneScanRows(rawSaps);
+const saps = confirmOcrCands(rawSaps);
     if (saps.length === 0) { noResult(); return; }
     if (!listStarted && saps.length === 1) {
       closeScanner();
@@ -5592,11 +5733,28 @@ await w.setParameters({
     function switchTab(tab) {
   document.getElementById('panelNormal').style.display = tab === 'normal' ? 'block' : 'none';
   document.getElementById('panelUpload').style.display = tab === 'upload' ? 'block' : 'none';
-  document.getElementById('panelStock').style.display = tab === 'stock' ? 'block' : 'none';
+    document.getElementById('panelStock').style.display = tab === 'stock' ? 'block' : 'none';
+  document.getElementById('panelLedger').style.display = tab === 'ledger' ? 'block' : 'none';
   document.getElementById('tabNormal').classList.toggle('active', tab === 'normal');
   document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
   document.getElementById('tabStock').classList.toggle('active', tab === 'stock');
+  document.getElementById('tabLedger').classList.toggle('active', tab === 'ledger');
 }
+
+// ─── Ledger settings show/hide (persisted) ───
+let lgOpen = localStorage.getItem('lgSetCollapsed') !== 'true';
+function applyLgOpen() {
+  document.getElementById('lgBody').classList.toggle('collapsed', !lgOpen);
+  const h = document.getElementById('lgHead');
+  h.classList.toggle('tg-open', lgOpen);
+  h.setAttribute('aria-expanded', lgOpen);
+}
+function toggleLgSet() {
+  lgOpen = !lgOpen;
+  applyLgOpen();
+  localStorage.setItem('lgSetCollapsed', (!lgOpen).toString());
+}
+applyLgOpen();
 
 // ─── Quick Tools (dynamic footer links) ───
 const TOOL_ICONS = ['🏷️','🗂️','📋','🖨️','📦','🔧','📊','🔗'];
@@ -5959,7 +6117,7 @@ itemMaster.filter(i => !i.location || !i.location.trim()).forEach(i =>
       } else {
         rows = [["SAP", "Description", "Location"]];
 itemMaster.forEach(i =>
-  rows.push([i.sap || '', i.name || '', i.location || '(Not Assigned)']));
+  rows.push([i.sap || '', i.name || '', i.location || '']));
         filename = 'material_full_backup.csv';
       }
       const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
