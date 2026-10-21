@@ -2326,6 +2326,22 @@ body.loading .upload-zone { opacity: 0.45; }
   border-radius: 14px 14px 0 0;
   padding-top: 8px;
 }
+
+/* ─── Moving tab (5th bell tab) ─── */
+.notif-tabs{grid-template-columns:repeat(5,1fr)}
+.notif-pill{width:calc((100% - 24px)/5)}
+.sa-fch.mv{gap:5px}
+.sa-fch.mv .sa-fchip{flex-direction:column;gap:1px;padding:0 2px}
+.sa-fch.mv .sa-fchip span{font-size:9.5px;letter-spacing:.2px}
+.sa-fchip.fa{--c:var(--green);--t:rgba(5,150,105,.09)}
+.sa-fchip.sl{--c:var(--amber);--t:rgba(180,83,9,.09)}
+.sa-fchip.nm{--c:#ea580c;--t:rgba(234,88,12,.09)}
+.sa-fchip.dd{--c:var(--red);--t:rgba(220,38,38,.09)}
+.sa-cap.fa{--cb:rgba(5,150,105,.4);--ct:rgba(5,150,105,.12);--cc:var(--green)}
+.sa-cap.sl{--cb:rgba(180,83,9,.4);--ct:rgba(180,83,9,.12);--cc:var(--amber)}
+.sa-cap.nm{--cb:rgba(234,88,12,.4);--ct:rgba(234,88,12,.12);--cc:#ea580c}
+.sa-cap.dd{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
+.lg-status{margin-bottom:10px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface2);line-height:1.55}
 </style>
 </head>
 
@@ -2554,6 +2570,7 @@ body.loading .upload-zone { opacity: 0.45; }
 <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')"><i>🖨️</i>Bins<span class="tab-badge hidden" id="notifTabBinBadge">0</span></button>
 <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')"><i>🚨</i>Alerts<span class="tab-badge hidden" id="notifTabAlertBadge">0</span></button>
 <button class="notif-tab" id="notifTabPhys" onclick="switchNotifTab('phys')"><i>⚖️</i>Physical<span class="tab-badge hidden" id="notifTabPhysBadge">0</span></button>
+<button class="notif-tab" id="notifTabMov" onclick="switchNotifTab('mov')"><i>📈</i>Moving</button>
     </div>
 <div class="notif-slot">
 <div class="sa-fch" id="saFilter"></div>
@@ -2770,15 +2787,41 @@ body.loading .upload-zone { opacity: 0.45; }
     <div id="lgBody">
       <div class="lg-in">
         <div class="lg-thr">
-          <div class="a"><small>Slow</small><input type="number" id="lgSlow" value="90" min="1" inputmode="numeric"><span>days over</span></div>
+          <div class="a"><small>Slow Moving</small><input type="number" id="lgSlow" value="90" min="1" inputmode="numeric"><span>days over</span></div>
           <div class="b"><small>Non Moving</small><input type="number" id="lgNon" value="180" min="1" inputmode="numeric"><span>days over</span></div>
-          <div class="c"><small>Dead</small><input type="number" id="lgDead" value="365" min="1" inputmode="numeric"><span>days over</span></div>
+          <div class="c"><small>Dead Stock</small><input type="number" id="lgDead" value="365" min="1" inputmode="numeric"><span>days over</span></div>
         </div>
       </div>
     </div>
   </div>
-  <label class="upload-zone" id="ledgerUploadZone">
-    <input type="file" id="ledgerUploadFile" accept=".csv,.xlsx,.xls" style="display:none;">
+  <div class="proc-panel" id="lgProcPanel">
+    <div class="proc-head">
+      <div class="proc-spin" id="lgProcSpin"></div>
+      <div>
+        <div class="proc-title" id="lgProcTitle">Processing file…</div>
+        <div class="proc-sub" id="lgProcSub"></div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="lgProgFill"></div></div>
+    <div class="steps" id="lgStepsList">
+      <div class="step" data-step="0"><div class="step-dot"></div><span>Reading file</span></div>
+      <div class="step" data-step="1"><div class="step-dot"></div><span>Detecting SAP, Date &amp; Qty columns</span></div>
+      <div class="step" data-step="2"><div class="step-dot"></div><span>Calculating categories</span></div>
+      <div class="step" data-step="3"><div class="step-dot"></div><span>Saving to sheet</span></div>
+    </div>
+    <div class="proc-result" id="lgResultBox">
+      <div class="proc-result-stats">
+        <div class="pstat total"><div class="pstat-num" id="lgRTotal">0</div><div class="pstat-label">Ledger Items</div></div>
+        <div class="pstat matched"><div class="pstat-num" id="lgRSaved">0</div><div class="pstat-label">Saved</div></div>
+        <div class="pstat skipped"><div class="pstat-num" id="lgRSkipped">0</div><div class="pstat-label">Skipped</div></div>
+      </div>
+      <div class="proc-result-msg" id="lgResultMsg"></div>
+      <button class="btn btn-ghost" style="width:100%;" onclick="resetLedgerUpload()">↺ Upload Another File</button>
+    </div>
+  </div>
+
+  <label class="upload-zone" id="ledgerUploadZone" onclick="if(!guard('stock')){event.preventDefault();}">
+    <input type="file" id="ledgerUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleLedgerUpload(this)">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
       stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);margin-bottom:6px;">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -2823,7 +2866,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbyOgSTo91fvUBu2tFIlGpg2Ma89-APG2sarLq64LdiKGK0r3xe56T34weahvAyoUTGX/exec";
+    const API = "https://script.google.com/macros/s/AKfycbyGpaEt0BcRsCBO1yfg2Q52nXd-LjGCbca8sejYGgXh-5PRoe_aHKUa-7TLI58ZfH0D/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycby9jHO68yOjgs9yO6Hp6j9YogNai0ZhsvGuY5i-KSWjrsvMOhsnJjGHn1R-E9iXfpkZGw/exec";
 let actQ = [], actTimer = null, actBusy = false;
 try { actQ = JSON.parse(localStorage.getItem('actQueue') || '[]'); } catch (e) {}
@@ -2934,7 +2977,7 @@ if (document.getElementById('bellBadge')) {
   document.getElementById('bellBadge').textContent = c;
   document.getElementById('bellBadge').classList.toggle('hidden', c === 0);
   document.getElementById('bellBtn').classList.toggle('has-alert', c > 0);
-  if (notifOpen) { renderTabBadges(); if (activeNotifTab === 'alert') renderAlertList(); }
+  if (notifOpen) { renderTabBadges(); if (activeNotifTab === 'alert') renderAlertList(); if (activeNotifTab === 'mov') renderMovList(); }
 }
 
 }
@@ -3527,6 +3570,313 @@ function downloadPhys() {
   showToast('Downloaded: physical_adjustments.csv', 'blue');
 }
 
+
+// ═══════════ LEDGER → MOVING STOCK ═══════════
+const MOV_CATS = { fa: 'Fast Moving', sl: 'Slow Moving', nm: 'Non Moving', dd: 'Dead Stock' };
+let movList = [], movLocalTs = 0, movFilter = 'all', movLimit = 150;
+try { movList = JSON.parse(localStorage.getItem('movCache')) || []; } catch (e) { movList = []; }
+
+function movNorm(r) {
+  const k = Object.keys(MOV_CATS).find(x => MOV_CATS[x] === r.cat) || 'dd';
+  return { sap: String(r.sap).trim(), name: r.name || '', k, last: Number(r.last) || 0, qty: Number(r.qty) || 0, stock: r.stock, ts: Number(r.ts) || 0 };
+}
+function movItem(sap) { return itemMaster.find(i => String(i.sap).trim() === sap); }
+function movSave() { try { localStorage.setItem('movCache', JSON.stringify(movList)); } catch (e) {} }
+function lgStatus(html, bad) {
+  const el = document.getElementById('ledgerStatus');
+  el.style.display = 'block';
+  el.style.borderColor = bad ? 'var(--red)' : 'var(--border)';
+  el.innerHTML = html;
+}
+
+// date: Excel Date / Excel serial / dd-mm-yyyy / yyyy-mm-dd / 05-Mar-2025
+function lgParseDate(v) {
+  if (v instanceof Date) return isNaN(v) ? null : v.getTime();
+  if (typeof v === 'number') return (v > 20000 && v < 80000) ? Math.round((v - 25569) * 86400000) : null;
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if (m) {
+    let y = +m[3]; if (y < 100) y += 2000;
+    const d = new Date(y, +m[2] - 1, +m[1]);
+    return d.getMonth() === +m[2] - 1 ? d.getTime() : null;
+  }
+  m = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+  if (/[A-Za-z]{3}/.test(s)) { const t = Date.parse(s); return isNaN(t) ? null : t; }
+  return null;
+}
+
+// header row + SAP / Issue Date / Issue Qty columns auto-detect
+function lgDetectCols(data) {
+  const pick = (H, tests) => { for (const t of tests) { const i = H.findIndex(t); if (i !== -1) return i; } return -1; };
+  const T = {
+    sap: [h => h.includes('SAP'), h => /MATERIAL|ITEM CODE|ITEM NO|PART/.test(h) && !h.includes('DESC'), h => /(^|\s)CODE$/.test(h)],
+    date: [h => h.includes('ISSUE') && h.includes('DATE'), h => /POSTING|DOC.*DATE|TRANS.*DATE/.test(h), h => h.includes('DATE')],
+    qty: [h => h.includes('ISSUE') && /QTY|QUANTITY/.test(h), h => h.includes('ISSUE') && !h.includes('DATE'), h => /QTY|QUANTITY/.test(h)]
+  };
+  let best = null;
+  for (let r = 0; r < Math.min(15, data.length); r++) {
+    const H = data[r].map(x => String(x == null ? '' : x).toUpperCase().trim());
+    const c = { row: r, sap: pick(H, T.sap), date: pick(H, T.date), qty: pick(H, T.qty) };
+    if (c.qty === c.date) c.qty = -1;
+    c.score = (c.sap > -1) + (c.date > -1) + (c.qty > -1);
+    if (!best || c.score > best.score) best = c;
+    if (c.score === 3) break;
+  }
+  const sample = data.slice(best.row + 1, best.row + 201);
+  const width = data[best.row].length;
+  if (best.date === -1) {            // fallback: jis column me zyada dates hon
+    let bc = -1, bs = 0;
+    for (let c = 0; c < width; c++) {
+      if (c === best.sap || c === best.qty) continue;
+      let ok = 0, tot = 0;
+      sample.forEach(r => { if (r[c] === '' || r[c] == null) return; tot++; if (lgParseDate(r[c]) !== null) ok++; });
+      if (tot && ok / tot > 0.6 && ok / tot > bs) { bs = ok / tot; bc = c; }
+    }
+    best.date = bc;
+  }
+  if (best.sap === -1) {             // fallback: known SAP codes se match
+    const known = new Set(itemMaster.map(i => String(i.sap).trim()));
+    let bc = -1, bs = 0;
+    for (let c = 0; c < width; c++) {
+      if (c === best.date || c === best.qty) continue;
+      let hit = 0, tot = 0;
+      sample.forEach(r => {
+        const d = String(r[c] == null ? '' : r[c]).replace(/\.0$/, '').replace(/\D/g, '');
+        if (!d) return; tot++; if (known.has(padSAP(d))) hit++;
+      });
+      if (tot && hit / tot > 0.3 && hit / tot > bs) { bs = hit / tot; bc = c; }
+    }
+    best.sap = bc;
+  }
+  best.head = data[best.row].map(x => String(x == null ? '' : x).trim());
+  return best;
+}
+
+// ─── Ledger upload: process panel ───
+function lgSetStep(i, pct) {
+  document.getElementById('lgStepsList').querySelectorAll('.step').forEach((s, idx) => {
+    s.classList.remove('active');
+    if (idx < i) s.classList.add('done'); else s.classList.remove('done');
+  });
+  const cur = document.querySelector(`#lgStepsList .step[data-step="${i}"]`);
+  if (cur) { cur.classList.remove('done'); cur.classList.add('active'); }
+  document.getElementById('lgProgFill').style.width = pct + '%';
+}
+
+function lgFinishSuccess(total, saved, skipped, msgHtml) {
+  document.querySelectorAll('#lgStepsList .step').forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+  document.getElementById('lgProgFill').style.width = '100%';
+  document.getElementById('lgProcSpin').className = 'proc-spin done';
+  document.getElementById('lgProcTitle').textContent = 'Upload complete';
+  document.getElementById('lgRTotal').textContent = total;
+  document.getElementById('lgRSaved').textContent = saved;
+  document.getElementById('lgRSkipped').textContent = skipped;
+  document.getElementById('lgResultMsg').innerHTML = msgHtml;
+  document.getElementById('lgResultBox').classList.add('show');
+  showToast('Ledger sheet me save ho gaya ✓', 'green');
+}
+
+function lgFinishError(msg) {
+  document.getElementById('lgProcSpin').className = 'proc-spin err';
+  document.getElementById('lgProcTitle').textContent = 'Could not process file';
+  document.getElementById('lgResultMsg').textContent = msg;
+  document.getElementById('lgRTotal').textContent = '—';
+  document.getElementById('lgRSaved').textContent = '—';
+  document.getElementById('lgRSkipped').textContent = '—';
+  document.getElementById('lgProgFill').style.width = '100%';
+  document.getElementById('lgResultBox').classList.add('show');
+  document.querySelectorAll('#lgStepsList .step').forEach(s => s.classList.remove('active'));
+  showToast('Ledger upload failed', 'red');
+}
+
+function resetLedgerUpload() {
+  document.getElementById('ledgerUploadZone').style.display = 'flex';
+  document.getElementById('lgProcPanel').classList.remove('active');
+  document.getElementById('lgResultBox').classList.remove('show');
+  document.getElementById('lgProgFill').style.width = '0%';
+  document.getElementById('lgProcSpin').className = 'proc-spin';
+  document.querySelectorAll('#lgStepsList .step').forEach(s => s.classList.remove('active', 'done'));
+  document.getElementById('ledgerUploadFile').value = '';
+}
+
+function handleLedgerUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const slow = +document.getElementById('lgSlow').value;
+  const non = +document.getElementById('lgNon').value;
+  const dead = +document.getElementById('lgDead').value;
+  if (!(slow > 0 && slow < non && non < dead)) {
+    showToast('Days: Slow < Non Moving < Dead hone chahiye', 'red');
+    input.value = '';
+    return;
+  }
+  try { localStorage.setItem('lgThr', JSON.stringify([slow, non, dead])); } catch (e) {}
+
+  document.getElementById('ledgerUploadZone').style.display = 'none';
+  document.getElementById('lgProcPanel').classList.add('active');
+  document.getElementById('lgResultBox').classList.remove('show');
+  document.getElementById('lgProcSub').textContent = file.name;
+  document.getElementById('lgProcTitle').textContent = 'Processing file…';
+  document.getElementById('lgProcSpin').className = 'proc-spin';
+  document.getElementById('lgProgFill').style.width = '0%';
+  document.querySelectorAll('#lgStepsList .step').forEach(s => s.classList.remove('active', 'done'));
+  lgSetStep(0, 15);
+
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    try {
+      await wait(300);
+      // raw:true => CSV ki dates text rehti hain (dd/mm galat month me nahi badlegi)
+      const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true, raw: true });
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+      if (!data || data.length < 2) { lgFinishError('File me data nahi mila.'); return; }
+
+      lgSetStep(1, 40);
+      await wait(300);
+      const c = lgDetectCols(data);
+      const miss = [c.sap < 0 && 'SAP code', c.date < 0 && 'Issue date', c.qty < 0 && 'Issue qty'].filter(Boolean);
+      if (miss.length) { lgFinishError('Ye column detect nahi hue: ' + miss.join(', ') + '. Header check karein.'); return; }
+
+      lgSetStep(2, 65);
+      await wait(300);
+      const master = {};
+      itemMaster.forEach(i => { master[String(i.sap).trim()] = i; });
+
+      const agg = {};
+      let badDate = 0, noQty = 0;
+      for (let r = c.row + 1; r < data.length; r++) {
+        const row = data[r];
+        const d = String(row[c.sap] == null ? '' : row[c.sap]).replace(/\.0$/, '').replace(/\D/g, '');
+        if (!d) continue;
+        const sap = padSAP(d);
+        const q = Math.abs(parseFloat(String(row[c.qty]).replace(/,/g, '')));
+        if (!q) { noQty++; continue; }           // issue qty 0/blank = issue nahi
+        const t = lgParseDate(row[c.date]);
+        if (t === null) { badDate++; continue; }
+        const a = agg[sap] || (agg[sap] = { last: 0, qty: 0 });
+        if (t > a.last) a.last = t;
+        a.qty += q;
+      }
+
+      const now = Date.now(), rows = [], cnt = { fa: 0, sl: 0, nm: 0, dd: 0 };
+      let noMaster = 0, noStock = 0;
+      const total = Object.keys(agg).length;
+      Object.keys(agg).forEach(sap => {
+        const it = master[sap];
+        if (!it) { noMaster++; return; }
+        const stk = lmHasStock(it) ? parseFloat(it.curr_stock) : 0;
+        if (!(stk > 0)) { noStock++; return; }    // stock nahi => sheet me save hi nahi hoga
+        const days = Math.max(0, Math.floor((now - agg[sap].last) / 86400000));
+        const k = days <= slow ? 'fa' : days <= non ? 'sl' : days <= dead ? 'nm' : 'dd';
+        cnt[k]++;
+        rows.push({ sap, name: it.name, cat: MOV_CATS[k], last: agg[sap].last, qty: Math.round(agg[sap].qty * 1000) / 1000, stock: stk });
+      });
+
+      if (!rows.length) {
+        lgFinishError('Koi item save nahi hua: ' + noMaster + ' master me nahi, ' + noStock + ' ka stock nahi hai, ' + badDate + ' rows me date galat.');
+        return;
+      }
+
+      movList = rows.map(r => movNorm({ ...r, ts: now }));
+      movLocalTs = now;
+      movSave();
+      renderStats();
+      if (notifOpen && activeNotifTab === 'mov') renderMovList();
+      logAct('i_ledger', 'Ledger uploaded', file.name + ' · ' + rows.length + ' items');
+
+      lgSetStep(3, 90);
+      let res = null;
+      try {
+        res = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'setMoving', rows, by: userName, ts: now }) }).then(r => r.json());
+      } catch (err) {}
+
+      const skipped = total - rows.length;
+      const msg = 'Fast <b>' + cnt.fa + '</b> · Slow <b>' + cnt.sl + '</b> · Non <b>' + cnt.nm + '</b> · Dead <b>' + cnt.dd + '</b>' +
+        '<br><span style="font-size:11px">Columns: SAP = "' + lmEsc(c.head[c.sap] || '#' + (c.sap + 1)) + '", Date = "' + lmEsc(c.head[c.date] || '#' + (c.date + 1)) + '", Qty = "' + lmEsc(c.head[c.qty] || '#' + (c.qty + 1)) + '"' +
+        '<br>Skipped: ' + noStock + ' stock nahi, ' + noMaster + ' master me nahi · Rows: ' + badDate + ' bad date, ' + noQty + ' zero qty</span>';
+
+      if (res && res.status === 'ok') lgFinishSuccess(total, rows.length, skipped, msg);
+      else lgFinishError('Sheet me save confirm nahi hua. Data is device par saved hai, thodi der baad dobara upload karein.');
+    } catch (err) {
+      console.error(err);
+      lgFinishError('File process nahi ho payi.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function loadMoving() {
+  return fetch(`${API}?action=getMoving`).then(r => r.json()).then(rows => {
+    if (!Array.isArray(rows)) return;
+    const maxTs = rows.reduce((a, r) => Math.max(a, r.ts || 0), 0);
+    if (movLocalTs && Date.now() - movLocalTs < 120000 && maxTs < movLocalTs) return; // naya upload sheet me abhi pahunch raha hai
+    movList = rows.map(movNorm);
+    movLocalTs = 0;
+    movSave();
+    if (notifOpen && activeNotifTab === 'mov') renderMovList();
+  }).catch(() => {});
+}
+
+function setMovFilter(f) { movFilter = f; movLimit = 150; renderMovList(); }
+
+function renderMovList() {
+  const cnt = { fa: 0, sl: 0, nm: 0, dd: 0 };
+  let maxTs = 0;
+  movList.forEach(m => { cnt[m.k]++; if (m.ts > maxTs) maxTs = m.ts; });
+  const chip = (k, n, l) => `<button type="button" class="sa-fchip ${k}${movFilter === k ? ' sel' : ''}" onclick="setMovFilter('${k}')"><b>${n}</b><span>${l}</span></button>`;
+  document.getElementById('saFilter').innerHTML =
+    chip('all', movList.length, 'All') + chip('fa', cnt.fa, 'Fast') + chip('sl', cnt.sl, 'Slow') + chip('nm', cnt.nm, 'Non') + chip('dd', cnt.dd, 'Dead');
+  document.getElementById('notifCountBadge').textContent = movList.length;
+  document.getElementById('notifSub').textContent = movList.length ? 'Ledger: ' + phTime(maxTs) : 'Ledger upload karo';
+
+  const list = document.getElementById('notifList');
+  if (!movList.length) { list.innerHTML = '<div class="notif-empty">📈 Abhi koi ledger data nahi. Download & Upload → Ledger se upload karein.</div>'; return; }
+
+  const now = Date.now(), fmt = ms => new Date(ms).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const show = movList.filter(m => movFilter === 'all' || m.k === movFilter)
+    .sort((a, b) => movFilter === 'fa' ? b.last - a.last : a.last - b.last);   // fast: latest pehle, baaki: sabse purana pehle
+  if (!show.length) { list.innerHTML = '<div class="notif-empty">Is category me kuch nahi</div>'; return; }
+
+  const rows = show.slice(0, movLimit).map(m => {
+    const it = movItem(m.sap);
+    const stock = it ? (lmHasStock(it) ? it.curr_stock : 0) : (m.stock === '' ? 0 : m.stock);
+    const days = Math.max(0, Math.floor((now - m.last) / 86400000));
+    return `<div class="notif-row">
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(it ? it.name : m.name)}</div><div class="sa-cap ${m.k}"><span class="s">${MOV_CATS[m.k].split(' ')[0]}</span><span class="o"><b>${days}</b> d</span></div></div>
+      <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(m.sap)}${it && it.location ? ' · 📍 ' + lmEsc(it.location) : ''}</div>
+      <div class="sa-nft"><span>Stock <b>${lmEsc(stock)}</b> · Issued <b>${m.qty}</b></span><span>Last <b>${fmt(m.last)}</b></span></div>
+    </div>`;
+  }).join('');
+  const more = show.length > movLimit
+    ? `<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:6px" onclick="movLimit+=150;renderMovList()">Show more (${show.length - movLimit})</button>` : '';
+  list.innerHTML = rows + more;
+}
+
+function downloadMoving() {
+  if (!movList.length) { showToast('Koi ledger data nahi', 'amber'); return; }
+  const now = Date.now(), fmt = ms => new Date(ms).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const rows = [['SAP', 'Description', 'Category', 'Last Issue', 'Days', 'Issued Qty', 'Stock', 'Location']];
+  movList.forEach(m => {
+    const it = movItem(m.sap);
+    rows.push([m.sap, it ? it.name : m.name, MOV_CATS[m.k], fmt(m.last), Math.floor((now - m.last) / 86400000), m.qty, it && lmHasStock(it) ? it.curr_stock : '', it ? it.location || '' : '']);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'moving_stock.csv';
+  a.click();
+  showToast('Downloaded: moving_stock.csv', 'blue');
+}
+
+// pichli baar ki day-limits wapas bharo
+try {
+  const t = JSON.parse(localStorage.getItem('lgThr'));
+  if (t) { document.getElementById('lgSlow').value = t[0]; document.getElementById('lgNon').value = t[1]; document.getElementById('lgDead').value = t[2]; }
+} catch (e) {}
+
 function getStockNoLocationItems() {
   return itemMaster.filter(i => {
     const stockVal = parseFloat(i.curr_stock);
@@ -3564,18 +3914,20 @@ function downloadActiveNotifTab() {
   if (activeNotifTab === 'stock') downloadPendingFromNotif();
   else if (activeNotifTab === 'alert') downloadStockAlerts();
   else if (activeNotifTab === 'phys') downloadPhys();
+  else if (activeNotifTab === 'mov') downloadMoving();
   else downloadBinList();
 }
 
 function switchNotifTab(tab) {
   activeNotifTab = tab;
   notifRenderToken++;
-  const order = ['stock', 'bin', 'alert', 'phys'];
+  const order = ['stock', 'bin', 'alert', 'phys', 'mov'];
   document.querySelector('.notif-tabs').style.setProperty('--i', order.indexOf(tab));
   document.getElementById('notifTabStock').classList.toggle('active', tab === 'stock');
   document.getElementById('notifTabBin').classList.toggle('active', tab === 'bin');
   document.getElementById('notifTabAlert').classList.toggle('active', tab === 'alert');
   document.getElementById('notifTabPhys').classList.toggle('active', tab === 'phys');
+  document.getElementById('notifTabMov').classList.toggle('active', tab === 'mov');
   document.getElementById('notifList').scrollTop = 0;
   renderActiveNotifTab();
 }
@@ -3611,7 +3963,9 @@ function renderActiveNotifTab() {
   iconBadge.classList.toggle('bin', isBin);
   countChip.classList.toggle('bin', isBin);
   dlBtn.classList.toggle('bin', isBin);
-  const showChips = activeNotifTab === 'alert' || activeNotifTab === 'phys';
+  const showChips = activeNotifTab === 'alert' || activeNotifTab === 'phys' || activeNotifTab === 'mov';
+  document.getElementById('saFilter').classList.toggle('mv', activeNotifTab === 'mov');
+  document.querySelector('#notifCountChip .lbl').textContent = activeNotifTab === 'mov' ? 'Items' : 'Pending';
   document.getElementById('saFilter').style.visibility = showChips ? 'visible' : 'hidden';
   searchWrap.style.visibility = activeNotifTab === 'stock' ? 'visible' : 'hidden';
   document.getElementById('binBar').style.visibility = isBin ? 'visible' : 'hidden';
@@ -3631,6 +3985,11 @@ function renderActiveNotifTab() {
     titleText.textContent = 'PHYSICAL ADJ.';
     footer.textContent = 'Download the list, adjust in SAP, then tap Clear';
     renderPhysList();
+  } else if (activeNotifTab === 'mov') {
+    iconBadge.textContent = '📈';
+    titleText.textContent = 'MOVING STOCK';
+    footer.textContent = 'Fast / Slow / Non Moving / Dead — from your last ledger upload';
+    renderMovList();
   } else {
     iconBadge.textContent = '🖨️';
     titleText.textContent = 'BIN LISTS';
@@ -6104,6 +6463,7 @@ updates.push({ sap, stock: stockVal });
             body: JSON.stringify({ action: 'updateStock', updates, includeZcap })
           })
             .then(r => r.json())
+            .then(() => loadMoving())
             .catch(() => {
               showToast('Server sync unconfirmed — data saved locally', 'amber');
             });
@@ -6279,6 +6639,7 @@ window.addEventListener('pageshow', e => {
     loadItems();
     loadLevels();
     loadPhys();
+    loadMoving();
 
     // ─── Silent Background Refresh (cross-device sync) ───
     let silentRefreshInFlight = false;
@@ -6287,6 +6648,7 @@ window.addEventListener('pageshow', e => {
       if (silentRefreshInFlight || document.visibilityState !== 'visible') return;
       silentRefreshInFlight = true;
       if (++lvTick % 2 === 0) loadLevels();
+      loadMoving();
       loadPhys();
       syncBin();
 
@@ -6410,7 +6772,8 @@ const WRAP = {
   openBinPrint:'binprint', openBinPrintAll:'binprint',
   markBinDone:'binprint', clearPrintedBins:'binprint',
   addToolLink:'tools', deleteToolLink:'tools', toggleAddForm:'tools',
-  openPhys:'loc', savePhys:'loc', clrPhys:'loc', clrAllPhys:'loc'
+  openPhys:'loc', savePhys:'loc', clrPhys:'loc', clrAllPhys:'loc',
+  handleLedgerUpload:'stock'
 };
 Object.entries(WRAP).forEach(([fn, perm]) => {
   const orig = window[fn];
@@ -6456,7 +6819,7 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 }
 
 // ── scroll ruka rahe (Bins / Alerts / Physical) ──
-['renderBinList', 'renderPhysList', 'renderAlertList'].forEach(n => {
+['renderBinList', 'renderPhysList', 'renderAlertList', 'renderMovList'].forEach(n => {
   const orig = window[n];
   window[n] = function () {
     const l = document.getElementById('notifList');
@@ -6470,7 +6833,7 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 // ── notification tabs: left/right swipe ──
 (function () {
   const list = document.getElementById('notifList');
-  const ORDER = ['stock', 'bin', 'alert', 'phys'];
+  const ORDER = ['stock', 'bin', 'alert', 'phys', 'mov'];
   let x0 = 0, y0 = 0, dx = 0, t0 = 0, mode = null, ok = false;
 
   list.addEventListener('touchstart', e => {
