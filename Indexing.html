@@ -3876,6 +3876,13 @@ try {
   const t = JSON.parse(localStorage.getItem('lgThr'));
   if (t) { document.getElementById('lgSlow').value = t[0]; document.getElementById('lgNon').value = t[1]; document.getElementById('lgDead').value = t[2]; }
 } catch (e) {}
+// badalte hi save karo (upload ka wait nahi)
+['lgSlow', 'lgNon', 'lgDead'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    const v = ['lgSlow', 'lgNon', 'lgDead'].map(i => +document.getElementById(i).value);
+    if (v.every(n => n > 0)) { try { localStorage.setItem('lgThr', JSON.stringify(v)); } catch (e) {} }
+  });
+});
 
 function getStockNoLocationItems() {
   return itemMaster.filter(i => {
@@ -6797,13 +6804,16 @@ function openAdmin() {
   adminFrame.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:0;z-index:20000;background:#f4f6f9;';
   document.body.appendChild(adminFrame);
   document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  document.documentElement.style.scrollbarGutter = 'auto';
   history.pushState({ admin: 1 }, '');
 }
 function closeAdmin(fromPop) {
   if (!adminFrame) return;
-  adminFrame.remove();
-  adminFrame = null;
+  adminFrame.remove();  adminFrame = null;
   document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  document.documentElement.style.scrollbarGutter = '';
   if (!fromPop && history.state && history.state.admin) history.back();
 }
 window.addEventListener('popstate', () => closeAdmin(true));
