@@ -78,7 +78,7 @@ body.load-fail .header-stripe::before{background:var(--red)}
 /* ─── Cards ─── */
 main{display:flex;flex-direction:column;gap:10px;min-height:60vh;align-content:flex-start;will-change:transform;touch-action:pan-y}
 main.snap{transition:transform .26s cubic-bezier(.25,.8,.3,1),opacity .26s}
-body{overflow-x:hidden}
+body{overflow-x:clip}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--card-shadow);padding:16px}
 .card h3{font-size:14px;font-weight:700}
 .sub{font-size:12px;color:var(--muted);margin:2px 0 12px;line-height:1.4}
@@ -293,6 +293,22 @@ tbody tr:last-child td{border-bottom:none}
   .bar{grid-template-columns:92px 1fr 30px}
   .logo-sub{display:none}
 }
+.mvk{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mvk div{border-radius:8px;background:var(--surface2);border:1px solid var(--bc);padding:7px 9px;min-width:0}
+.mvk small{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;display:block}
+.mvk b{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--c)}
+.mvk i{font-style:normal;font-size:10px;font-weight:700;margin-left:5px;color:var(--muted)}
+.mv-fa{--c:var(--green);--bc:rgba(5,150,105,.3)}.mv-sl{--c:var(--amber);--bc:rgba(180,83,9,.3)}
+.mv-nm{--c:#ea580c;--bc:rgba(234,88,12,.3)}.mv-dd{--c:var(--red);--bc:rgba(220,38,38,.3)}
+.mvi{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.mvi:last-child{border:0}.mvi .t{flex:1;min-width:0}
+.mvi .n{font-size:12.5px;font-weight:600;line-height:1.3;word-break:break-word}
+.mvi .s{font:10.5px var(--mono);color:var(--accent2);margin-top:2px}
+.mvcap{display:flex;border-radius:20px;overflow:hidden;border:1px solid var(--bc);height:24px;white-space:nowrap;flex-shrink:0}
+.mvcap span{display:flex;align-items:center;padding:0 9px;font-size:10.5px;font-weight:700}
+.mvcap span:first-child{background:var(--surface2);color:var(--c)}
+.mvcap span:last-child{font-family:var(--mono);color:var(--muted);background:var(--surface)}
+.ut td.c1{color:var(--green)}.ut td.c2{color:var(--amber)}.ut td.c3{color:#ea580c}.ut td.c4{color:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .two{display:flex;gap:8px;margin-bottom:10px;align-items:center}
 .two .in{min-height:42px;padding:8px 10px}
@@ -371,7 +387,7 @@ const RN=Object.fromEntries(ROLES.map(r=>[r.id,r.n]));
 const COL=['#2563eb','#0891b2','#b45309','#7c3aed','#db2777','#059669'];
 const LC={add:'var(--green)',edit:'var(--accent)',del:'var(--red)',rights:'var(--amber)'};
 const TB=[['rep','📊 Reports'],['usr','👥 Users'],['rol','🔑 Rights'],['act','🕘 Activity']];
-const S={users:[],roles:{},log:[],me:'',tab:'rep',q:'',flt:'all',mx:null,sheet:null,busy:false,items:null,bins:null,lockErr:'',mo:null,rsel:'editor'};
+const S={users:[],roles:{},log:[],me:'',tab:'rep',q:'',flt:'all',mx:null,sheet:null,busy:false,items:null,bins:null,lockErr:'',mo:null,rsel:'editor',mov:null,mvTab:'Fast Moving'};
 let AUTH=null;
 const $=s=>document.querySelector(s);
 const NEW='<span class="new">NEW</span>';
@@ -417,9 +433,10 @@ async function loadReports(){
     }
     return null;
   };
-  const [it,bn]=await Promise.all([j(ITEMS_API+'?action=getItems'),j(ITEMS_API+'?action=getBin')]);
+  const [it,bn,mv]=await Promise.all([j(ITEMS_API+'?action=getItems'),j(ITEMS_API+'?action=getBin'),j(ITEMS_API+'?action=getMoving')]);
   if(it)S.items=it;
   if(bn)S.bins=bn;
+  if(mv)S.mov=mv;
   repLoading=false;
 }
 async function start(){
@@ -509,10 +526,33 @@ ${bar2('Stock, no loc',snl,inStock,'var(--red)')}${S.bins?bar2('Bins to print',B
 <div class="rgrp">Stock vs location</div>${bar2('Stock + located',stk.length-snl,stk.length,'var(--green)')}${bar2('Stock, no loc',snl,stk.length,'var(--red)')}${bar2('Loc, no stock',dead,loc,'var(--amber)')}<p class="note">"Loc, no stock" = location assigned but stock is zero. These locations can be freed up.</p></div>
 <div class="card"><h3><span class="sec-ic">🗂️</span>Coverage by zone${NEW}</h3><p class="sub">Zone = first letter of location code</p>${zk.length?zk.map(z=>bar2('Zone '+z,zm[z][0],zx,'var(--accent)')).join('')+'<div class="rgrp">In-stock items by zone</div>'+zk.map(z=>bar2('Zone '+z,zm[z][1],zx,'var(--green)')).join(''):'<div class="empty">No located items</div>'}</div>
 <div class="card"><h3><span class="sec-ic">📦</span>Location usage${NEW}</h3><p class="sub">${ls.length} locations in use</p>${ls.length?`<div class="kp"><div class="k-tot"><small>Locations used</small><b>${ls.length}</b></div><div class="k-loc"><small>Avg items / loc</small><b>${(loc/ls.length).toFixed(1)}</b></div><div class="k-amb"><small>Single-item locs</small><b>${ls.filter(x=>x[1]===1).length}</b></div><div class="k-pen"><small>Max in one loc</small><b>${ls[0][1]}</b></div></div>
-<div class="rgrp">Most crowded locations</div>${ls.slice(0,8).map(x=>`<span class="lp b lpx">${esc(x[0])} · ${x[1]}</span>`).join('')}`:'<div class="empty">No located items</div>'}</div>${roleCard}`;
+<div class="rgrp">Most crowded locations</div>${ls.slice(0,8).map(x=>`<span class="lp b lpx">${esc(x[0])} · ${x[1]}</span>`).join('')}`:'<div class="empty">No located items</div>'}</div>${movHTML()}${roleCard}`;
 }
 
+const MV=[['Fast Moving','Fast','var(--green)','mv-fa'],['Slow Moving','Slow','var(--amber)','mv-sl'],['Non Moving','Non','#ea580c','mv-nm'],['Dead Stock','Dead','var(--red)','mv-dd']];
+function movHTML(){
+  const M=S.mov,hd=`<h3><span class="sec-ic">📈</span>Moving stock${NEW}</h3>`;
+  if(!M)return`<div class="card">${hd}<p class="sub" style="margin-bottom:0">${repLoading?'Loading…':'Could not load. Tap Refresh.'}</p></div>`;
+  if(!M.length)return`<div class="card">${hd}<div class="empty">Ledger upload nahi hui. Download & Upload → Ledger se upload karein.</div></div>`;
+  const T=M.length,c=k=>M.filter(m=>m.cat===k).length,mx=Math.max(1,...MV.map(x=>c(x[0])));
+  const ts=M.reduce((a,m)=>Math.max(a,+m.ts||0),0),cur=S.mvTab,fast=cur==='Fast Moving'||cur==='Slow Moving';
+  const list=M.filter(m=>m.cat===cur).sort((a,b)=>fast?b.qty-a.qty:a.last-b.last).slice(0,8);
+  const fmt=x=>new Date(+x).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const ser=[...new Set(M.map(m=>String(m.sap).trim()[0]))].sort();
+  return`<div class="card">${hd}<p class="sub">Last ledger upload: ${ts?new Date(ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—'}</p>
+<div class="mvk">${MV.map(x=>`<div class="${x[3]}"><small>${x[1]}</small><b>${c(x[0])}</b><i>${Math.round(c(x[0])/T*100)}%</i></div>`).join('')}</div>
+<div class="rgrp">Items by category</div>
+<div class="stack">${MV.map(x=>`<i style="width:${c(x[0])/T*100}%;background:${x[2]}"></i>`).join('')}</div>
+<div class="leg">${MV.map(x=>`<span><i style="background:${x[2]}"></i>${x[1]} ${c(x[0])}</span>`).join('')}</div>
+${MV.map(x=>bar2(x[1]+' moving',c(x[0]),mx,x[2])).join('')}</div>
+<div class="card"><h3><span class="sec-ic">🔢</span>SAP series × category${NEW}</h3><p class="sub">Series = first digit of SAP code</p>
+<table class="ut"><tr><th>Series</th>${MV.map(x=>`<th>${x[1]}</th>`).join('')}<th>Σ</th></tr>${ser.map(s=>{const r=M.filter(m=>String(m.sap).trim()[0]===s);return`<tr><td>${esc(s)}xxx</td>${MV.map((x,i)=>`<td class="c${i+1}">${r.filter(m=>m.cat===x[0]).length||'·'}</td>`).join('')}<td><b>${r.length}</b></td></tr>`}).join('')}</table></div>
+<div class="card"><h3><span class="sec-ic">🏆</span>Top items${NEW}</h3><p class="sub">Fast and Slow: most issued · Non and Dead: oldest issue first</p>
+<div class="chips" style="margin-top:0">${MV.map(x=>`<button data-act="mvt" data-v="${x[0]}" aria-pressed="${cur===x[0]}">${x[1]} ${c(x[0])}</button>`).join('')}</div>
+${list.length?list.map(m=>{const x=MV.find(y=>y[0]===m.cat);return`<div class="mvi ${x[3]}"><div class="t"><div class="n">${esc(m.name)}</div><div class="s">${esc(m.sap)}</div></div><div class="mvcap"><span>${fmt(m.last)}</span><span>${Math.round(m.qty).toLocaleString('en-IN')}</span></div></div>`}).join(''):'<div class="empty">Is category me koi item nahi</div>'}</div>`;
+}
 /* users */
+
 function usrHTML(){return`<div class="card"><div class="tool"><div class="search-wrap"><span class="search-icon">🔍</span><input class="search" id="q" placeholder="Search name or User ID" autocomplete="off" autocorrect="off" spellcheck="false" value="${esc(S.q)}"></div><button class="btn" data-act="add">＋ Add</button></div><div class="chips" id="flt"></div><div class="ul" id="ulist"></div></div>`}
 const DOTS='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>';
 const EDI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
@@ -772,6 +812,7 @@ document.addEventListener('click',async e=>{
     case 'logout':logout();break;
     case 'tab':setTab(el.dataset.v);break;
     case 'rfr':await refreshReports();break;
+    case 'mvt':S.mvTab=el.dataset.v;render();break;
     case 'ap':AS.p=el.dataset.v;AS.n=30;if(AS.p==='custom'&&!AS.cf){const t=sod(Date.now());AS.cf=t-13*DAY;AS.ct=t}render();break;
     case 'av':AS.v=el.dataset.v;AS.n=30;render();break;
     case 'aref':loadAct();break;
