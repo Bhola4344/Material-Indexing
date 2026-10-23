@@ -717,7 +717,6 @@ body.loading .header-stripe::before {
       background: var(--border);
       border-radius: 2px;
     }
-
     .dd-item {
       display: flex;
       align-items: center;
@@ -1711,6 +1710,23 @@ body.loading .header-stripe::before {
   .btn-full-text {
     display: none;
   } 
+.hstat-num {
+    font-size: 14px;
+    letter-spacing: -0.3px;
+  }
+  .hstat-label {
+    font-size: 8.5px;
+    letter-spacing: 0.2px;
+    gap: 2px;
+  }
+  .hstat-label i {
+    font-size: 9px;
+  }
+  .hstat-chip {
+    gap: 1px;
+    padding: 1px;
+  }
+
 .info-boxes { grid-template-columns: 1.6fr 1fr; gap: 8px; }
   .info-box { padding: 10px 6px; gap: 4px; min-width: min-content; }
   .info-box .v { font-size: 12.5px; overflow: visible; text-overflow: clip; }
@@ -2342,6 +2358,8 @@ body.loading .upload-zone { opacity: 0.45; }
 .sa-cap.nm{--cb:rgba(234,88,12,.4);--ct:rgba(234,88,12,.12);--cc:#ea580c}
 .sa-cap.dd{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
 .lg-status{margin-bottom:10px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface2);line-height:1.55}
+#locSug::-webkit-scrollbar { width: 4px; }
+#locSug::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 </style>
 </head>
 
@@ -4406,6 +4424,7 @@ function saveNotifItem(sn) {
   const loc = inp.value.trim().toUpperCase();
   if (!loc) { inp.focus(); return; }
   localStorage.setItem("lastLocationText", loc);
+locRemember(loc);
 
   const item = itemMaster.find(i => i.sn === sn);
   const row = document.getElementById(`nrow-${sn}`);
@@ -5435,6 +5454,7 @@ function lmPick(sn) {
   const sn = currentItem.sn;
   const oldLoc = currentItem.location;
   localStorage.setItem("lastLocationText", loc);
+locRemember(loc);
   btn.disabled = true;
   btn.textContent = '⏳ Saving...';
   currentItem.location = loc;
@@ -6509,6 +6529,51 @@ itemMaster.forEach(i =>
       showToast(`Downloaded: ${filename}`, "blue");
       logAct('i_dl', 'CSV downloaded', filename);
     }
+
+// ─── Location suggestions ───
+let locHist = [];
+try { locHist = JSON.parse(localStorage.getItem('locHistory')) || []; } catch (e) {}
+function locRemember(loc) {
+  locHist = [loc, ...locHist.filter(l => l !== loc)].slice(0, 200);
+  try { localStorage.setItem('locHistory', JSON.stringify(locHist)); } catch (e) {}
+}
+const locSug = document.createElement('div');
+locSug.style.cssText = 'position:fixed;z-index:600;display:none;max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(15,23,42,.18)';
+locSug.id = 'locSug';
+document.body.appendChild(locSug);
+let locInp = null;
+const locNorm = s => String(s).toUpperCase().replace(/[\s\-]/g, '');
+const isLocInp = el => el && el.tagName === 'INPUT' && (el.id === 'updateLocation' || el.classList.contains('notif-inline-input'));
+function locHide() { locSug.style.display = 'none'; locInp = null; }
+function locShow(inp) {
+  const q = locNorm(inp.value);
+  const all = [...new Set([...locHist, ...itemMaster.map(i => String(i.location || '').trim().toUpperCase()).filter(Boolean)])];
+  const list = (q ? all.filter(l => locNorm(l).includes(q) && locNorm(l) !== q) : locHist.slice(0, 5)).slice(0, 6);
+  if (!list.length) { locHide(); return; }
+  locSug.innerHTML = list.map(l => `<div class="dd-item" data-v="${lmEsc(l)}"><div class="dd-name">${lmEsc(l)}</div></div>`).join('');
+  const r = inp.getBoundingClientRect();
+  locSug.style.width = r.width + 'px';
+  locSug.style.left = r.left + 'px';
+  locSug.style.top = (r.bottom + 4) + 'px';
+  locSug.style.display = 'block';
+  locInp = inp;
+}
+document.addEventListener('focusin', e => { if (isLocInp(e.target)) locShow(e.target); });
+document.addEventListener('input', e => { if (isLocInp(e.target)) locShow(e.target); });
+document.addEventListener('focusout', e => { if (isLocInp(e.target)) setTimeout(locHide, 180); });
+locSug.addEventListener('mousedown', e => e.preventDefault());
+locSug.addEventListener('click', e => {
+  const r = e.target.closest('.dd-item');
+  if (r && locInp) { locInp.value = r.dataset.v; locHide(); }
+});
+window.addEventListener('scroll', e => {
+  if (e.target === locSug || locSug.contains(e.target)) return;   // list ka apna scroll: kuch mat karo
+  if (locSug.style.display !== 'block' || !locInp) return;
+  const r = locInp.getBoundingClientRect();                       // bahar ka scroll: search jaisa reposition
+  if (r.bottom < 0 || r.top > window.innerHeight) { locHide(); return; }
+  locSug.style.left = r.left + 'px';
+  locSug.style.top = (r.bottom + 4) + 'px';
+}, true);
 
         // ─── Double-space autofill ───
     document.addEventListener('input', e => {
