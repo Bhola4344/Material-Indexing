@@ -5650,7 +5650,7 @@ function openScanner(targetId) {
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
   scanTarget = targetId || null;
-  if (!ocrWorker && scanSettings.mode !== 'qr') setTimeout(preloadOcrWorker, 1500);
+  if (!ocrWorker && scanSettings.mode !== 'qr') preloadOcrWorker();
 
   const isLocationScan = !!scanTarget && scanTarget !== 'notifSearchBox';
   document.getElementById('scannerTitleText').textContent = isLocationScan
@@ -5708,13 +5708,20 @@ function openScanner(targetId) {
   darkTimer = setInterval(checkDark, 700);
   if (autoOcrTimer) clearInterval(autoOcrTimer);
   let lastOcrTs = Date.now();
+  const openedAt = Date.now();
   autoOcrTimer = setInterval(() => {
     if (scanListItems.length && !scanIdleStopped &&
     Date.now() - Math.max(lastNewScanTs, listTouchTs) > SCAN_IDLE_MS) stopScanIdle();
     if (scanIdleStopped) return;
+    if (!scanListItems.length && Date.now() - openedAt > 20000) {
+      closeScanner();
+      showToast('Scanner band ho gaya (20 sec koi code nahi mila)', 'amber');
+      return;
+    }
     if (ocrInProgress || scanSettings.mode === 'qr') return;
     if (Date.now() - listTouchTs < 1200) return;   // list is being scrolled, pause OCR
-    if (Date.now() - lastOcrTs < scanSettings.ocrMs) return;
+    const hot = !scanListItems.length && Object.keys(ocrConfirm).some(k => !scanSeen.has(k));
+    if (Date.now() - lastOcrTs < (hot ? 150 : scanSettings.ocrMs)) return;
     lastOcrTs = Date.now();
     if (ocrPaused) {
       if (!sceneChanged()) return;   // camera sthir hai to OCR nahi chalega
@@ -5763,6 +5770,11 @@ function closeScanner() {
   resetScanList();
   resetAdaptiveScan();
 }
+
+// app/tab background me jaye to scanner band (battery + garmi bachane ke liye)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && html5QrCode) closeScanner();
+});
 
 const AUTO_OPEN_SCANNER_KEY = 'autoOpenScannerOnLogin';
 
@@ -6607,6 +6619,7 @@ statsBody.classList.toggle('collapsed', !statsOpen);
 document.getElementById('autoOpenScannerToggle').checked = getAutoOpenScannerPref();
 syncScanSettingsUI();
 if (getAutoOpenScannerPref()) openScanner();
+setTimeout(() => { if (scanSettings.mode !== 'qr') preloadOcrWorker(); }, 3000);
 renderToolIconRow();
 renderToolLinks();
     });
