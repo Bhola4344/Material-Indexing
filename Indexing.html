@@ -3764,7 +3764,7 @@ function handleLedgerUpload(input) {
       itemMaster.forEach(i => { master[String(i.sap).trim()] = i; });
 
       const agg = {};
-      let badDate = 0, noQty = 0;
+      let badDate = 0, noQty = 0, gMin = Infinity, gMax = 0;
       for (let r = c.row + 1; r < data.length; r++) {
         const row = data[r];
         const d = String(row[c.sap] == null ? '' : row[c.sap]).replace(/\.0$/, '').replace(/\D/g, '');
@@ -3777,11 +3777,19 @@ function handleLedgerUpload(input) {
         const a = agg[sap] || (agg[sap] = { last: 0, qty: 0 });
         if (t > a.last) a.last = t;
         a.qty += q;
+        if (t < gMin) gMin = t;
+        if (t > gMax) gMax = t;
       }
 
       const now = Date.now(), rows = [], cnt = { fa: 0, sl: 0, nm: 0, dd: 0 };
       let noMaster = 0, noStock = 0;
       const total = Object.keys(agg).length;
+      if (gMin !== Infinity) {
+        const spanDays = Math.max(7, Math.round((gMax - gMin) / 86400000) + 1);
+        const pdMap = {};
+        Object.keys(agg).forEach(sap => { pdMap[sap] = Math.round(agg[sap].qty / spanDays * 1000) / 1000; });
+        try { localStorage.setItem('lgPerDay', JSON.stringify(pdMap)); } catch (e) {}
+      }
       Object.keys(agg).forEach(sap => {
         const it = master[sap];
         if (!it) { noMaster++; return; }
@@ -6976,6 +6984,202 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
   }
   list.addEventListener('touchend', end, { passive: true });
   list.addEventListener('touchcancel', end, { passive: true });
+})();
+
+// ═══════════ ADD-ON: Cycle Count + Auto Min/Max ═══════════
+(function () {
+  const st = document.createElement('style');
+  st.textContent = `
+.lm-foot{font-size:12px;color:var(--muted)}
+.cc-row{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface)}
+.cc-row.s{border-color:rgba(220,38,38,.5);background:rgba(220,38,38,.06)}
+.cc-row.e{border-color:rgba(37,99,235,.5);background:rgba(37,99,235,.06)}
+.cc-info{min-width:0;flex:1}
+.cc-df{font-size:11.5px;font-weight:600;color:var(--green);margin-top:3px}
+.cc-row.s .cc-df{color:var(--red)}.cc-row.e .cc-df{color:var(--accent)}
+.cc-stp{display:flex;align-items:center;gap:4px;flex:none}
+.cc-stp button{width:36px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cc-stp button:active{background:var(--border)}
+.cc-stp input{width:64px;height:40px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'JetBrains Mono',monospace;outline:none;padding:0 2px;-moz-appearance:textfield}
+.cc-stp input::-webkit-inner-spin-button,.cc-stp input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.cc-stp input:focus{border-color:var(--accent)}
+.cc-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.cc-sum div{border:1.5px solid var(--border);border-radius:10px;padding:5px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted)}
+.cc-sum b{display:block;font:700 17px 'JetBrains Mono',monospace}
+.cc-send{width:100%;justify-content:center}
+.cc-note{font-size:11.5px;color:var(--muted);line-height:1.5;margin:2px 2px 8px}
+.cc-dot{color:var(--amber);margin-right:4px;font-size:10px}
+.am-sug{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1.5px dashed var(--accent);background:rgba(37,99,235,.07);border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:12px;line-height:1.5}
+.am-sug b{font-family:'JetBrains Mono',monospace}
+.am-sug button{border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:8px;padding:7px 14px;font:700 12px 'Inter',sans-serif;cursor:pointer}`;
+  document.head.appendChild(st);
+
+  const DK = 'ccDrafts';
+  let dr = {};
+  try { dr = JSON.parse(localStorage.getItem(DK)) || {}; } catch (e) { dr = {}; }
+  const saveDr = () => { try { localStorage.setItem(DK, JSON.stringify(dr)); } catch (e) {} };
+  const hasDr = b => !!(dr[b] && Object.keys(dr[b]).length);
+
+  const bkEl = document.getElementById('lmBackdrop');
+  bkEl.removeAttribute('onclick');
+  bkEl.onclick = null;
+
+  const L = document.getElementById('lmList');
+  const FOOT = document.querySelector('.lm-foot');
+
+  function rowsOf() {
+    return itemMaster
+      .filter(i => i.location && String(i.location).trim().toUpperCase() === lmLoc)
+      .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+  }
+  function baseOf(it) {
+    const o = phEntry(it.sn), s = lvStockNum(it);
+    return { sys: o ? o.sys : s, cur: o ? o.phys : s };
+  }
+  function footInit() {
+    FOOT.innerHTML = '<div class="cc-sum"><div><b id="ccS" style="color:var(--red)">0</b>Short</div><div><b id="ccE" style="color:var(--accent)">0</b>Excess</div><div><b id="ccM" style="color:var(--green)">0</b>Match</div></div>' +
+      '<button class="btn btn-success cc-send" id="ccSend" disabled>No change</button>';
+    document.getElementById('ccSend').onclick = send;
+  }
+  function build() {
+    const list = rowsOf(), d = dr[lmLoc] || {}, prev = L.scrollTop;
+    document.getElementById('lmLoc').textContent = lmLoc;
+    document.getElementById('lmSub').textContent = list.length + ' items · cycle count';
+    L.innerHTML = '<div class="cc-note">Physical qty bharo. Entries draft me save rehti hain jab tak Send na karo, popup band ho jaye tab bhi.</div>' +
+      (list.map(i => {
+        const b = baseOf(i), v = d[i.sn] !== undefined ? d[i.sn] : b.cur;
+        return `<div class="cc-row" data-sn="${lmEsc(i.sn)}" data-sys="${b.sys}" data-cur="${b.cur}">
+          <div class="cc-info"><div class="lm-name">${lmEsc(i.name)}</div><div class="lm-sap">${lmEsc(i.sap)} · System ${b.sys}</div><div class="cc-df"></div></div>
+          <div class="cc-stp"><button type="button" data-d="-1" aria-label="Minus">−</button><input type="number" inputmode="decimal" min="0" step="any" value="${v}" aria-label="Physical qty"><button type="button" data-d="1" aria-label="Plus">+</button></div>
+        </div>`;
+      }).join('') || '<div class="lm-empty">Koi item nahi mila</div>');
+    L.scrollTop = prev;
+    calc();
+  }
+  function calc() {
+    let s = 0, e = 0, m = 0, ch = 0;
+    L.querySelectorAll('.cc-row').forEach(r => {
+      const sys = +r.dataset.sys, cur = +r.dataset.cur, v = r.querySelector('input').value, p = v === '' ? cur : +v, d = p - sys;
+      r.className = 'cc-row' + (d < 0 ? ' s' : d > 0 ? ' e' : '');
+      r.querySelector('.cc-df').textContent = d < 0 ? '⬇ Short ' + Math.abs(d) : d > 0 ? '⬆ Excess +' + d : '✓ Matches system';
+      d < 0 ? s++ : d > 0 ? e++ : m++;
+      if (p !== cur) ch++;
+    });
+    const q = id => document.getElementById(id);
+    if (!q('ccS')) return;
+    q('ccS').textContent = s; q('ccE').textContent = e; q('ccM').textContent = m;
+    q('ccSend').disabled = !ch;
+    q('ccSend').textContent = ch ? 'Save ' + ch + ' change(s) to Physical tab' : 'No change';
+  }
+  function dot() {
+    const lb = document.getElementById('locBox');
+    if (!lb || !currentItem) return;
+    const v = lb.querySelector('.v');
+    if (!v) return;
+    const o = v.querySelector('.cc-dot');
+    if (o) o.remove();
+    if (currentItem.location && hasDr(String(currentItem.location).trim().toUpperCase()))
+      v.insertAdjacentHTML('afterbegin', '<span class="cc-dot" title="Draft saved">●</span>');
+  }
+
+  L.addEventListener('input', e => {
+    const r = e.target.closest('.cc-row');
+    if (!r) return;
+    const v = e.target.value;
+    dr[lmLoc] = dr[lmLoc] || {};
+    if (v === '' || +v === +r.dataset.cur) delete dr[lmLoc][r.dataset.sn];
+    else dr[lmLoc][r.dataset.sn] = v;
+    if (!hasDr(lmLoc)) delete dr[lmLoc];
+    saveDr(); calc(); dot();
+  });
+  L.addEventListener('click', e => {
+    const bt = e.target.closest('.cc-stp button');
+    if (!bt) return;
+    const r = bt.closest('.cc-row'), inp = r.querySelector('input');
+    const v = inp.value === '' ? +r.dataset.cur : +inp.value;
+    inp.value = Math.max(0, Math.round((v + (+bt.dataset.d)) * 1000) / 1000);
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  function send() {
+    const ts = Date.now();
+    if (!guard('loc')) return;
+    let saved = 0;
+    L.querySelectorAll('.cc-row').forEach(r => {
+      const it = itemMaster.find(i => String(i.sn) === r.dataset.sn);
+      if (!it) return;
+      const sys = +r.dataset.sys, cur = +r.dataset.cur, v = r.querySelector('input').value, val = v === '' ? cur : +v;
+      if (val === cur) return;
+      const had = phEntry(it.sn);
+      if (val === sys) {
+        if (!had) return;
+        physList = physList.filter(p => String(p.sn) !== String(it.sn));
+        physOps[it.sn] = { type: 'remove', ts };
+        binSend({ action: 'removePhys', sn: it.sn });
+        saved++;
+        return;
+      }
+      const sap = String(it.sap).trim();
+      const item = { sn: it.sn, sap, name: it.name, loc: it.location || 'No Loc', sys, phys: val, ts, remark: had ? (had.remark || '') : '' };
+      physList = physList.filter(p => String(p.sn) !== String(it.sn));
+      physList.unshift(item);
+      physOps[it.sn] = { type: 'set', ts, item };
+      binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts, remark: item.remark });
+      saved++;
+    });
+    delete dr[lmLoc]; saveDr();
+    phSaveLocal(); phPaint(); renderStats();
+    if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
+    closeLocModal();
+    dot();
+    showToast(saved ? 'Saved ✓ ' + saved + ' item(s) Physical tab me gaye' : 'Koi change nahi tha', saved ? 'green' : 'amber');
+  }
+
+  window.openLocModal = function () {
+    if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
+    lmLoc = String(currentItem.location).trim().toUpperCase();
+    footInit();
+    L.scrollTop = 0;
+    build();
+    locModalOpen = true;
+    document.getElementById('lmBackdrop').classList.add('open');
+    document.getElementById('lmModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (hasDr(lmLoc)) showToast('Draft restored: pehle ki entries wapas aa gayi', 'amber');
+  };
+  window.renderLocModal = function () {
+    const a = document.activeElement;
+    if (a && L.contains(a)) return;
+    build();
+  };
+  const _ri = renderItem;
+  window.renderItem = function () { const r = _ri.apply(this, arguments); dot(); return r; };
+
+  const AM = { lead: 10, safe: 7, cycle: 30 };
+  function amInject() {
+    const f = document.querySelector('#stockAlertBox .sa-f3');
+    if (!f || !currentItem) return;
+    let map = {};
+    try { map = JSON.parse(localStorage.getItem('lgPerDay')) || {}; } catch (e) {}
+    const pd = map[String(currentItem.sap).trim()];
+    const box = document.createElement('div');
+    box.className = 'am-sug';
+    if (!pd) {
+      box.innerHTML = '<span>✨ Auto suggestion ke liye Ledger tab se ledger upload karo</span>';
+    } else {
+      const mn = Math.ceil(pd * AM.safe), re = Math.ceil(pd * AM.lead) + mn, mx = re + Math.ceil(pd * AM.cycle);
+      box.innerHTML = `<span>✨ Ledger avg <b>${pd}</b>/day<br>Min <b>${mn}</b> · Reorder <b>${re}</b> · Max <b>${mx}</b></span><button type="button">Apply</button>`;
+      box.querySelector('button').onclick = () => {
+        document.getElementById('alMin').value = mn;
+        document.getElementById('alRe').value = re;
+        document.getElementById('alMax').value = mx;
+        showToast('Suggestion fill ho gaya. Check karke Save karo', 'blue');
+      };
+    }
+    f.parentNode.insertBefore(box, f);
+  }
+  const _rab = renderAlertBox;
+  window.renderAlertBox = function () { const r = _rab.apply(this, arguments); amInject(); return r; };
 })();
   </script>
 </body>
