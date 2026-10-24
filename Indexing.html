@@ -2356,7 +2356,6 @@ body.loading .upload-zone { opacity: 0.45; }
 .lg-status{margin-bottom:10px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface2);line-height:1.55}
 #locSug::-webkit-scrollbar { width: 4px; }
 #locSug::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-@media(max-width:350px){.cc-act{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr)}}
 </style>
 </head>
 
@@ -6981,14 +6980,15 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 .cc-cpl .b{display:flex;align-items:center;padding:0 8px;background:var(--surface);color:var(--cc);font:700 12px 'JetBrains Mono',monospace}
 .cc-mt:active{transform:scale(.95)}
 .cc-mt.on{background:var(--green);color:#fff}
-.cc-act{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:9px;align-items:center}
+.cc-act{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:9px;align-items:center}
 .cc-mt{min-width:0;width:100%;height:44px;border:1.5px solid var(--green);border-radius:10px;background:transparent;color:var(--green);font:700 12.5px 'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;padding:0}
-.cc-rt{display:grid;grid-template-columns:36px minmax(0,1fr) 36px 36px;gap:2px;min-width:0}
+.cc-rt{display:grid;grid-template-columns:44px minmax(0,1fr) 44px 44px;gap:6px;min-width:0}
 .cc-stp{display:contents}
 .cc-rt button{height:44px;width:100%;padding:0;border-radius:10px;font-size:22px;font-weight:700;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .cc-rt .cc-stp button{border:1.5px solid var(--border);background:var(--surface2);color:var(--text)}
 .cc-rt .cc-nf{border:1.5px solid rgba(220,38,38,.35);background:transparent;color:var(--red);font-size:16px}
-.cc-stp input{width:100%;min-width:0;height:44px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 14px 'JetBrains Mono',monospace;outline:none;padding:0;-moz-appearance:textfield}
+.cc-stp input{width:100%;min-width:0;height:44px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'JetBrains Mono',monospace;outline:none;padding:0 4px;-moz-appearance:textfield}
+.cc-stp input::placeholder{font:500 12px 'Inter',sans-serif;color:var(--muted);opacity:.8}
 
 
 .cc-stp input::-webkit-inner-spin-button,.cc-stp input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
