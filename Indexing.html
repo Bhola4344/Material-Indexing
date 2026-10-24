@@ -2010,8 +2010,8 @@ body.loading .header-stripe::before {
 
 .lm-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;opacity:0;pointer-events:none;transition:opacity .2s;}
 .lm-backdrop.open{opacity:1;pointer-events:auto;}
-.lm-modal{position:fixed;left:50%;bottom:0;width:100%;max-width:600px;max-height:82vh;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -12px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;transform:translate(-50%,100%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
-.lm-modal.open{transform:translate(-50%,0);}
+.lm-modal{position:fixed;left:0;top:0;width:100%;max-width:600px;height:var(--lm-h,80vh);background:var(--surface);border-radius:14px;box-shadow:0 16px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(40px) scale(.98);transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s linear .28s;}
+.lm-modal.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s;}
 .lm-stripe{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));flex-shrink:0;}
 .lm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;}
 .lm-title{display:flex;align-items:center;gap:10px;}
@@ -2019,19 +2019,15 @@ body.loading .header-stripe::before {
 .lm-loc{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
 .lm-sub{font-size:11px;color:var(--muted);margin-top:1px;}
 .lm-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;}
-.lm-list{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 10px 10px;}
-.lm-row{border:1px solid var(--border);border-radius:12px;padding:11px 12px;margin-bottom:6px;background:var(--surface);cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.lm-row:active{border-color:var(--accent);background:rgba(37,99,235,.04);}
-.lm-row.cur{border-color:rgba(5,150,105,.45);background:rgba(5,150,105,.05);}
-.lm-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;}
-.lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
-.lm-chip{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2);white-space:nowrap;}
-.lm-chip.none{background:var(--surface2);color:var(--muted);border-color:var(--border);}
-.lm-sap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);}
-.lm-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);padding:1px 6px;border-radius:20px;margin-left:6px;}
-.lm-empty{padding:20px;text-align:center;color:var(--muted);font-size:13px;}
-.lm-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);text-align:center;background:var(--surface2);}
+.lm-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 12px 8px;}
 
+.lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
+
+.lm-sap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);}
+
+.lm-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);text-align:center;background:var(--surface2);}
+#lmList{scrollbar-width:none;-ms-overflow-style:none}
+#lmList::-webkit-scrollbar{display:none;width:0;height:0}
 /* ─── Bin Print Modal ─── */
 .bp-back{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;z-index:950;align-items:flex-end;justify-content:center}
 .bp-back.open{display:flex}
@@ -2376,7 +2372,7 @@ body.loading .upload-zone { opacity: 0.45; }
   <div id="dropdown"></div>
 
 <!-- Location Modal -->
-<div class="lm-backdrop" id="lmBackdrop" onclick="closeLocModal()"></div>
+<div class="lm-backdrop" id="lmBackdrop"></div>
 <div class="lm-modal" id="lmModal">
   <div class="lm-stripe"></div>
   <div class="lm-head">
@@ -2390,7 +2386,7 @@ body.loading .upload-zone { opacity: 0.45; }
     <button class="lm-close" onclick="closeLocModal()">✕</button>
   </div>
   <div class="lm-list" id="lmList"></div>
-  <div class="lm-foot">Item par tap karo — uska card khul jayega</div>
+  <div class="lm-foot"></div>
 </div>
 
 <!-- Bin Print Modal -->
@@ -5345,7 +5341,6 @@ function simStk(it) {
 // ─── Location Modal ───
 let locModalOpen = false;
 let lmLoc = '';
-let lmShowAll = false;
 
 function lmEsc(s) {
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -5355,17 +5350,7 @@ function lmHasStock(i) {
   return i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "";
 }
 
-function openLocModal() {
-  if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
-  lmLoc = String(currentItem.location).trim().toUpperCase();
-  lmShowAll = false;
-  document.getElementById('lmList').scrollTop = 0;
-  renderLocModal();
-  locModalOpen = true;
-  document.getElementById('lmBackdrop').classList.add('open');
-  document.getElementById('lmModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
+
 
 function closeLocModal() {
   locModalOpen = false;
@@ -5374,44 +5359,7 @@ function closeLocModal() {
   document.body.style.overflow = '';
 }
 
-function renderLocModal() {
-  const LIMIT = 50;
-  const all = itemMaster.filter(i => i.location && String(i.location).trim().toUpperCase() === lmLoc);
 
-  const isCur = i => currentItem && String(i.sn) === String(currentItem.sn);
-  const list = all.slice().sort((a, b) => (isCur(b) ? 1 : 0) - (isCur(a) ? 1 : 0) || String(a.name || '').localeCompare(String(b.name || '')));
-
-  const inStock = all.filter(lmHasStock).length;
-  document.getElementById('lmLoc').textContent = lmLoc;
-  document.getElementById('lmSub').textContent = `${all.length} items · ${inStock} in stock`;
-
-  const shown = lmShowAll ? list : list.slice(0, LIMIT);
-  let html = shown.map(i => `
-    <div class="lm-row ${isCur(i) ? 'cur' : ''}" onclick="lmPick('${lmEsc(i.sn)}')">
-      <div class="lm-row-top">
-        <div class="lm-name">${lmEsc(i.name)}${isCur(i) ? '<span class="lm-tag">Current</span>' : ''}</div>
-        <span class="lm-chip ${lmHasStock(i) ? '' : 'none'}">📦 ${lmHasStock(i) ? lmEsc(i.curr_stock) : 'No Stock'}</span>
-      </div>
-      <div class="lm-sap">${lmEsc(i.sap)}</div>
-    </div>`).join('');
-
-  if (!shown.length) html = `<div class="lm-empty">Koi item nahi mila</div>`;
-  if (shown.length < list.length) {
-    html += `<button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="lmShowAll=true;renderLocModal()">Show all (${list.length})</button>`;
-  }
-  const lmListEl = document.getElementById('lmList');
-  const prevScroll = lmListEl.scrollTop;
-  lmListEl.innerHTML = html;
-  lmListEl.scrollTop = prevScroll;
-}
-
-function lmPick(sn) {
-  const it = itemMaster.find(x => String(x.sn) === String(sn));
-  if (!it) return;
-  closeLocModal();
-  ddItems = [it];
-  pickItem(0);
-}
 
     // ─── Update Form ───
     function showUpdateForm() {
@@ -6986,47 +6934,156 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
   list.addEventListener('touchcancel', end, { passive: true });
 })();
 
-// ═══════════ ADD-ON: Cycle Count + Auto Min/Max ═══════════
+// ═══════════ ADD-ON: Cycle Count (new design + location jump) + Auto Min/Max ═══════════
 (function () {
   const st = document.createElement('style');
   st.textContent = `
-.lm-foot{font-size:12px;color:var(--muted)}
-.cc-row{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface)}
-.cc-row.s{border-color:rgba(220,38,38,.5);background:rgba(220,38,38,.06)}
-.cc-row.e{border-color:rgba(37,99,235,.5);background:rgba(37,99,235,.06)}
-.cc-info{min-width:0;flex:1}
-.cc-df{font-size:11.5px;font-weight:600;color:var(--green);margin-top:3px}
-.cc-row.s .cc-df{color:var(--red)}.cc-row.e .cc-df{color:var(--accent)}
-.cc-stp{display:flex;align-items:center;gap:4px;flex:none}
-.cc-stp button{width:36px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.cc-stp button:active{background:var(--border)}
-.cc-stp input{width:64px;height:40px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'JetBrains Mono',monospace;outline:none;padding:0 2px;-moz-appearance:textfield}
+.lm-foot{flex-shrink:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+#lmList{padding-bottom:10px;overflow-x:hidden}
+.cc-row{min-width:0;max-width:100%}
+#ccRows{min-width:0}
+.lm-name{min-width:0;word-break:break-word}
+.cc-lb{padding:0 12px 8px;flex-shrink:0}
+.cc-lbin{position:relative}
+.cc-lbin .ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.cc-lbin input{width:100%;height:46px;border:2px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font:600 16px 'JetBrains Mono',monospace;text-transform:uppercase;padding:0 48px 0 38px;outline:none;-webkit-appearance:none}
+.cc-lbin input::placeholder{font:500 12.5px 'Inter',sans-serif;text-transform:none;color:var(--muted)}
+.cc-lbin input:focus{border-color:var(--accent);background:var(--surface)}
+.cc-lbin button{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:9px;background:transparent;color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cc-lbin button:active{transform:translateY(-50%) scale(.9);color:var(--accent2)}
+.cc-lbin button svg{width:20px;height:20px}
+.cc-sug{display:none;margin-top:6px;border:1px solid var(--border);border-radius:12px;background:var(--surface);max-height:196px;overflow-y:auto;overscroll-behavior:contain;box-shadow:var(--card-shadow)}
+.cc-sug.on{display:block}
+.cc-sg{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;min-height:46px;-webkit-tap-highlight-color:transparent}
+.cc-sg:last-child{border-bottom:0}
+.cc-sg:active{background:var(--surface2)}
+.cc-sg b{font:700 13.5px 'JetBrains Mono',monospace}
+.cc-sg span{font-size:11px;color:var(--muted);font-weight:600}
+.cc-sg em{font-style:normal;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--amber);background:rgba(180,83,9,.1);border-radius:20px;padding:2px 7px;margin-left:6px}
+.cc-sgn{padding:14px;text-align:center;font-size:12px;color:var(--muted)}
+.cc-lg{display:flex;justify-content:space-around;margin:0 0 4px}
+.cc-lg div{display:flex;align-items:center;gap:3px;height:auto;padding:0;border:0;background:none}
+.cc-lg b{font:700 12px 'JetBrains Mono',monospace;line-height:1}
+.cc-lg small{font-size:10.5px;font-weight:600;color:var(--muted)}
+.cc-chips{display:flex;gap:5px;margin:0 0 5px}
+.cc-chp{flex:1;height:24px;border:1.5px solid var(--border);background:var(--surface);border-radius:8px;color:var(--muted);font:700 10.5px 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;-webkit-tap-highlight-color:transparent;padding:0}
+.cc-chp b{font:700 13px 'JetBrains Mono',monospace}
+.cc-chp.sel{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.cc-row{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;background:var(--surface);transition:border-color .2s,background .2s}
+.cc-row.s{border-color:rgba(220,38,38,.5);background:color-mix(in srgb,var(--red) 6%,var(--surface))}
+.cc-row.e{border-color:rgba(37,99,235,.5);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.cc-row.m{border-color:rgba(5,150,105,.45);background:color-mix(in srgb,var(--green) 6%,var(--surface))}
+.cc-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.cc-cpl{display:flex;height:22px;border-radius:20px;overflow:hidden;flex-shrink:0;border:1px solid color-mix(in srgb,var(--cc) 40%,transparent);animation:ccpop .25s cubic-bezier(.3,1.8,.5,1)}
+@keyframes ccpop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+.cc-cpl .a{display:flex;align-items:center;padding:0 8px;background:color-mix(in srgb,var(--cc) 12%,transparent);color:var(--cc);font:700 10px 'Inter',sans-serif;letter-spacing:.4px;text-transform:uppercase}
+.cc-cpl .b{display:flex;align-items:center;padding:0 8px;background:var(--surface);color:var(--cc);font:700 12px 'JetBrains Mono',monospace}
+.cc-mt:active{transform:scale(.95)}
+.cc-mt.on{background:var(--green);color:#fff}
+.cc-act{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:9px;align-items:center}
+.cc-mt{min-width:0;width:100%;height:44px;border:1.5px solid var(--green);border-radius:10px;background:transparent;color:var(--green);font:700 12.5px 'Inter',sans-serif;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;padding:0}
+.cc-rt{display:grid;grid-template-columns:36px minmax(0,1fr) 36px 36px;gap:2px;min-width:0}
+.cc-stp{display:contents}
+.cc-rt button{height:44px;width:100%;padding:0;border-radius:10px;font-size:22px;font-weight:700;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cc-rt .cc-stp button{border:1.5px solid var(--border);background:var(--surface2);color:var(--text)}
+.cc-rt .cc-nf{border:1.5px solid rgba(220,38,38,.35);background:transparent;color:var(--red);font-size:16px}
+.cc-stp input{width:100%;min-width:0;height:44px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 14px 'JetBrains Mono',monospace;outline:none;padding:0;-moz-appearance:textfield}
+
+
 .cc-stp input::-webkit-inner-spin-button,.cc-stp input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .cc-stp input:focus{border-color:var(--accent)}
-.cc-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-.cc-sum div{border:1.5px solid var(--border);border-radius:10px;padding:5px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted)}
-.cc-sum b{display:block;font:700 17px 'JetBrains Mono',monospace}
-.cc-send{width:100%;justify-content:center}
-.cc-note{font-size:11.5px;color:var(--muted);line-height:1.5;margin:2px 2px 8px}
+
+.cc-send{width:100%;height:40px;border:0;border-radius:12px;background:var(--green);color:#fff;font:700 13.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(5,150,105,.25)}
+.cc-send:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+.cc-empty{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px}
 .cc-dot{color:var(--amber);margin-right:4px;font-size:10px}
 .am-sug{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1.5px dashed var(--accent);background:rgba(37,99,235,.07);border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:12px;line-height:1.5}
 .am-sug b{font-family:'JetBrains Mono',monospace}
 .am-sug button{border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:8px;padding:7px 14px;font:700 12px 'Inter',sans-serif;cursor:pointer}`;
   document.head.appendChild(st);
 
+  // drafts (same key as before, old drafts still work)
   const DK = 'ccDrafts';
   let dr = {};
   try { dr = JSON.parse(localStorage.getItem(DK)) || {}; } catch (e) { dr = {}; }
   const saveDr = () => { try { localStorage.setItem(DK, JSON.stringify(dr)); } catch (e) {} };
   const hasDr = b => !!(dr[b] && Object.keys(dr[b]).length);
 
-  const bkEl = document.getElementById('lmBackdrop');
-  bkEl.removeAttribute('onclick');
-  bkEl.onclick = null;
-
   const L = document.getElementById('lmList');
   const FOOT = document.querySelector('.lm-foot');
+  const fmt = n => String(Math.round(n * 1000) / 1000);
+  let flt = 'all';
 
+  // location search + scan bar
+  const lb = document.createElement('div');
+  lb.className = 'cc-lb';
+  lb.innerHTML = '<div class="cc-lbin"><span class="ic">🔍</span>' +
+    '<input id="ccLocInp" type="text" placeholder="Search or scan another location" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go">' +
+    '<button type="button" id="ccLocScan" aria-label="Scan location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></button></div>' +
+    '<div class="cc-sug" id="ccSug"></div>';
+  L.parentNode.insertBefore(lb, L);
+  const inp = document.getElementById('ccLocInp');
+  const sug = document.getElementById('ccSug');
+  const nz = s => String(s).toUpperCase().replace(/[\s\-]/g, '');
+
+  function locIndex() {
+    const m = {};
+    itemMaster.forEach(i => { const l = i.location && String(i.location).trim().toUpperCase(); if (l) m[l] = (m[l] || 0) + 1; });
+    return m;
+  }
+  function sugHide() { sug.classList.remove('on'); sug.innerHTML = ''; }
+  function sugShow() {
+    const q = nz(inp.value), idx = locIndex();
+    let keys = Object.keys(idx);
+    if (!q) keys = keys.filter(k => k !== lmLoc && hasDr(k));
+    else keys = keys.filter(k => nz(k).includes(q) && k !== lmLoc)
+      .sort((a, b) => (nz(b).startsWith(q) - nz(a).startsWith(q)) || a.localeCompare(b));
+    keys = keys.slice(0, 8);
+    if (!keys.length) {
+      if (q) { sug.innerHTML = '<div class="cc-sgn">No matching location found</div>'; sug.classList.add('on'); }
+      else sugHide();
+      return;
+    }
+    sug.innerHTML = keys.map(k => `<div class="cc-sg" data-l="${lmEsc(k)}"><div><b>📍 ${lmEsc(k)}</b>${hasDr(k) ? '<em>Draft</em>' : ''}</div><span>${idx[k]} items</span></div>`).join('');
+    sug.classList.add('on');
+  }
+  function ccGo(v) {
+    const idx = locIndex(), k = Object.keys(idx).find(x => nz(x) === nz(v));
+    if (!k) { showToast('This location is not in the master', 'amber'); return; }
+    lmLoc = k; flt = 'all';
+    inp.value = ''; sugHide(); inp.blur();
+    L.scrollTop = 0;
+    build(); dot();
+    if (hasDr(k)) showToast('Draft restored for this bin', 'amber');
+  }
+  inp.addEventListener('input', e => {
+    if (e.isTrusted === false) { const v = inp.value; setTimeout(() => ccGo(v), 0); return; }   // filled by scanner = jump directly
+    sugShow();
+  });
+  inp.addEventListener('focus', sugShow);
+  inp.addEventListener('blur', () => setTimeout(sugHide, 180));
+  inp.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const q = nz(inp.value);
+    if (!q) return;
+    const first = sug.querySelector('.cc-sg');
+    const exact = Object.keys(locIndex()).find(x => nz(x) === q);
+    ccGo(exact || (first ? first.dataset.l : inp.value));
+  });
+  sug.addEventListener('mousedown', e => e.preventDefault());
+  sug.addEventListener('click', e => { const r = e.target.closest('.cc-sg'); if (r) ccGo(r.dataset.l); });
+  document.getElementById('ccLocScan').onclick = () => openScanner('ccLocInp');
+
+  // restore body scroll lock after scanner closes (modal is still open)
+  const _cs = window.closeScanner;
+  window.closeScanner = function () {
+    const r = _cs.apply(this, arguments);
+    if (locModalOpen) document.body.style.overflow = 'hidden';
+    return r;
+  };
+
+  // data helpers
   function rowsOf() {
     return itemMaster
       .filter(i => i.location && String(i.location).trim().toUpperCase() === lmLoc)
@@ -7036,45 +7093,99 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
     const o = phEntry(it.sn), s = lvStockNum(it);
     return { sys: o ? o.sys : s, cur: o ? o.phys : s };
   }
-  function footInit() {
-    FOOT.innerHTML = '<div class="cc-sum"><div><b id="ccS" style="color:var(--red)">0</b>Short</div><div><b id="ccE" style="color:var(--accent)">0</b>Excess</div><div><b id="ccM" style="color:var(--green)">0</b>Match</div></div>' +
-      '<button class="btn btn-success cc-send" id="ccSend" disabled>No change</button>';
-    document.getElementById('ccSend').onclick = send;
+  function vOf(i) {
+    const d = dr[lmLoc];
+    if (d && d[i.sn] !== undefined && d[i.sn] !== '') return +d[i.sn];
+    const o = phEntry(i.sn);
+    return o ? o.phys : null;
   }
-  function build() {
-    const list = rowsOf(), d = dr[lmLoc] || {}, prev = L.scrollTop;
-    document.getElementById('lmLoc').textContent = lmLoc;
-    document.getElementById('lmSub').textContent = list.length + ' items · cycle count';
-    L.innerHTML = '<div class="cc-note">Physical qty bharo. Entries draft me save rehti hain jab tak Send na karo, popup band ho jaye tab bhi.</div>' +
-      (list.map(i => {
-        const b = baseOf(i), v = d[i.sn] !== undefined ? d[i.sn] : b.cur;
-        return `<div class="cc-row" data-sn="${lmEsc(i.sn)}" data-sys="${b.sys}" data-cur="${b.cur}">
-          <div class="cc-info"><div class="lm-name">${lmEsc(i.name)}</div><div class="lm-sap">${lmEsc(i.sap)} · System ${b.sys}</div><div class="cc-df"></div></div>
-          <div class="cc-stp"><button type="button" data-d="-1" aria-label="Minus">−</button><input type="number" inputmode="decimal" min="0" step="any" value="${v}" aria-label="Physical qty"><button type="button" data-d="1" aria-label="Plus">+</button></div>
-        </div>`;
-      }).join('') || '<div class="lm-empty">Koi item nahi mila</div>');
-    L.scrollTop = prev;
-    calc();
+  function stOf(i) {
+    const v = vOf(i), sys = baseOf(i).sys;
+    return v === null ? 'p' : v === sys ? 'm' : v < sys ? 's' : 'e';
   }
-  function calc() {
-    let s = 0, e = 0, m = 0, ch = 0;
-    L.querySelectorAll('.cc-row').forEach(r => {
-      const sys = +r.dataset.sys, cur = +r.dataset.cur, v = r.querySelector('input').value, p = v === '' ? cur : +v, d = p - sys;
-      r.className = 'cc-row' + (d < 0 ? ' s' : d > 0 ? ' e' : '');
-      r.querySelector('.cc-df').textContent = d < 0 ? '⬇ Short ' + Math.abs(d) : d > 0 ? '⬆ Excess +' + d : '✓ Matches system';
-      d < 0 ? s++ : d > 0 ? e++ : m++;
-      if (p !== cur) ch++;
-    });
+  const COL = { m: 'var(--green)', s: 'var(--red)', e: 'var(--accent)', p: 'var(--border)' };
+  function capH(i) {
+    const s = stOf(i);
+    if (s === 'p') return '';
+    const d = vOf(i) - baseOf(i).sys;
+    return `<div class="cc-cpl" style="--cc:${COL[s]}"><span class="a">${s === 'm' ? 'Matched' : s === 's' ? 'Short' : 'Excess'}</span><span class="b">${s === 'm' ? '✓' : (d > 0 ? '+' : '−') + fmt(Math.abs(d))}</span></div>`;
+  }
+function rowN(i) {
+  const s = stOf(i), v = vOf(i), b = baseOf(i);
+  return `<div class="cc-row${s === 'p' ? '' : ' ' + s}" data-sn="${lmEsc(i.sn)}">
+    <div class="cc-top"><div class="lm-name">${lmEsc(i.name)}</div><span class="cc-ch">${capH(i)}</span></div>
+    <div class="lm-sap" style="margin-top:3px">${lmEsc(i.sap)} · System ${fmt(b.sys)}</div>
+    <div class="cc-act"><button type="button" class="cc-mt${s === 'm' ? ' on' : ''}" data-m>${s === 'm' ? '✓ Matched' : '✓ Match'}</button>
+    <div class="cc-rt"><div class="cc-stp"><button type="button" data-d="-1" aria-label="Minus">−</button><input type="number" inputmode="decimal" min="0" step="any" placeholder="Qty" value="${v === null ? '' : v}" aria-label="Physical qty"><button type="button" data-d="1" aria-label="Plus">+</button></div>
+    <button type="button" class="cc-nf" data-z title="Not found" aria-label="Not found">∅</button></div></div></div>`;
+}
+  function chgCount(list) {
+    let n = 0;
+    const d = dr[lmLoc] || {};
+    list.forEach(i => { if (d[i.sn] !== undefined && +d[i.sn] !== baseOf(i).cur) n++; });
+    return n;
+  }
+
+function footInit() {
+  FOOT.innerHTML = '<div class="cc-lg" id="ccLg"></div><div class="cc-chips" id="ccChips"></div><button class="cc-send" id="ccSend" disabled></button>';
+  document.getElementById('ccSend').onclick = send;
+}
+
+FOOT.addEventListener('click', e => {
+  const f = e.target.closest('[data-f]');
+  if (f) { flt = f.dataset.f; build(); }
+});
+
+function build() {
+  const list = rowsOf(), prev = L.scrollTop;
+  document.getElementById('lmLoc').textContent = lmLoc;
+  document.getElementById('lmSub').textContent = list.length + ' items · bin audit';
+  const show = list.filter(i => flt === 'all' || (flt === 'p' ? stOf(i) === 'p' : (stOf(i) === 's' || stOf(i) === 'e')));
+  L.innerHTML = '<div id="ccRows">' +
+    (show.length ? show.map(rowN).join('') : '<div class="cc-empty">' + (!list.length ? 'No items found' : flt === 'p' ? '🎉 All items checked' : 'No differences') + '</div>') + '</div>';
+  L.scrollTop = prev;
+  sum(list);
+}
+  function sum(list) {
+    list = list || rowsOf();
+    const c = { p: 0, m: 0, s: 0, e: 0 }, n = list.length;
+    list.forEach(i => c[stOf(i)]++);
     const q = id => document.getElementById(id);
-    if (!q('ccS')) return;
-    q('ccS').textContent = s; q('ccE').textContent = e; q('ccM').textContent = m;
-    q('ccSend').disabled = !ch;
-    q('ccSend').textContent = ch ? 'Save ' + ch + ' change(s) to Physical tab' : 'No change';
+    if (!q('ccLg')) return;
+    q('ccLg').innerHTML = [['m', 'Matched', 'var(--green)'], ['s', 'Short', 'var(--red)'], ['e', 'Excess', 'var(--accent)'], ['p', 'Pending', 'var(--muted)']]
+      .map(([k, l, col]) => `<div><b style="color:${col}">${c[k]}</b><small>${l}</small></div>`).join('');
+    q('ccChips').innerHTML = [['all', 'All', n], ['p', 'Pending', c.p], ['d', 'Differences', c.s + c.e]]
+      .map(([k, l, v]) => `<button type="button" class="cc-chp${flt === k ? ' sel' : ''}" data-f="${k}"><b>${v}</b>${l}</button>`).join('');
+    const sd = q('ccSend');
+    if (!sd) return;
+    const counted = n - c.p, chg = chgCount(list);
+    sd.disabled = !counted && !hasDr(lmLoc);
+    sd.textContent = chg ? 'Save (' + chg + ')' : (counted ? 'Done' : 'Save');
+  }
+  function patch(sn, keep) {
+    const i = itemMaster.find(x => String(x.sn) === String(sn));
+    const r = [...L.querySelectorAll('.cc-row')].find(x => x.dataset.sn === String(sn));
+    if (!i || !r) { sum(); return; }
+    const s = stOf(i), v = vOf(i);
+    r.className = 'cc-row' + (s === 'p' ? '' : ' ' + s);
+    r.querySelector('.cc-ch').innerHTML = capH(i);
+    const m = r.querySelector('.cc-mt');
+    m.className = 'cc-mt' + (s === 'm' ? ' on' : '');
+    m.textContent = s === 'm' ? '✓ Matched' : '✓ Match';
+    if (!keep) r.querySelector('input').value = v === null ? '' : v;
+    sum();
+  }
+  function setDraft(sn, v, keep) {
+    const d = dr[lmLoc] = dr[lmLoc] || {};
+    if (v === '' || v == null) delete d[sn];
+    else { const n = +v; if (isNaN(n)) return; d[sn] = Math.max(0, n); }
+    if (!hasDr(lmLoc)) delete dr[lmLoc];
+    saveDr(); patch(sn, keep); dot();
   }
   function dot() {
-    const lb = document.getElementById('locBox');
-    if (!lb || !currentItem) return;
-    const v = lb.querySelector('.v');
+    const lbx = document.getElementById('locBox');
+    if (!lbx || !currentItem) return;
+    const v = lbx.querySelector('.v');
     if (!v) return;
     const o = v.querySelector('.cc-dot');
     if (o) o.remove();
@@ -7084,34 +7195,39 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 
   L.addEventListener('input', e => {
     const r = e.target.closest('.cc-row');
-    if (!r) return;
-    const v = e.target.value;
-    dr[lmLoc] = dr[lmLoc] || {};
-    if (v === '' || +v === +r.dataset.cur) delete dr[lmLoc][r.dataset.sn];
-    else dr[lmLoc][r.dataset.sn] = v;
-    if (!hasDr(lmLoc)) delete dr[lmLoc];
-    saveDr(); calc(); dot();
+    if (!r || e.target.tagName !== 'INPUT') return;
+    setDraft(r.dataset.sn, e.target.value, true);
   });
   L.addEventListener('click', e => {
+    const r = e.target.closest('.cc-row');
+    if (!r) return;
+    const sn = r.dataset.sn, i = itemMaster.find(x => String(x.sn) === sn);
+    if (!i) return;
+    const sys = baseOf(i).sys;
     const bt = e.target.closest('.cc-stp button');
-    if (!bt) return;
-    const r = bt.closest('.cc-row'), inp = r.querySelector('input');
-    const v = inp.value === '' ? +r.dataset.cur : +inp.value;
-    inp.value = Math.max(0, Math.round((v + (+bt.dataset.d)) * 1000) / 1000);
-    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    if (bt) {
+      const cur = vOf(i), base = cur === null ? sys : cur;
+      setDraft(sn, Math.max(0, Math.round((base + (+bt.dataset.d)) * 1000) / 1000), false);
+      return;
+    }
+    if (e.target.closest('[data-m]')) {
+      const d = (dr[lmLoc] || {})[sn];
+      if (d !== undefined && +d === sys) setDraft(sn, '', false); else setDraft(sn, sys, false);
+      return;
+    }
+    if (e.target.closest('[data-z]')) setDraft(sn, 0, false);
   });
 
   function send() {
-    const ts = Date.now();
     if (!guard('loc')) return;
+    const ts = Date.now(), d = dr[lmLoc] || {};
     let saved = 0;
-    L.querySelectorAll('.cc-row').forEach(r => {
-      const it = itemMaster.find(i => String(i.sn) === r.dataset.sn);
-      if (!it) return;
-      const sys = +r.dataset.sys, cur = +r.dataset.cur, v = r.querySelector('input').value, val = v === '' ? cur : +v;
-      if (val === cur) return;
+    rowsOf().forEach(it => {
+      if (d[it.sn] === undefined) return;
+      const b = baseOf(it), val = +d[it.sn];
+      if (val === b.cur) return;
       const had = phEntry(it.sn);
-      if (val === sys) {
+      if (val === b.sys) {
         if (!had) return;
         physList = physList.filter(p => String(p.sn) !== String(it.sn));
         physOps[it.sn] = { type: 'remove', ts };
@@ -7120,11 +7236,11 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
         return;
       }
       const sap = String(it.sap).trim();
-      const item = { sn: it.sn, sap, name: it.name, loc: it.location || 'No Loc', sys, phys: val, ts, remark: had ? (had.remark || '') : '' };
+      const item = { sn: it.sn, sap, name: it.name, loc: it.location || 'No Loc', sys: b.sys, phys: val, ts, remark: had ? (had.remark || '') : '' };
       physList = physList.filter(p => String(p.sn) !== String(it.sn));
       physList.unshift(item);
       physOps[it.sn] = { type: 'set', ts, item };
-      binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys, phys: val, by: userName, ts, remark: item.remark });
+      binSend({ action: 'setPhys', sn: it.sn, sap, name: it.name, loc: item.loc, sys: b.sys, phys: val, by: userName, ts, remark: item.remark });
       saved++;
     });
     delete dr[lmLoc]; saveDr();
@@ -7132,29 +7248,45 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
     if (notifOpen) { renderTabBadges(); renderActiveNotifTab(); }
     closeLocModal();
     dot();
-    showToast(saved ? 'Saved ✓ ' + saved + ' item(s) Physical tab me gaye' : 'Koi change nahi tha', saved ? 'green' : 'amber');
+    showToast(saved ? 'Saved ✓ ' + saved + ' item(s) sent to Physical tab' : 'No differences found', saved ? 'green' : 'amber');
   }
+
+  function positionLocModal() {
+    const shell = document.querySelector('.app-shell');
+    const m = document.getElementById('lmModal');
+    const r = shell.getBoundingClientRect();
+    const top = Math.max(10, r.top);
+    m.style.width = r.width + 'px';
+    m.style.left = r.left + 'px';
+    m.style.top = top + 'px';
+    m.style.setProperty('--lm-h', (window.innerHeight - top - 10) + 'px');
+  }
+  window.addEventListener('resize', () => { if (locModalOpen) positionLocModal(); });
 
   window.openLocModal = function () {
     if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
     lmLoc = String(currentItem.location).trim().toUpperCase();
+    flt = 'all';
+    inp.value = ''; sugHide();
     footInit();
     L.scrollTop = 0;
     build();
     locModalOpen = true;
+    positionLocModal();
     document.getElementById('lmBackdrop').classList.add('open');
     document.getElementById('lmModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-    if (hasDr(lmLoc)) showToast('Draft restored: pehle ki entries wapas aa gayi', 'amber');
+    if (hasDr(lmLoc)) showToast('Draft restored: your earlier entries are back', 'amber');
   };
   window.renderLocModal = function () {
     const a = document.activeElement;
-    if (a && L.contains(a)) return;
+    if (a && a.tagName === 'INPUT' && document.getElementById('lmModal').contains(a)) return;
     build();
   };
   const _ri = renderItem;
   window.renderItem = function () { const r = _ri.apply(this, arguments); dot(); return r; };
 
+  // ═══ Auto Min/Max ═══
   const AM = { lead: 10, safe: 7, cycle: 30 };
   function amInject() {
     const f = document.querySelector('#stockAlertBox .sa-f3');
@@ -7165,7 +7297,7 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
     const box = document.createElement('div');
     box.className = 'am-sug';
     if (!pd) {
-      box.innerHTML = '<span>✨ Auto suggestion ke liye Ledger tab se ledger upload karo</span>';
+      box.innerHTML = '<span>✨ Upload a ledger from the Ledger tab to get auto suggestions</span>';
     } else {
       const mn = Math.ceil(pd * AM.safe), re = Math.ceil(pd * AM.lead) + mn, mx = re + Math.ceil(pd * AM.cycle);
       box.innerHTML = `<span>✨ Ledger avg <b>${pd}</b>/day<br>Min <b>${mn}</b> · Reorder <b>${re}</b> · Max <b>${mx}</b></span><button type="button">Apply</button>`;
@@ -7173,7 +7305,7 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
         document.getElementById('alMin').value = mn;
         document.getElementById('alRe').value = re;
         document.getElementById('alMax').value = mx;
-        showToast('Suggestion fill ho gaya. Check karke Save karo', 'blue');
+        showToast('Suggestion filled. Review and save', 'blue');
       };
     }
     f.parentNode.insertBefore(box, f);
