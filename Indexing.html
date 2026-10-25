@@ -2099,43 +2099,36 @@ body.loading .btn-dl,
 body.loading .upload-zone { opacity: 0.45; }
 
 /* ─── Stock Alert v2 ─── */
-.sa-row{margin-top:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface2);overflow:hidden;transition:border-color .2s,background .2s}
+.sa-row{margin:0;border:1px solid var(--border);border-radius:14px;background:var(--surface2);overflow:hidden;transition:margin .3s,border-color .2s,background .2s}
 .sa-row.unset{border-style:dashed;background:#fafbfd}
 .sa-row.ok{border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.04)}
 .sa-row.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.07)}
 .sa-row.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.05)}
 .sa-row.off{opacity:.85}
-.sa-top{display:flex;align-items:center;gap:10px;padding:10px 12px;min-height:56px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.sa-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0;background:#e8edf3}
-.sa-row.ok .sa-ic{background:rgba(5,150,105,.14)}
-.sa-row.re .sa-ic{background:rgba(245,158,11,.2)}
-.sa-row.crit .sa-ic{background:rgba(220,38,38,.14)}
-.sa-tx{flex:1;min-width:0}
-.sa-t{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;line-height:1.2}
-.sa-s{font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .sa-chip{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .sa-chip.ok{background:rgba(5,150,105,.12);color:var(--green)}
 .sa-chip.re{background:rgba(180,83,9,.12);color:var(--amber)}
 .sa-chip.crit{background:rgba(220,38,38,.12);color:var(--red)}
 .sa-chip.off{background:#e8edf3;color:var(--muted)}
-.sa-set{height:36px;padding:0 14px;border-radius:9px;border:1.5px solid rgba(37,99,235,.3);background:rgba(37,99,235,.07);color:var(--accent);font:700 12px 'Inter',sans-serif;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
 .sa-sw{position:relative;width:38px;height:22px;border-radius:20px;background:#cbd5e1;border:0;flex-shrink:0;transition:background .2s;cursor:pointer;padding:0}
 .sa-sw::before{content:'';position:absolute;inset:-11px -6px}
 .sa-sw::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
 .sa-sw.on{background:var(--green)}
 .sa-sw.on::after{transform:translateX(16px)}
-.sa-chev{display:inline-block;font-size:11px;color:var(--muted);transition:transform .25s}
-.sa-row.open .sa-chev{transform:rotate(180deg)}
-.sa-mini{position:relative;height:6px;margin:0 12px 10px;border-radius:6px;display:flex;gap:2px}
+
+.sa-mini{position:relative;height:6px;margin:12px 12px 0;border-radius:6px;display:flex;gap:2px}
 .sa-mini i{display:block;height:100%}
 .sa-mini i:first-child{border-radius:6px 0 0 6px}
 .sa-mini i:nth-child(3){border-radius:0 6px 6px 0}
 .sa-mini span{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;border:2.5px solid #fff;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(15,23,42,.35)}
 .sa-mini.off i{background:#e2e8f0!important}
+.sa-bin .sa-mini{margin:0 0 10px}
 .sa-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1)}
 .sa-row.open .sa-body{grid-template-rows:1fr}
 .sa-body>div{overflow:hidden;min-height:0}
-.sa-bin{padding:2px 12px 12px}
+.sa-bin{padding:12px}
 .sa-lv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
 .sa-lv>div{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 8px;text-align:center}
 .sa-lv small{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
@@ -2360,6 +2353,70 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-res{padding:8px 10px;margin-bottom:8px;font-size:12px}
 .ph-res strong{font-size:13px}
 .ph-save{height:40px;font-size:13.5px}
+.sk-page{width:210mm;height:296mm;padding-top:14mm;background:#fff;color:#000;overflow:hidden;break-after:page}
+.sk-page:last-child{break-after:auto}
+.sk-grid{display:grid;grid-template-columns:repeat(2,99.1mm);grid-auto-rows:33.9mm;column-gap:2mm;justify-content:center}
+.sk-lb{height:33.9mm;padding:4mm;display:flex;align-items:center;justify-content:space-between;gap:2mm;overflow:hidden;font:600 9.5pt Arial,sans-serif}
+.sk-q{width:14mm;height:14mm;flex-shrink:0}
+.sk-q canvas,.sk-q img{width:100%!important;height:100%!important}
+.stx{margin:0;border:1px dashed var(--border);border-radius:14px;background:var(--surface2);overflow:hidden;transition:margin .3s,border-color .2s,background .2s}
+.stx.q{border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.05)}
+
+.stx-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s}
+.stx.open .stx-body{grid-template-rows:1fr}
+.stx-body>div{overflow:hidden;min-height:0}
+.stx-form{padding:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.stx-n{display:grid;grid-template-columns:36px 56px 36px;gap:4px}
+.stx-n button,.stx-n input,.stx-ib{height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:0;cursor:pointer}
+.stx-n button{font-size:20px;font-weight:700}
+.stx-n input{text-align:center;font:700 16px 'JetBrains Mono',monospace;border-width:2px;outline:0;cursor:text;-moz-appearance:textfield}
+.stx-n input::-webkit-inner-spin-button{-webkit-appearance:none}
+.stx-b{display:flex;gap:6px;margin-left:auto}
+.stx-ib{width:40px;font-size:16px}
+.stx-ib.p{background:var(--accent);border-color:var(--accent);color:#fff}
+.stx-ib.r{color:var(--red);border-color:rgba(220,38,38,.35)}
+.stx-rem{flex:1 1 100%;width:100%;height:40px;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'Inter',sans-serif;padding:0 12px;text-transform:uppercase;outline:0;-webkit-appearance:none}
+.stx-rem:focus{border-color:var(--accent)}
+.stx-rem::placeholder{font-weight:500;font-size:13px;text-transform:none;color:var(--muted)}
+.stx-seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px;margin:0 0 8px}
+.stx-pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:9px;background:var(--accent);pointer-events:none;transition:transform .3s cubic-bezier(.34,1.3,.64,1)}
+.stx-seg.r .stx-pill{transform:translateX(100%)}
+.stx-seg button{position:relative;z-index:1;height:38px;border:0;background:transparent;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:6px;font:700 12.5px 'Inter',sans-serif;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .25s}
+.stx-seg button.on{color:#fff}
+.stx-seg i{font-style:normal;font-size:15px;line-height:1}
+.stx-seg b{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(220,38,38,.12);color:var(--red);font:700 11px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
+.stx-seg button.on b{background:#fff;color:var(--accent)}
+.bin-bar .pa-bar{flex-wrap:wrap;row-gap:6px}
+.bin-bar .bp-mini{height:30px}
+.stx-ln{display:flex;align-items:center;gap:4px}
+.stx-ln .stx-n{grid-template-columns:28px 38px 28px;gap:3px;flex-shrink:0}
+.stx-ln .stx-rem{flex:1 1 0;min-width:0;width:auto;padding:0 9px;font-size:14px}
+.stx-ln .stx-ib{width:36px;flex-shrink:0}
+.stx-ln .stx-ib{width:40px}
+.stx-ib.ok{color:var(--green);border-color:rgba(5,150,105,.4)}
+.stx-done{opacity:.65;border-color:rgba(5,150,105,.35)!important}
+.stx-form{flex-wrap:nowrap;gap:4px}
+.stx-form .stx-n{grid-template-columns:28px 40px 28px;gap:3px;flex-shrink:0}
+.stx-form .stx-rem{order:2;flex:1 1 0;min-width:0;width:auto;padding:0 9px}
+.stx-form .stx-b{order:3;margin-left:0;gap:4px;flex-shrink:0}
+.stx-form .stx-ib{width:36px}
+/* tools row: alert + sticker chips */
+.tl-row{display:flex;gap:8px;margin-top:12px}
+.tl-chip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;min-height:52px;text-align:left;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,transform .1s}
+.tl-chip:active{transform:scale(.98)}
+.tl-chip.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.05)}
+.tl-chip.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.07)}
+.tl-chip.ok{border-color:rgba(5,150,105,.35);background:rgba(5,150,105,.04)}
+.tl-chip.q{border-color:rgba(37,99,235,.4);background:rgba(37,99,235,.05)}
+.tl-chip.on{border-color:var(--accent)}
+.tl-e{font-size:17px;flex-shrink:0}
+.tl-tx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.tl-t{font-size:13px;font-weight:700;line-height:1.2}
+.tl-s{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.tl-v{font-size:11px;color:var(--muted);transition:transform .25s;flex-shrink:0}
+.tl-chip.on .tl-v{transform:rotate(180deg)}
+.sa-row.open,.stx.open{margin-top:10px}
+.sa-row:not(.open),.stx:not(.open){margin:-1px 0;border-color:transparent;background:transparent}
 </style>
 </head>
 
@@ -2886,7 +2943,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbyGpaEt0BcRsCBO1yfg2Q52nXd-LjGCbca8sejYGgXh-5PRoe_aHKUa-7TLI58ZfH0D/exec";
+    const API = "https://script.google.com/macros/s/AKfycbxtJgQmZf_0CLQX7j6-J8sDikigRtbJO1HkkWzlMS1Q547x0YUD9UCnavvljzRCIBUy/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycbyc_BkRKEin5Yo_F4ufq9g_pCl1pV0SVv2clc40LjvGADU1vFF2d_hQkDgVdMReP9ZCFw/exec";
 const PERMS = new Set(JSON.parse(sessionStorage.getItem('userPerms') || '[]'));
 const can = p => PERMS.has(p);
@@ -3123,11 +3180,7 @@ function toggleSA() {
   setSAOpen(!saOpen);
   const r = document.getElementById('saRow');
   if (r) r.classList.toggle('open', saOpen);
-}
-function saTopClick() {
-  if (alFormOpen) return;
-  if (!lvOf(currentItem)) { openAlertForm(); return; }
-  toggleSA();
+  if (window.renderTools) window.renderTools();
 }
 
 function saveLevelsCache() { try { localStorage.setItem(LV_CACHE_KEY, JSON.stringify(levelsMap)); } catch (e) {} }
@@ -3167,20 +3220,8 @@ function renderAlertBox() {
   if (alForSn !== currentItem.sn) { alForSn = currentItem.sn; alFormOpen = false; alRmAsk = false; }
   const it = currentItem, l = lvOf(it), s = lvState(it), q = lvStockNum(it);
   const k = l ? s.k : 'unset';
-  const ICON = { unset: '🔔', ok: '✅', re: '⚠️', crit: '🚨', off: '🔕' };
   const open = l ? saOpen : alFormOpen;
-  let top, body = '';
-
-  if (!l) {
-    top = `<div class="sa-ic">${ICON.unset}</div>
-      <div class="sa-tx"><div class="sa-t">Stock alert</div><div class="sa-s">Get notified when stock runs low</div></div>
-      ${alFormOpen ? '' : '<button class="sa-set" onclick="event.stopPropagation();openAlertForm()">＋ Set</button>'}`;
-  } else {
-    top = `<div class="sa-ic">${ICON[k]}</div>
-      <div class="sa-tx"><div class="sa-t">Stock alert <span class="sa-chip ${k}">${s.label}</span><span class="sa-chev">▾</span></div>
-      <div class="sa-s">Stock ${q} · Min ${l.min} · Reorder ${l.reorder}</div></div>
-      ${alFormOpen ? '' : `<button class="sa-sw${l.off ? '' : ' on'}" role="switch" aria-checked="${!l.off}" aria-label="Alert on/off" onclick="event.stopPropagation();toggleAlertOff()"></button>`}`;
-  }
+  let body = '';
 
     if (alFormOpen) {
     const v = l || { min: '', reorder: '', max: '' };
@@ -3204,6 +3245,8 @@ function renderAlertBox() {
     const needTxt = (s.k === 'crit' || s.k === 're') ? `<b style="color:var(--red)">${need}</b>` : `<b style="color:var(--muted)">—</b>`;
     const c = l, t = ctTel(c.mobile);
     body = `<div class="sa-bin">
+      <div class="sa-order"><span>Alert ${l.off ? 'paused' : 'active'}</span><button class="sa-sw${l.off ? '' : ' on'}" role="switch" aria-checked="${!l.off}" aria-label="Alert on/off" onclick="toggleAlertOff()"></button></div>
+      ${lvBarHTML(it)}
       <div class="sa-lv"><div class="a"><small>Min</small><b>${l.min}</b></div><div class="b"><small>Reorder</small><b>${l.reorder}</b></div><div class="c"><small>Max</small><b>${l.max}</b></div></div>
       <div class="sa-order"><span>Qty to order</span>${needTxt}</div>
       <div class="clbl">👤 Pur./Vend. Contact</div>
@@ -3220,11 +3263,8 @@ function renderAlertBox() {
       ${l.off ? `<div class="sa-hint">Alerts are paused. This item won't trigger alerts after a stock upload.</div>` : ''}
       <div class="sa-two"><button class="btn btn-ghost" onclick="openAlertForm()">✏️ Edit levels &amp; contact</button><button class="btn btn-ghost sa-del" onclick="askRemoveAlert()">🗑️ Remove</button></div></div>`;
   }
-
-  box.innerHTML = `<div class="sa-row ${k}${open ? ' open' : ''}" id="saRow">
-    <div class="sa-top" onclick="saTopClick()">${top}</div>
-    ${l ? lvBarHTML(it) : ''}
-    <div class="sa-body"><div>${body}</div></div></div>`;
+  box.innerHTML = `<div class="sa-row ${k}${open ? ' open' : ''}" id="saRow"><div class="sa-body"><div>${body}</div></div></div>`;
+  if (window.renderTools) window.renderTools();
 }
 
 function openAlertForm() { setSAOpen(true); alFormOpen = true; alRmAsk = false; renderAlertBox(); setTimeout(() => { const i = document.getElementById('alMin'); if (i) i.focus(); }, 80); }
@@ -4011,6 +4051,8 @@ function renderActiveNotifTab() {
   document.getElementById('saFilter').style.visibility = showChips ? 'visible' : 'hidden';
   searchWrap.style.visibility = activeNotifTab === 'stock' ? 'visible' : 'hidden';
   document.getElementById('binBar').style.visibility = isBin ? 'visible' : 'hidden';
+document.querySelector('.notif-slot').style.height = isBin ? 'auto' : '';
+document.getElementById('binBar').style.display = isBin ? '' : 'none';
 
   if (activeNotifTab === 'stock') {
     iconBadge.textContent = '📊';
@@ -5105,7 +5147,9 @@ document.getElementById('scanCandidatesList').addEventListener('click', e => {
           </button>
         </div>
                 <div id="updateForm"></div>
-        <div id="stockAlertBox"></div>
+        <div class="tl-row" id="toolsRow"></div>
+<div id="stockAlertBox"></div>
+<div id="stickerBox"></div>
       `;
       renderAlertBox();
     }
@@ -7388,6 +7432,235 @@ function build() {
     document.getElementById('searchWrap').after(m);
   }
 })();
+
+
+// ═══ STICKER LIST (Google Sheet sync) ═══
+let stkQ = [], stkBusy = 0, stkVer = 0, stkSub = 'bp';
+try { stkQ = JSON.parse(localStorage.getItem('stkQueue')) || []; } catch (e) {}
+const skE = id => document.getElementById(id);
+const stkFind = s => stkQ.find(x => x.sap === s);
+const stkItem = s => itemMaster.find(i => String(i.sap).trim() === s);
+
+function stkSend(p) {
+  stkBusy++; stkVer++;
+  try { localStorage.setItem('stkQueue', JSON.stringify(stkQ)); } catch (e) {}
+  binSend(p).finally(() => stkBusy--);
+}
+function stkPut(q) {
+  q.ts = Date.now();
+  stkSend({ action: 'setSticker', sap: q.sap, qty: q.qty, rem: q.rem, printed: q.printed ? '1' : '0', by: userName, ts: q.ts });
+}
+function stkUI() {
+  renderStats();
+  if (notifOpen && activeNotifTab === 'bin') renderBinList();
+  if (currentItem && !addItemMode) renderStickerBox();
+}
+function syncStk() {
+  if (!can('binview') && !can('binprint')) return;
+  const v = stkVer;
+  fetch(`${API}?action=getStickers`).then(r => r.json()).then(rows => {
+    if (!Array.isArray(rows) || stkBusy || v !== stkVer) return;
+    if (rows.length && !('qty' in rows[0])) return;
+    const a = document.activeElement;
+    if (a && a.closest && a.closest('#notifList,#stickerBox')) return;
+    stkQ = rows.map(r => ({ sap: String(r.sap).trim(), qty: +r.qty || 1, rem: r.rem || '', printed: !!r.printed, ts: +r.ts || 0 }));
+    try { localStorage.setItem('stkQueue', JSON.stringify(stkQ)); } catch (e) {}
+    stkUI();
+  }).catch(() => {});
+}
+
+
+function stkDel(sap) { stkQ = stkQ.filter(x => x.sap !== sap); stkSend({ action: 'removeSticker', sap }); stkUI(); }
+function stkQty(sap, v) { const q = stkFind(sap); if (!q) return; q.qty = Math.max(1, Math.min(999, parseInt(v) || 1)); q.printed = false; stkPut(q); stkUI(); }
+function stkClearDone() { stkQ.filter(q => q.printed).forEach(q => stkDel(q.sap)); }
+function stkTab(k) {
+  stkSub = k;
+  const sg = skE('stxSeg');
+  if (sg) {
+    sg.classList.toggle('r', k === 'sp');
+    sg.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', (i === 1) === (k === 'sp')));
+  }
+  setTimeout(renderBinList, 180);
+}
+
+// bell → Bins → Sticker Print
+function stkSwitch() {
+  const b = (k, i, l, n) => `<button type="button" class="${stkSub === k ? 'on' : ''}" onclick="stkTab('${k}')"><i>${i}</i>${l}${n ? `<b>${n}</b>` : ''}</button>`;
+  return `<div class="stx-seg${stkSub === 'sp' ? ' r' : ''}" id="stxSeg"><span class="stx-pill"></span>${b('bp', '🖨️', 'Bin print', binPending.length)}${b('sp', '🏷️', 'Sticker print', stkQ.length)}</div>`;
+}
+
+function renderStkList() {
+  const n = stkQ.length, tot = stkQ.reduce((a, q) => a + q.qty, 0), done = stkQ.filter(q => q.printed).length;
+  skE('notifCountBadge').textContent = n;
+  skE('notifSub').textContent = n ? 'Print and clear' : 'Sab up to date';
+  const qrT = `<label class="bp-mini"><span>QR</span><span class="bp-sw"><input type="checkbox" ${stkQR ? 'checked' : ''} onchange="stkQrT(this.checked)"><i></i></span></label>`;
+  skE('binBar').innerHTML = n ? `<div class="pa-bar"><div class="pa-txt"><b>${n}</b> Items<br/><span>${tot} Stickers · ${Math.ceil(tot / 16)} Pages</span></div><div class="pa-grp" style="align-items:center">${qrT}${done ? `<button class="pa-clr" onclick="stkClearDone()">✓ Clear (${done})</button>` : ''}<button class="pa-btn" onclick="stkPrint()">🖨️ Print All</button></div></div>` : '';
+  skE('notifList').innerHTML = n ? stkQ.slice().sort((a, b) => b.ts - a.ts).map(q => {
+    const it = stkItem(q.sap), s = q.sap;
+    return `<div class="notif-row${q.printed ? ' stx-done' : ''}">
+      <div class="notif-name">${lmEsc(it ? it.name : 'SAP ' + s)}</div>
+      <div class="sa-nsap" style="margin:4px 0 8px">${s}${it && it.location ? ' · 📍 ' + lmEsc(it.location) : ''}${q.printed ? ' <span class="sa-chip ok">Printed</span>' : ''}</div>
+      <div class="stx-ln">
+        <div class="stx-n"><button onclick="stkQty('${s}',${q.qty - 1})">−</button><input type="number" min="1" max="999" value="${q.qty}" onchange="stkQty('${s}',this.value)"><button onclick="stkQty('${s}',${q.qty + 1})">+</button></div>
+        <input class="stx-rem" maxlength="40" placeholder="Remark" value="${lmEsc(q.rem || '')}" onchange="stkRem('${s}',this.value)">
+        <button class="stx-ib" onclick="stkPrint('${s}')" aria-label="Print">🖨️</button>
+        ${q.printed
+          ? `<button class="stx-ib ok" onclick="stkDel('${s}')" aria-label="Clear">✓</button>`
+          : `<button class="stx-ib r" onclick="stkDel('${s}')" aria-label="Remove">✕</button>`}
+      </div></div>`;
+  }).join('') : '<div class="notif-empty">✅ Koi sticker pending nahi hai</div>';
+}
+
+// print: A4 portrait, 2 x 8 labels
+function stkRmPS() { const s = skE('skPS'); if (s) s.remove(); }
+function stkPrint(sap) {
+  if (!guard('binprint')) return;
+  const keys = sap ? [sap] : stkQ.map(q => q.sap), L = [];
+  keys.forEach(k => {
+    const q = stkFind(k), it = stkItem(k);
+    if (!q) return;
+    for (let i = 0; i < q.qty; i++) L.push({ k, n: it ? it.name : 'SAP ' + k, l: it && it.location ? String(it.location).trim() : '', r: q.rem });
+  });
+  if (!L.length) return;
+  let h = '';
+  for (let p = 0; p < L.length; p += 16) h += '<div class="sk-page"><div class="sk-grid">' + L.slice(p, p + 16).map(x =>
+    `<div class="sk-lb"><div style="flex:1;min-width:0"><div style="max-height:2.6em;overflow:hidden;margin-bottom:1mm">${lmEsc(x.n)}</div><div>SAP - ${x.k}</div><div>LOC - ${x.l ? lmEsc(x.l) : '________'}</div>${x.r ? '<div>REM - ' + lmEsc(x.r) + '</div>' : ''}</div>${stkQR ? '<div class="sk-q" data-q="SAP-' + x.k + '"></div>' : ''}</div>`).join('') + '</div></div>';
+  const r = skE('bpPrintRoot');
+  r.innerHTML = h;
+  r.querySelectorAll('.sk-q').forEach(e => new QRCode(e, { text: e.dataset.q, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M }));
+  keys.forEach(k => { const q = stkFind(k); if (q && !q.printed) { q.printed = true; stkPut(q); } });
+  logAct('i_bin', 'Sticker printed', keys.join(', ').slice(0, 120));
+  stkUI();
+  stkRmPS();
+  const st = document.createElement('style');
+  st.id = 'skPS'; st.textContent = '@page{size:A4 portrait;margin:0}';
+  document.head.appendChild(st);
+  setTimeout(() => window.print(), 200);
+}
+window.addEventListener('afterprint', stkRmPS);
+
+// existing functions ke upar wrappers (purana code same rahega)
+const _bdp = bpDoPrint;
+window.bpDoPrint = function () { stkRmPS(); return _bdp.apply(this, arguments); };
+
+const _ri2 = renderItem;
+window.renderItem = function () {
+  const r = _ri2.apply(this, arguments);
+  if (currentItem) renderStickerBox();
+  return r;
+};
+const _rbl = renderBinList;
+window.renderBinList = function () {
+  const l = skE('notifList'), s = l.scrollTop;
+  if (stkSub === 'sp') renderStkList();
+  else _rbl.apply(this, arguments);
+  skE('binBar').insertAdjacentHTML('afterbegin', stkSwitch());
+  l.scrollTop = s;
+};
+const _rs = renderStats;
+window.renderStats = function () {
+  _rs.apply(this, arguments);
+  if (!can('binview') || !stkQ.length) return;
+  const b = skE('bellBadge');
+  b.textContent = (+b.textContent || 0) + stkQ.length;
+  b.classList.remove('hidden');
+  skE('bellBtn').classList.add('has-alert');
+};
+const _rtb = renderTabBadges;
+window.renderTabBadges = function () {
+  _rtb.apply(this, arguments);
+  if (!stkQ.length) return;
+  const b = skE('notifTabBinBadge');
+  b.textContent = binPending.length + stkQ.length;
+  b.classList.remove('hidden');
+};
+const _sb = syncBin;
+window.syncBin = function () { syncStk(); return _sb.apply(this, arguments); };
+
+// ── Sticker UI (new design) ──
+let stkOpen = 0, stkFor = '', stkDq = 1, stkDr = '';
+let stkQR = localStorage.getItem('stkQR') !== '0';
+function stkQrT(v) { stkQR = v; try { localStorage.setItem('stkQR', v ? '1' : '0'); } catch (e) {} renderBinList(); }
+
+function renderStickerBox() {
+  const b = skE('stickerBox');
+  if (!b || !currentItem) return;
+  if (!can('binprint')) { b.innerHTML = ''; renderTools(); return; }
+  const s = String(currentItem.sap).trim(), q = stkFind(s);
+  if (stkFor !== s) { stkFor = s; stkOpen = 0; }
+  if (!stkOpen) { stkDq = q ? q.qty : 1; stkDr = q ? q.rem : ''; }
+  const old = skE('stx');
+  if (old && !stkOpen && old.classList.contains('open')) {
+    old.classList.remove('open');
+    old.classList.toggle('q', !!q);
+    setTimeout(() => { if (!stkOpen) renderStickerBox(); }, 320);
+    renderTools();
+    return;
+  }
+  b.innerHTML = `<div class="stx${q ? ' q' : ''}${stkOpen ? ' open' : ''}" id="stx"><div class="stx-body"><div><div class="stx-form">
+      <div class="stx-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
+      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib" onclick="stkTog()">✕</button><button class="stx-ib p" onclick="stkAdd()">➕</button>`}</div>
+      <input class="stx-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
+    </div></div></div></div>`;
+  renderTools();
+}
+
+function stkTog() {
+  const x = skE('stx');
+  if (!x) return;
+  stkOpen = stkOpen ? 0 : 1;
+  x.classList.toggle('open', !!stkOpen);
+  if (!stkOpen) setTimeout(() => { if (!stkOpen) renderStickerBox(); }, 320);
+  renderTools();
+}
+function stkQn(v) { stkDq = Math.max(1, Math.min(999, parseInt(v) || 1)); }
+function stkB(d) { stkQn((parseInt(skE('skQ').value) || stkDq) + d); skE('skQ').value = stkDq; }
+function stkAdd() {
+  if (!can('binprint') || !currentItem) return;
+  const sap = String(currentItem.sap).trim(), q = { sap, qty: stkDq, rem: skE('skR').value.trim().toUpperCase(), printed: false };
+  stkQ = stkQ.filter(x => x.sap !== sap); stkQ.push(q);
+  stkOpen = 0; stkPut(q); stkUI();
+  logAct('i_bin', 'Sticker queued · ' + currentItem.name, 'SAP ' + sap + ' · qty ' + q.qty);
+  showToast('Sticker list me add ho gaya ✓', 'green');
+}
+function stkRem(s, v) { const q = stkFind(s); if (!q) return; q.rem = v.toUpperCase().trim().slice(0, 40); q.printed = false; stkPut(q); stkUI(); }
+window.renderTools = function () {
+  const row = skE('toolsRow');
+  if (!row || !currentItem) return;
+  const it = currentItem, l = lvOf(it), s = lvState(it);
+  const AI = { ok: '✅', re: '⚠️', crit: '🚨', off: '🔕' };
+  const aOn = l ? saOpen : alFormOpen;
+  let h = `<button type="button" class="tl-chip${l ? ' ' + s.k : ''}${aOn ? ' on' : ''}" onclick="toolAlert()">
+    <span class="tl-e">${l ? AI[s.k] : '🔔'}</span>
+    <span class="tl-tx"><span class="tl-t">Stock alert</span><span class="tl-s">${l ? `<span class="sa-chip ${s.k}">${s.label}</span>${lvStockNum(it)}` : 'Not set'}</span></span>
+    <span class="tl-v">▾</span></button>`;
+  if (can('binprint')) {
+    const q = stkFind(String(it.sap).trim());
+    h += `<button type="button" class="tl-chip${q ? ' q' : ''}${stkOpen ? ' on' : ''}" onclick="toolSticker()">
+      <span class="tl-e">🏷️</span>
+      <span class="tl-tx"><span class="tl-t">Sticker</span><span class="tl-s">${q ? `<span class="sa-chip ok">${q.printed ? 'Printed' : 'In list'}</span>qty ${q.qty}` : 'Not in list'}</span></span>
+      <span class="tl-v">▾</span></button>`;
+  }
+  row.innerHTML = h;
+};
+
+function toolAlert() {
+  if (!currentItem) return;
+  if (alFormOpen) { closeAlertForm(); return; }
+  if (stkOpen) stkTog();
+  if (!lvOf(currentItem)) { openAlertForm(); return; }
+  toggleSA();
+}
+
+function toolSticker() {
+  if (!currentItem || !can('binprint')) return;
+  if (alFormOpen) { showToast('Pehle alert form save ya cancel karo', 'amber'); return; }
+  if (!stkOpen && lvOf(currentItem) && saOpen) toggleSA();
+  stkTog();
+}
+
+renderStats();
+if (currentItem && !addItemMode) renderItem();
   </script>
 </body>
 
