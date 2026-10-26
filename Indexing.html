@@ -2353,11 +2353,11 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-res{padding:8px 10px;margin-bottom:8px;font-size:12px}
 .ph-res strong{font-size:13px}
 .ph-save{height:40px;font-size:13.5px}
-.sk-page{width:210mm;height:296mm;padding-top:14mm;background:#fff;color:#000;overflow:hidden;break-after:page}
+.sk-page{width:210mm;height:297mm;padding-top:14mm;background:#fff;color:#000;overflow:hidden;break-after:page}
 .sk-page:last-child{break-after:auto}
 .sk-grid{display:grid;grid-template-columns:repeat(2,99.1mm);grid-auto-rows:33.9mm;column-gap:2mm;justify-content:center}
 .sk-lb{height:33.9mm;padding:4mm;display:flex;align-items:center;justify-content:space-between;gap:2mm;overflow:hidden;font:600 9.5pt Arial,sans-serif}
-.sk-q{width:14mm;height:14mm;flex-shrink:0}
+.sk-q{width:20mm;height:20mm;flex-shrink:0}
 .sk-q canvas,.sk-q img{width:100%!important;height:100%!important}
 .stx{margin:0;border:1px dashed var(--border);border-radius:14px;background:var(--surface2);overflow:hidden;transition:margin .3s,border-color .2s,background .2s}
 .stx.q{border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.05)}
@@ -2395,11 +2395,14 @@ body.loading .upload-zone { opacity: 0.45; }
 .stx-ln .stx-ib{width:40px}
 .stx-ib.ok{color:var(--green);border-color:rgba(5,150,105,.4)}
 .stx-done{opacity:.65;border-color:rgba(5,150,105,.35)!important}
-.stx-form{flex-wrap:nowrap;gap:4px}
-.stx-form .stx-n{grid-template-columns:28px 40px 28px;gap:3px;flex-shrink:0}
-.stx-form .stx-rem{order:2;flex:1 1 0;min-width:0;width:auto;padding:0 9px}
-.stx-form .stx-b{order:3;margin-left:0;gap:4px;flex-shrink:0}
-.stx-form .stx-ib{width:36px}
+.stx-form{flex-wrap:nowrap;gap:6px}
+.stx-form .stx-n{grid-template-columns:38px 48px 38px;gap:4px;flex-shrink:0}
+.stx-form .stx-n button,.stx-form .stx-n input,.stx-form .stx-ib{height:46px}
+.stx-form .stx-n button{font-size:24px}
+.stx-form .stx-n input{font-size:18px}
+.stx-form .stx-rem{order:2;flex:1 1 0;min-width:0;width:auto;padding:0 9px;height:46px}
+.stx-form .stx-b{order:3;margin-left:0;gap:6px;flex-shrink:0}
+.stx-form .stx-ib{width:46px;font-size:20px}
 /* tools row: alert + sticker chips */
 .tl-row{display:flex;gap:8px;margin-top:12px}
 .tl-chip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;min-height:52px;text-align:left;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,transform .1s}
@@ -7524,10 +7527,10 @@ function stkPrint(sap) {
   if (!L.length) return;
   let h = '';
   for (let p = 0; p < L.length; p += 16) h += '<div class="sk-page"><div class="sk-grid">' + L.slice(p, p + 16).map(x =>
-    `<div class="sk-lb"><div style="flex:1;min-width:0"><div style="max-height:2.6em;overflow:hidden;margin-bottom:1mm">${lmEsc(x.n)}</div><div>SAP - ${x.k}</div><div>LOC - ${x.l ? lmEsc(x.l) : '________'}</div>${x.r ? '<div>REM - ' + lmEsc(x.r) + '</div>' : ''}</div>${stkQR ? '<div class="sk-q" data-q="SAP-' + x.k + '"></div>' : ''}</div>`).join('') + '</div></div>';
+    `<div class="sk-lb"><div style="flex:1;min-width:0"><div style="margin-bottom:2mm">${lmEsc(x.n)}</div><div>SAP - ${x.k}</div><div style="margin-top:3mm"><div style="margin-top:5px">LOC - ${x.l ? lmEsc(x.l) : '________'}</div>${x.r ? '<div style="margin-top:5px">REM - ' + lmEsc(x.r) + '</div>' : ''}</div></div>${stkQR ? '<div class="sk-q" data-q="' + encodeURIComponent('SAP-' + x.k + (x.l ? '\nLOC - ' + x.l.toUpperCase() : '')) + '"></div>' : ''}</div>`).join('') + '</div></div>';
   const r = skE('bpPrintRoot');
   r.innerHTML = h;
-  r.querySelectorAll('.sk-q').forEach(e => new QRCode(e, { text: e.dataset.q, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M }));
+  r.querySelectorAll('.sk-q').forEach(e => new QRCode(e, { text: decodeURIComponent(e.dataset.q), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M }));
   keys.forEach(k => { const q = stkFind(k); if (q && !q.printed) { q.printed = true; stkPut(q); } });
   logAct('i_bin', 'Sticker printed', keys.join(', ').slice(0, 120));
   stkUI();
@@ -7599,7 +7602,7 @@ function renderStickerBox() {
   }
   b.innerHTML = `<div class="stx${q ? ' q' : ''}${stkOpen ? ' open' : ''}" id="stx"><div class="stx-body"><div><div class="stx-form">
       <div class="stx-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
-      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib" onclick="stkTog()">✕</button><button class="stx-ib p" onclick="stkAdd()">➕</button>`}</div>
+      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib p" onclick="stkAdd()">➕</button>`}</div>
       <input class="stx-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
     </div></div></div></div>`;
   renderTools();
