@@ -2405,7 +2405,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .stx-form .stx-ib{width:46px;font-size:20px}
 /* tools row: alert + sticker chips */
 .tl-row{display:flex;gap:8px;margin-top:12px}
-.tl-chip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;min-height:52px;text-align:left;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,transform .1s}
+.tl-chip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:6px 10px;min-height:44px;text-align:left;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,transform .1s}
 .tl-chip:active{transform:scale(.98)}
 .tl-chip.crit{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.05)}
 .tl-chip.re{border-color:rgba(180,83,9,.4);background:rgba(245,158,11,.07)}
@@ -3239,7 +3239,7 @@ function renderAlertBox() {
         <input class="form-input-reg" id="alEml" type="email" inputmode="email" value="${lmEsc(c.email)}" placeholder="name@company.com" autocomplete="off" autocapitalize="off">
       </div>
       <div class="sa-err" id="alErr"></div>
-      <div class="sa-two"><button class="btn btn-ghost" onclick="closeAlertForm()">Cancel</button><button class="btn btn-success" style="flex:2" onclick="saveAlertLevels()">💾 ${l ? 'Update' : 'Save Alert'}</button></div></div>`;
+      <div class="sa-two"><button class="btn btn-success" onclick="saveAlertLevels()">💾 ${l ? 'Update' : 'Save Alert'}</button></div></div>`;
   } else if (l && alRmAsk) {
     body = `<div class="sa-bin"><div class="sa-order" style="color:var(--text);font-weight:600">Remove this item from stock alerts?</div>
       <div class="sa-two"><button class="btn btn-ghost" onclick="cancelRemoveAlert()">No</button><button class="btn btn-ghost sa-del" onclick="removeAlertLevels()">🗑️ Yes, remove</button></div></div>`;
@@ -4611,6 +4611,7 @@ locRemember(loc);
       sessionStorage.setItem('lastSearchTerm', currentItem.name);
       addItemMode = false;
       searchBox.value = currentItem.name;
+      searchBox.blur();
       document.getElementById('clearSearch').classList.add('visible');
       closeDropdown();
       showNormalCard();
@@ -5455,10 +5456,6 @@ function closeLocModal() {
           </button>
         </div>
       `;
-      setTimeout(() => {
-        const inp = document.getElementById('updateLocation');
-        if (inp) inp.focus();
-      }, 100);
     }
 
     function updateLocation() {
