@@ -2446,6 +2446,32 @@ body.loading .upload-zone { opacity: 0.45; }
 #saFilter .sa-fchip.sel{background:transparent}
 #saFilter .sa-fchip b,#saFilter .sa-fchip span{transition:color .25s}
 #saFilter .sa-fchip.sel b,#saFilter .sa-fchip.sel span{color:#fff}
+.stx-form .stx-ib.p.add{font-size:28px;font-weight:500;line-height:1}
+.tools-section:not(.qo)>:not(.tl-row){display:none}
+.tools-section>.tl-row{margin:0 0 10px}
+.tools-section:not(.qo)>.tl-row{margin:0}
+#lcList{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.lc-g{border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:10px;background:var(--surface2)}
+.lc-vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.lc-v{display:flex;flex-direction:column;align-items:flex-start;padding:6px 10px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);font-family:inherit;cursor:pointer}
+.lc-v b{font:700 13px 'JetBrains Mono',monospace;color:var(--text)}
+.lc-v span{font-size:10.5px;color:var(--muted);font-weight:600}
+.lc-v.sel{border-color:var(--accent);background:rgba(37,99,235,.07)}
+.lc-rw,.lc-ask,.lc-ar{display:flex;gap:8px;align-items:center}
+.lc-rw .form-input{flex:1;min-width:0;margin-bottom:0}
+.lc-ask{display:none}
+.lc-ask span{flex:1;font-size:12.5px;font-weight:600}
+.lc-ask span b{font-family:'JetBrains Mono',monospace;color:var(--green)}
+.lc-g.ask .lc-rw{display:none}
+.lc-g.ask .lc-ask{display:flex}
+.lc-ar{margin-top:10px}
+.lc-ab{flex:1;min-height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 12px 'Inter',sans-serif;cursor:pointer}
+.lc-ab.nd{color:var(--red);border-color:rgba(220,38,38,.35)}
+.lc-il{display:none;margin-top:8px}
+.lc-il.o{display:block}
+.lc-it{padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px}
+.lc-it span{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2);margin-right:6px}
+
 </style>
 </head>
 
@@ -2955,8 +2981,20 @@ body.loading .upload-zone { opacity: 0.45; }
 </div>
 
 <div class="tools-section">
+  <div class="tl-row">
+    <button type="button" class="tl-chip" id="qtChip" onclick="toggleQT()">
+<span class="tl-e">🧰</span>
+      <span class="tl-tx"><span class="tl-t">Quick Tools</span><span class="tl-s">Shortcuts</span></span>
+      <span class="tl-v">▾</span>
+    </button>
+    <button type="button" class="tl-chip" id="lcChip" onclick="openLocClean()">
+      <span class="tl-e">🧹</span>
+      <span class="tl-tx"><span class="tl-t">Location Cleanup</span><span class="tl-s" id="lcChipSub">Checking…</span></span>
+      <span class="tl-v">›</span>
+    </button>
+  </div>
   <div class="tools-title-row">
-    <span class="tools-title">🧰 Quick Tools</span>
+<span class="tools-title">🧰 Quick Tools</span>
     <button class="tools-add-btn" onclick="toggleAddForm()">＋</button>
   </div>
 
@@ -2974,7 +3012,7 @@ body.loading .upload-zone { opacity: 0.45; }
   </div>
 
   <div class="tools-grid" id="toolsGrid"></div>
-  <div class="tools-empty" id="toolsEmpty" style="display:none;">Koi tool link add nahi hua abhi</div>
+  <div class="tools-empty" id="toolsEmpty" style="display:none;">No tool links added yet</div>
 </div>
         </div>
       </div>
@@ -3094,6 +3132,7 @@ window.addEventListener('resize', () => { if (notifOpen) positionNotifPanel(); }
   const pending = total - located;
   const inStock = itemMaster.filter(i => i.curr_stock !== undefined && i.curr_stock !== null && String(i.curr_stock).trim() !== "").length;
   document.getElementById('statTotal').textContent = total.toLocaleString();
+  try { lcBadge(); } catch (e) {}
   document.getElementById('statLocated').textContent = located.toLocaleString();
   document.getElementById('statPending').textContent = pending.toLocaleString();
   const stockEl = document.getElementById('statStock');
@@ -7697,7 +7736,7 @@ function renderStickerBox() {
   }
   b.innerHTML = `<div class="stx${q ? ' q' : ''}${stkOpen ? ' open' : ''}" id="stx"><div class="stx-body"><div><div class="stx-form">
       <div class="stx-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
-      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib p" onclick="stkAdd()">➕</button>`}</div>
+      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib p add" onclick="stkAdd()" aria-label="Add">+</button>`}</div>
       <input class="stx-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
     </div></div></div></div>`;
   renderTools();
@@ -7755,6 +7794,120 @@ function toolSticker() {
   if (alFormOpen) closeAlertForm();
   else if (!stkOpen && lvOf(currentItem) && saOpen) toggleSA();
   stkTog();
+}
+
+// ═══ QUICK TOOLS chip + LOCATION CLEANUP ═══
+function toggleQT() {
+  skE('qtChip').classList.toggle('on', document.querySelector('.tools-section').classList.toggle('qo'));
+}
+if (!can('loc')) skE('lcChip').style.display = 'none';
+
+const lcKey = l => (String(l).toUpperCase().match(/[A-Z]+|\d+/g) || []).map(x => x.replace(/^0+(?=\d)/, '')).join('|');
+let lcCur = [], lcQ = Promise.resolve();
+
+function lcList() {
+  const by = {}, ig = JSON.parse(localStorage.getItem('locIgnore') || '[]');
+  itemMaster.forEach(i => {
+    const l = String(i.location || '').trim(), k = lcKey(l);
+    if (!k) return;
+    const g = by[k] = by[k] || {};
+    (g[l] = g[l] || []).push(i);
+  });
+  return Object.keys(by).filter(k => Object.keys(by[k]).length > 1 && !ig.includes(k))
+    .map(k => ({ k, vars: Object.entries(by[k]).sort((a, b) => b[1].length - a[1].length) }));
+}
+
+function lcBadge() {
+  if (!dataReady) return;
+  const n = lcList().length, c = skE('lcChip');
+  skE('lcChipSub').textContent = n ? n + (n === 1 ? ' group' : ' groups') + ' to fix' : 'All clean';
+  c.classList.toggle('q', n > 0);
+  c.classList.toggle('ok', n === 0);
+}
+
+function lcRender() {
+  lcCur = lcList();
+  const n = lcCur.reduce((s, g) => s + g.vars.reduce((a, v) => a + v[1].length, 0), 0);
+  skE('lcSub').textContent = lcCur.length ? lcCur.length + ' groups · ' + n + ' items' : 'No duplicates found';
+  skE('lcList').innerHTML = lcCur.length ? lcCur.map((g, gi) => `<div class="lc-g" id="lcG${gi}">
+    <div class="lc-vs">${g.vars.map((v, vi) => `<button type="button" class="lc-v${vi ? '' : ' sel'}" onclick="lcPick(${gi},${vi},this)"><b>${lmEsc(v[0])}</b><span>${v[1].length} items${vi ? '' : ' · most items'}</span></button>`).join('')}</div>
+    <div class="lc-rw"><input class="form-input" id="lcI${gi}" value="${lmEsc(g.vars[0][0].toUpperCase())}" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"><button class="btn btn-success" onclick="lcAsk(${gi})">Merge</button></div>
+    <div class="lc-ask"><span id="lcAt${gi}"></span><button class="btn btn-ghost" onclick="lcOff(${gi})">Cancel</button><button class="btn btn-success" onclick="lcDo(${gi})">Yes, merge</button></div>
+    <div class="lc-ar"><button type="button" class="lc-ab" onclick="skE('lcL${gi}').classList.toggle('o')">👁 View items</button><button type="button" class="lc-ab nd" onclick="lcIgnore(${gi})">🚫 Not duplicate</button></div>
+    <div class="lc-il" id="lcL${gi}">${g.vars.map(v => v[1].slice(0, 15).map(i => `<div class="lc-it"><span>${lmEsc(v[0])}</span>${lmEsc(i.name)}</div>`).join('')).join('')}</div></div>`).join('')
+    : '<div class="notif-empty">✅ No duplicate locations</div>';
+}
+
+function lcOff(gi) { const c = skE('lcG' + gi); if (c) c.classList.remove('ask'); }
+function lcPick(gi, vi, b) {
+  lcOff(gi);
+  skE('lcI' + gi).value = lcCur[gi].vars[vi][0].toUpperCase();
+  b.parentNode.querySelectorAll('.lc-v').forEach(x => x.classList.toggle('sel', x === b));
+}
+function lcIgnore(gi) {
+  const ig = JSON.parse(localStorage.getItem('locIgnore') || '[]');
+  ig.push(lcCur[gi].k);
+  localStorage.setItem('locIgnore', JSON.stringify(ig));
+  lcRender(); lcBadge();
+}
+function lcTodo(gi) {
+  const fin = skE('lcI' + gi).value.trim().toUpperCase();
+  return { fin, todo: lcCur[gi].vars.flatMap(v => v[1]).filter(i => String(i.location).trim() !== fin) };
+}
+function lcAsk(gi) {
+  if (!guard('loc')) return;
+  const { fin, todo } = lcTodo(gi);
+  if (!fin) { showToast('Enter the final location', 'red'); return; }
+  if (!todo.length) { showToast('All items already have this location', 'amber'); return; }
+  skE('lcAt' + gi).innerHTML = todo.length + ' items → <b>' + lmEsc(fin) + '</b>';
+  skE('lcG' + gi).classList.add('ask');
+}
+function lcDo(gi) {
+  if (!guard('loc')) return;
+  const { fin, todo } = lcTodo(gi);
+  if (!fin || !todo.length) return;
+  todo.forEach(it => {
+    const sn = it.sn;
+    it.location = fin;
+    pendingUpdates[sn] = { location: fin, ts: Date.now() + 600000 };
+    lcQ = lcQ.then(() => {
+      if (pendingUpdates[sn]) pendingUpdates[sn].ts = Date.now();
+      return fetch(`${API}?action=update&sn=${sn}&location=${encodeURIComponent(fin)}&update_by=${encodeURIComponent(userName)}`).catch(() => {});
+    });
+  });
+  lcCur[gi].vars.forEach(v => {
+    const o = v[0].toUpperCase();
+    if (o !== fin && binPending.some(p => p.loc === o)) {
+      binOps[o] = { type: 'remove', ts: Date.now() };
+      binSend({ action: 'removeBin', loc: o });
+      binPending = binPending.filter(p => p.loc !== o);
+    }
+  });
+  addBinPending(fin, 'Item added here');
+  locRemember(fin);
+  logAct('i_loc', 'Locations merged', fin + ' · ' + todo.length + ' items');
+  renderStats();
+  if (currentItem && !skE('updateLocation')) renderItem();
+  showToast(todo.length + ' items moved to ' + fin + ' · syncing', 'green');
+  lcRender(); lcBadge();
+}
+
+document.body.insertAdjacentHTML('beforeend',
+  '<div class="bp-back" id="lcBack" onclick="if(event.target===this)closeLocClean()"><div class="bp-modal" style="height:88vh">' +
+  '<div class="lm-stripe"></div><div class="lm-head"><div class="lm-title"><div class="lm-icon">🧹</div><div>' +
+  '<div class="lm-loc" style="font-family:inherit;font-size:14px">LOCATION CLEANUP</div><div class="lm-sub" id="lcSub"></div></div></div>' +
+  '<button class="lm-close" onclick="closeLocClean()">✕</button></div><div id="lcList"></div></div></div>');
+
+function openLocClean() {
+  if (!guard('loc')) return;
+  if (!dataReady) { showToast('Data is still loading, please wait', 'amber'); return; }
+  lcRender();
+  skE('lcBack').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLocClean() {
+  skE('lcBack').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 renderStats();
