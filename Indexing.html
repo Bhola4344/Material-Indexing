@@ -2203,35 +2203,8 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-act{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
 .ph-act small{font-size:10.5px;color:var(--muted)}
 .ph-act>div{display:flex;gap:6px}
-.ph-bk{position:fixed;inset:0;background:rgba(15,23,42,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:960}
-.ph-bk.open{opacity:1;pointer-events:auto}
-.ph-sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:600px;background:var(--surface);border-radius:20px 20px 0 0;transform:translate(-50%,105%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:961;box-shadow:0 -12px 40px rgba(15,23,42,.3)}
-.ph-sheet.open{transform:translate(-50%,0)}
-.ph-grip{width:38px;height:4px;border-radius:4px;background:var(--border)}
-.ph-hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.ph-pn{font-weight:600;line-height:1.35}
-.ph-ps{font:11px 'JetBrains Mono',monospace;color:var(--accent2);margin-top:2px}
-.ph-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0}
-.ph-two{display:grid;grid-template-columns:1fr 1fr}
-.ph-mb{border:1.5px solid var(--border);border-radius:10px;text-align:center}
-.ph-mb small{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
-.ph-mb b{font:700 24px 'JetBrains Mono',monospace}
-.ph-mb.p{border-color:var(--c,var(--border))}.ph-mb.p b{color:var(--c,var(--text))}
-#phRng{width:100%;accent-color:var(--accent)}
-.ph-stp{display:grid}
-.ph-stp button{border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-weight:700;cursor:pointer}
-.ph-stp button:active{background:var(--border)}
-.ph-stp input{min-width:0;text-align:center;font:700 20px 'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text)}
-.ph-stp input:focus{outline:none;border-color:var(--accent)}
-.ph-res{border-radius:12px;line-height:1.45;border:1.5px solid var(--c,var(--border));background:var(--surface2)}
-.ph-res strong{display:block;color:var(--c,var(--text))}
-.ph-res.s{--c:var(--red)}.ph-res.e{--c:var(--accent)}.ph-res.m{--c:var(--green)}
-.ph-save{width:100%;height:48px;border:0;border-radius:12px;font:700 14px 'Inter',sans-serif;cursor:pointer;color:#fff;background:var(--c,var(--muted))}
-.ph-save:disabled{opacity:.45;cursor:not-allowed}
-.ph-save.s{--c:var(--red)}.ph-save.e{--c:var(--accent)}
+
 #notifPanel > *{flex-shrink:0;}
-.ph-rem{width:100%;border:2px solid var(--border);border-radius:10px;font:500 14px 'Inter',sans-serif;background:var(--surface);color:var(--text);outline:none;-webkit-appearance:none}
-.ph-rem:focus{border-color:var(--accent)}
 .ph-remtxt{font-size:11.5px;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 9px;margin:6px 0 2px;line-height:1.4;word-break:break-word}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
 #notifPanel {
@@ -2337,22 +2310,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .lg-status{margin-bottom:10px;padding:10px 12px;border-radius:10px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface2);line-height:1.55}
 #locSug::-webkit-scrollbar { width: 4px; }
 #locSug::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-/* ─── Physical sheet: compact ─── */
-.ph-sheet{padding:6px 14px calc(12px + env(safe-area-inset-bottom,0px))}
-.ph-grip{margin:0 auto 8px}
-.ph-hd{margin-bottom:8px}
-.ph-pn{font-size:13px}
-.ph-two{gap:8px;margin-bottom:8px}
-.ph-mb{padding:5px 8px}
-.ph-mb b{font-size:20px;line-height:1.25}
-#phRng{height:24px;margin-bottom:4px}
-.ph-stp{grid-template-columns:36px minmax(0,1fr) 36px;gap:6px;margin-bottom:8px}
-.ph-stp button{height:36px;font-size:20px;padding:0}
-.ph-stp input{height:36px;font-size:16px;padding:0}
-.ph-rem{height:36px;padding:0 12px;font-size:13px;margin-bottom:8px}
-.ph-res{padding:8px 10px;margin-bottom:8px;font-size:12px}
-.ph-res strong{font-size:13px}
-.ph-save{height:40px;font-size:13.5px}
+
 .sk-page{width:210mm;height:297mm;padding-top:14mm;background:#fff;color:#000;overflow:hidden;break-after:page}
 .sk-page:last-child{break-after:auto}
 .sk-grid{display:grid;grid-template-columns:repeat(2,99.1mm);grid-auto-rows:33.9mm;column-gap:2mm;justify-content:center}
@@ -2420,6 +2378,55 @@ body.loading .upload-zone { opacity: 0.45; }
 .tl-chip.on .tl-v{transform:rotate(180deg)}
 .sa-row.open,.stx.open{margin-top:10px}
 .sa-row:not(.open),.stx:not(.open){margin:-1px 0;border-color:transparent;background:transparent}
+/* ─── Physical Adjust sheet (new) ─── */
+.ph-bk{position:fixed;inset:0;background:rgba(10,16,28,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:960}
+.ph-bk.open{opacity:1;pointer-events:auto}
+.ph-sheet{--c:var(--green);position:fixed;left:50%;bottom:0;width:100%;max-width:600px;max-height:94vh;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;box-shadow:0 -16px 50px rgba(0,0,0,.35);transform:translate(-50%,105%);transition:transform .38s cubic-bezier(.32,1.1,.4,1);z-index:961;padding:0 16px calc(14px + env(safe-area-inset-bottom,0px))}
+.ph-sheet.open{transform:translate(-50%,0)}
+.ph-sheet.s{--c:var(--red)}
+.ph-sheet.e{--c:var(--accent)}
+.ph-glow{position:absolute;left:0;right:0;top:0;height:120px;background:radial-gradient(ellipse at 50% -30%,var(--c),transparent 70%);opacity:.18;pointer-events:none}
+.ph-grip{width:40px;height:4px;border-radius:4px;background:var(--border);margin:8px auto 12px;position:relative}
+.ph-top{display:flex;gap:10px;align-items:flex-start;position:relative}
+.ph-t{flex:1;min-width:0}
+.ph-pn{font-size:14px;font-weight:600;line-height:1.35}
+.ph-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ph-chip{font:600 11px 'JetBrains Mono',monospace;padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--accent2)}
+.ph-chip.l{color:var(--green)}
+.ph-x{width:32px;height:32px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0}
+.ph-cmp{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:16px 0 12px;position:relative}
+.ph-bx{border:1.5px solid var(--border);border-radius:14px;padding:10px 8px;text-align:center;background:var(--surface2);transition:border-color .3s,background .3s}
+.ph-bx small{display:block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.ph-bx b{display:block;font:700 30px/1.15 'JetBrains Mono',monospace}
+.ph-bx.p{border-color:var(--c);background:color-mix(in srgb,var(--c) 8%,var(--surface))}
+.ph-bx.p b{color:var(--c)}
+.ph-bx b.pop{animation:phPop .22s ease}
+@keyframes phPop{50%{transform:scale(1.12)}}
+.ph-diff{min-width:64px;text-align:center;padding:8px 10px;border-radius:14px;background:var(--c);color:#fff;font:700 18px 'JetBrains Mono',monospace;line-height:1.1;transition:background .3s;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent)}
+.ph-diff small{display:block;font:700 9px 'Inter',sans-serif;letter-spacing:.6px;text-transform:uppercase;opacity:.9;margin-top:2px}
+.ph-stp{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:10px;margin-bottom:10px}
+.ph-stp button{height:58px;border-radius:16px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:30px;font-weight:600;line-height:1;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .1s,background .15s}
+.ph-stp button:active{transform:scale(.93);background:var(--border)}
+.ph-stp input{min-width:0;width:100%;height:58px;text-align:center;font:700 26px 'JetBrains Mono',monospace;border:2px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text);outline:none;-moz-appearance:textfield}
+.ph-stp input::-webkit-inner-spin-button{-webkit-appearance:none}
+.ph-stp input:focus{border-color:var(--c)}
+.ph-qk{display:flex;gap:5px;width:100%;margin-bottom:10px}
+.ph-q{flex:1 1 0;min-width:0;height:38px;padding:0 2px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:700 12px 'JetBrains Mono',monospace;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.ph-q:active{background:var(--surface2)}
+.ph-q.sys,.ph-q.zr{flex:1.6 1 0}
+.ph-q.sys{border-color:rgba(5,150,105,.5);color:var(--green)}
+.ph-q.zr{border-color:rgba(220,38,38,.4);color:var(--red)}
+.ph-rem{width:100%;height:42px;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:500 14px 'Inter',sans-serif;padding:0 12px;outline:none;margin-bottom:8px;-webkit-appearance:none}
+.ph-rem:focus{border-color:var(--c)}
+.ph-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ph-tg{height:28px;padding:0 10px;border-radius:8px;border:1px dashed var(--border);background:transparent;font:600 11.5px 'Inter',sans-serif;color:var(--muted);cursor:pointer;touch-action:manipulation}
+.ph-tg.on{border-style:solid;border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 8%,transparent)}
+.ph-res{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 7%,var(--surface));margin-bottom:12px;font-size:12.5px;line-height:1.4}
+.ph-res .ic{font-size:20px}
+.ph-res strong{display:block;color:var(--c);font-size:13px}
+.ph-save{width:100%;height:52px;border:0;border-radius:14px;color:#fff;font:700 15px 'Inter',sans-serif;cursor:pointer;background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 70%,#06b6d4));box-shadow:0 8px 20px color-mix(in srgb,var(--c) 35%,transparent)}
+.ph-save:active{transform:scale(.98)}
+.ph-save:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
 </style>
 </head>
 
@@ -2484,16 +2491,29 @@ body.loading .upload-zone { opacity: 0.45; }
 <!-- Physical Adjust Sheet -->
 <div class="ph-bk" id="phBk" onclick="closePhys()"></div>
 <div class="ph-sheet" id="phSheet">
+  <div class="ph-glow"></div>
   <div class="ph-grip"></div>
-  <div class="ph-hd"><div><div class="ph-pn" id="phPn"></div><div class="ph-ps" id="phPs"></div></div><button class="ph-x" onclick="closePhys()">✕</button></div>
-  <div class="ph-two">
-    <div class="ph-mb"><small>System stock</small><b id="phSys"></b></div>
-    <div class="ph-mb p" id="phBox"><small>Physical found</small><b id="phVal"></b></div>
+  <div class="ph-top">
+    <div class="ph-t">
+      <div class="ph-pn" id="phPn"></div>
+      <div class="ph-meta"><span class="ph-chip" id="phPs"></span><span class="ph-chip l" id="phLoc"></span></div>
+    </div>
+    <button class="ph-x" onclick="closePhys()" aria-label="Close">✕</button>
   </div>
-  <input type="range" id="phRng" min="0" step="1" oninput="phSet(this.value)" aria-label="Physical quantity">
-  <div class="ph-stp"><button onclick="phBump(-1)" aria-label="Minus">−</button><input id="phNum" type="number" step="any" inputmode="decimal" min="0" oninput="phSet(this.value,1)" aria-label="Physical quantity"><button onclick="phBump(1)" aria-label="Plus">+</button></div>
-  <input class="ph-rem" id="phRem" type="text" maxlength="200" placeholder="Remark (optional)" autocomplete="off">
-  <div class="ph-res m" id="phRes"></div>
+  <div class="ph-cmp">
+    <div class="ph-bx"><small>System</small><b id="phSys"></b></div>
+    <div class="ph-diff" id="phDiff"></div>
+    <div class="ph-bx p"><small>Physical</small><b id="phVal"></b></div>
+  </div>
+  <div class="ph-stp">
+    <button type="button" data-d="-1" aria-label="Minus">−</button>
+    <input id="phNum" type="number" step="any" inputmode="decimal" min="0" oninput="phSet(this.value,1)" aria-label="Physical quantity">
+    <button type="button" data-d="1" aria-label="Plus">+</button>
+  </div>
+  <div class="ph-qk" id="phQk"></div>
+  <input class="ph-rem" id="phRem" type="text" maxlength="200" placeholder="Remark (optional)" autocomplete="off" oninput="phSyncTags()">
+  <div class="ph-tags" id="phTags"></div>
+  <div class="ph-res" id="phRes"></div>
   <button class="ph-save" id="phSv" onclick="savePhys()"></button>
 </div>
 
@@ -3501,17 +3521,26 @@ function loadPhys() {
   }).catch(() => {}).finally(() => { physSyncing = false; });
 }
 
+const PH_TAGS = ['Issue', 'Damage', 'Lost', 'Short', 'Not Received'];
+const phFmt = n => String(Math.round(n * 1000) / 1000);
+
 function openPhys(sn) {
   const it = itemMaster.find(i => String(i.sn) === String(sn));
   if (!it) return;
   const old = phEntry(sn), base = lvStockNum(it);   // base = Sheet1 ka system stock
   PH.sn = it.sn; PH.sys = old ? old.sys : base;
   const cur = old ? old.phys : base;
+  const loc = it.location && String(it.location).trim();
   phEl('phPn').textContent = it.name;
   phEl('phPs').textContent = it.sap;
-  phEl('phSys').textContent = PH.sys;
-  phEl('phRng').max = Math.max(10, PH.sys * 2, cur);
+  phEl('phLoc').textContent = '📍 ' + (loc || 'No Loc');
+  phEl('phSys').textContent = phFmt(PH.sys);
   phEl('phRem').value = old ? (old.remark || '') : '';
+  phEl('phTags').innerHTML = PH_TAGS.map(t => `<button type="button" class="ph-tg" data-t="${t}">${t}</button>`).join('');
+  phEl('phQk').innerHTML = '<button type="button" class="ph-q sys" data-m="1">Match</button>' +
+    [-10, -5, -2, 2, 5, 10].map(d => `<button type="button" class="ph-q" data-d="${d}">${d < 0 ? '−' : '+'}${Math.abs(d)}</button>`).join('') +
+    '<button type="button" class="ph-q zr" data-z="1">Zero</button>';
+  phSyncTags();
   phSet(cur);
   phEl('phBk').classList.add('open');
   phEl('phSheet').classList.add('open');
@@ -3520,32 +3549,57 @@ function closePhys() {
   phEl('phBk').classList.remove('open');
   phEl('phSheet').classList.remove('open');
 }
-function phBump(d) { phSet(PH.val + d); }
 function phSet(v, fromInput) {
   v = Math.max(0, Number(v) || 0); PH.val = v;
-  const rng = phEl('phRng');
-  if (v > Number(rng.max)) rng.max = v;
-  rng.value = v;
   if (!fromInput) phEl('phNum').value = v;
-  phEl('phVal').textContent = v;
-  const d = v - PH.sys, r = phEl('phRes'), s = phEl('phSv'), pb = phEl('phBox');
-  if (d < 0) {
-    r.className = 'ph-res s';
-    r.innerHTML = `<strong>⬇ Physical Short: ${Math.abs(d)}</strong>System ${PH.sys} → physical ${v}. Sirf Physical list me save hoga.`;
-    s.className = 'ph-save s'; s.disabled = false; s.textContent = 'Save · Short ' + Math.abs(d);
-    pb.style.setProperty('--c', 'var(--red)');
-  } else if (d > 0) {
-    r.className = 'ph-res e';
-    r.innerHTML = `<strong>⬆ Physical Excess: +${d}</strong>System ${PH.sys} → physical ${v}. Sirf Physical list me save hoga.`;
-    s.className = 'ph-save e'; s.disabled = false; s.textContent = 'Save · Excess +' + d;
-    pb.style.setProperty('--c', 'var(--accent)');
+  const b = phEl('phVal');
+  b.textContent = phFmt(v);
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  const d = v - PH.sys, st = d < 0 ? 's' : d > 0 ? 'e' : 'm';
+  const sh = phEl('phSheet'), r = phEl('phRes'), s = phEl('phSv');
+  sh.classList.toggle('s', st === 's');
+  sh.classList.toggle('e', st === 'e');
+  phEl('phDiff').innerHTML = (d === 0 ? '0' : (d > 0 ? '+' : '−') + phFmt(Math.abs(d))) +
+    '<small>' + (st === 's' ? 'Short' : st === 'e' ? 'Excess' : 'Match') + '</small>';
+  if (st === 's') {
+    r.innerHTML = `<span class="ic">⬇️</span><div><strong>Physical Short ${phFmt(Math.abs(d))}</strong>System ${phFmt(PH.sys)} → physical ${phFmt(v)}. Sirf Physical list me save hoga.</div>`;
+    s.textContent = 'Save · Short ' + phFmt(Math.abs(d)); s.disabled = false;
+  } else if (st === 'e') {
+    r.innerHTML = `<span class="ic">⬆️</span><div><strong>Physical Excess +${phFmt(d)}</strong>System ${phFmt(PH.sys)} → physical ${phFmt(v)}. Sirf Physical list me save hoga.</div>`;
+    s.textContent = 'Save · Excess +' + phFmt(d); s.disabled = false;
   } else {
-    r.className = 'ph-res m';
-    r.innerHTML = '<strong>✓ Matches system</strong>No difference, nothing to save.';
-    s.className = 'ph-save'; s.disabled = true; s.textContent = 'No difference';
-    pb.style.removeProperty('--c');
+    r.innerHTML = '<span class="ic">✅</span><div><strong>Matches system</strong>Koi difference nahi, save karne ki zarurat nahi.</div>';
+    s.textContent = 'No difference'; s.disabled = true;
   }
 }
+function phSyncTags() {
+  const v = phEl('phRem').value.trim().toLowerCase();
+  document.querySelectorAll('#phTags .ph-tg').forEach(b => b.classList.toggle('on', v === b.dataset.t.toLowerCase()));
+}
+
+// quick chips + remark tags + hold-to-repeat
+phEl('phQk').addEventListener('click', e => {
+  const b = e.target.closest('.ph-q'); if (!b) return;
+  if (b.dataset.m) phSet(PH.sys);
+  else if (b.dataset.z) phSet(0);
+  else phSet(PH.val + (+b.dataset.d));
+});
+phEl('phTags').addEventListener('click', e => {
+  const b = e.target.closest('.ph-tg'); if (!b) return;
+  const r = phEl('phRem');
+  r.value = r.value.trim().toLowerCase() === b.dataset.t.toLowerCase() ? '' : b.dataset.t;
+  phSyncTags();
+});
+phEl('phSheet').querySelectorAll('.ph-stp button').forEach(btn => {
+  let t1, t2; const d = +btn.dataset.d;
+  const stop = () => { clearTimeout(t1); clearInterval(t2); };
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    phSet(PH.val + d);
+    t1 = setTimeout(() => { t2 = setInterval(() => phSet(PH.val + d), 70); }, 350);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+});
 
 function phChipUpdate(sn) {
   const it = itemMaster.find(i => String(i.sn) === String(sn));
