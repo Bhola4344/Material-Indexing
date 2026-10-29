@@ -1804,9 +1804,7 @@ body.loading .header-stripe::before {
 }
 
 .notif-stripe {
-  height: 5px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  flex-shrink: 0;
+  display: none;
 }
 
 .notif-header-v3 {
@@ -2011,7 +2009,7 @@ body.loading .header-stripe::before {
 .lm-backdrop.open{opacity:1;pointer-events:auto;}
 .lm-modal{position:fixed;left:0;top:0;width:100%;max-width:600px;height:var(--lm-h,80vh);background:var(--surface);border-radius:14px;box-shadow:0 16px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(40px) scale(.98);transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s linear .28s;}
 .lm-modal.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s;}
-.lm-stripe{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));flex-shrink:0;}
+.lm-stripe{display:none;}
 .lm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;}
 .lm-title{display:flex;align-items:center;gap:10px;}
 .lm-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(37,99,235,.28);}
@@ -2451,22 +2449,26 @@ body.loading .upload-zone { opacity: 0.45; }
 .tools-section>.tl-row{margin:0 0 10px}
 .tools-section:not(.qo)>.tl-row{margin:0}
 #lcList{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 12px calc(12px + env(safe-area-inset-bottom,0px))}
-.lc-g{border:1px solid var(--border);border-radius:14px;padding:10px;margin-bottom:10px;background:var(--surface2)}
-.lc-vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.lc-v{display:flex;flex-direction:column;align-items:flex-start;padding:6px 10px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);font-family:inherit;cursor:pointer}
-.lc-v b{font:700 13px 'JetBrains Mono',monospace;color:var(--text)}
-.lc-v span{font-size:10.5px;color:var(--muted);font-weight:600}
-.lc-v.sel{border-color:var(--accent);background:rgba(37,99,235,.07)}
+.lc-g{border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:12px;background:var(--surface)}
+.lc-vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.lc-v{position:relative;display:flex;flex-direction:column;align-items:flex-start;padding:8px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);font-family:inherit;cursor:pointer}
+.lc-v b{font:700 14px 'JetBrains Mono',monospace;color:var(--text);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lc-v span{font-size:11px;color:var(--muted);font-weight:600}
+.lc-v.sel{border-color:var(--accent);background:rgba(37,99,235,.08)}
+.lc-v.sel::after{content:'✓';position:absolute;top:6px;right:9px;font-size:12px;font-weight:700;color:var(--accent)}
 .lc-rw,.lc-ask,.lc-ar{display:flex;gap:8px;align-items:center}
-.lc-rw .form-input{flex:1;min-width:0;margin-bottom:0}
+.lc-rw{flex-wrap:wrap}
+.lc-rw::before{content:'Final location';flex:1 1 100%;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green)}
+.lc-rw .form-input{flex:1;min-width:0;margin-bottom:0;font-size:15px;padding:10px 14px;border-radius:12px}
+.lc-rw .btn{min-height:46px;padding:0 18px;border-radius:12px}
 .lc-ask{display:none}
 .lc-ask span{flex:1;font-size:12.5px;font-weight:600}
 .lc-ask span b{font-family:'JetBrains Mono',monospace;color:var(--green)}
 .lc-g.ask .lc-rw{display:none}
 .lc-g.ask .lc-ask{display:flex}
-.lc-ar{margin-top:10px}
-.lc-ab{flex:1;min-height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 12px 'Inter',sans-serif;cursor:pointer}
-.lc-ab.nd{color:var(--red);border-color:rgba(220,38,38,.35)}
+.lc-ar{justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px dashed var(--border)}
+.lc-ab{background:none;border:0;min-height:34px;padding:0 4px;font:600 12px 'Inter',sans-serif;color:var(--muted);cursor:pointer}
+.lc-ab.nd{color:var(--red)}
 .lc-il{display:none;margin-top:8px}
 .lc-il.o{display:block}
 .lc-it{padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px}
@@ -2989,7 +2991,7 @@ body.loading .upload-zone { opacity: 0.45; }
     </button>
     <button type="button" class="tl-chip" id="lcChip" onclick="openLocClean()">
       <span class="tl-e">🧹</span>
-      <span class="tl-tx"><span class="tl-t">Location Cleanup</span><span class="tl-s" id="lcChipSub">Checking…</span></span>
+      <span class="tl-tx"><span class="tl-t">Merge Location</span><span class="tl-s" id="lcChipSub">Checking…</span></span>
       <span class="tl-v">›</span>
     </button>
   </div>
@@ -7895,7 +7897,7 @@ function lcDo(gi) {
 document.body.insertAdjacentHTML('beforeend',
   '<div class="bp-back" id="lcBack" onclick="if(event.target===this)closeLocClean()"><div class="bp-modal" style="height:88vh">' +
   '<div class="lm-stripe"></div><div class="lm-head"><div class="lm-title"><div class="lm-icon">🧹</div><div>' +
-  '<div class="lm-loc" style="font-family:inherit;font-size:14px">LOCATION CLEANUP</div><div class="lm-sub" id="lcSub"></div></div></div>' +
+  '<div class="lm-loc" style="font-family:inherit;font-size:14px">MERGE LOCATION</div><div class="lm-sub" id="lcSub"></div></div></div>' +
   '<button class="lm-close" onclick="closeLocClean()">✕</button></div><div id="lcList"></div></div></div>');
 
 function openLocClean() {
