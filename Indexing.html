@@ -1300,78 +1300,6 @@ body.loading .header-stripe::before {
       transform: translateY(-6px);
     }
 
-    .radio-group {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-        .radio-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-      padding: 5px 6px 5px 12px;
-      border-radius: 20px;
-      background: rgba(37, 99, 235, 0.06);
-      border: 1px solid rgba(37, 99, 235, 0.25);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      white-space: nowrap;
-      color: #1d4ed8;
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-    }
-
-    .radio-label input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-        /* toggle track */
-    .radio-label::after {
-      content: '';
-      width: 34px;
-      height: 20px;
-      flex-shrink: 0;
-      border-radius: 20px;
-      background: rgba(37, 99, 235, 0.3);
-      transition: background 0.2s;
-    }
-
-    /* toggle knob */
-    .radio-label::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: 24px;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #fff;
-      transform: translateY(-50%);
-      z-index: 1;
-      transition: right 0.2s;
-    }
-
-    .radio-label:has(input:checked) {
-      background: rgba(5, 150, 105, 0.1);
-      border-color: rgba(5, 150, 105, 0.25);
-      color: #047857;
-    }
-    .radio-label:has(input:checked)::after {
-      background: var(--green);
-    }
-    .radio-label:has(input:checked)::before {
-      right: 9px;
-    }
-
     .btn-dl {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: #fff;
@@ -1560,70 +1488,6 @@ body.loading .header-stripe::before {
 .icon-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
 .icon-choice{width:34px;height:34px;border-radius:8px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;}
 .icon-choice.sel{border-color:var(--accent);background:rgba(37,99,235,.08);}
-
-/* ─── ZCAP toggle ─── */
-.zcap-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(37, 99, 235, 0.06);
-  border: 1px solid rgba(37, 99, 235, 0.25);
-  transition: background 0.2s, border-color 0.2s;
-  border-radius: 20px;
-  padding: 5px 6px 5px 12px;
-  margin: 0 0 8px 0;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.zcap-text {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-  color: #1d4ed8;
-  transition: color 0.2s;
-}
-.zcap-sw {
-  position: relative;
-  width: 34px;
-  height: 20px;
-  flex-shrink: 0;
-}
-.zcap-sw input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-.zcap-sl {
-  position: absolute;
-  inset: 0;
-  background: rgba(37, 99, 235, 0.3);
-  border-radius: 20px;
-  transition: background 0.2s;
-}
-.zcap-sl::before {
-  content: '';
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  left: 3px;
-  top: 3px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.2s;
-}
-.zcap-sw input:checked + .zcap-sl { background: var(--green); }
-.zcap-sw input:checked + .zcap-sl::before { transform: translateX(14px); }
-.zcap-pill:has(input:checked) {
-  background: rgba(5, 150, 105, 0.1);
-  border-color: rgba(5, 150, 105, 0.25);
-}
-.zcap-pill:has(input:checked) .zcap-text {
-  color: #047857;
-}
 
     /* ─── Ledger settings ─── */
     .lg-card { border: 1px solid var(--border); border-radius: 12px; background: var(--surface2); padding: 10px 12px; margin-bottom: 12px; }
@@ -2473,7 +2337,25 @@ body.loading .upload-zone { opacity: 0.45; }
 .lc-il.o{display:block}
 .lc-it{padding:5px 0;border-bottom:1px dashed var(--border);font-size:12px}
 .lc-it span{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2);margin-right:6px}
+/* ── Download type: segmented ── */
+.dl-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;margin-bottom:12px}
+.dl-seg label{position:relative;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;user-select:none;-webkit-tap-highlight-color:transparent}
+.dl-seg input{position:absolute;opacity:0;width:0;height:0}
+.dl-seg label:has(input:checked){background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.28)}
+.dl-seg label{gap:6px}
+.dl-seg svg{width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
+/* ── Switch row (With Stock / Include ZCAP) ── */
+.sw-row{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--border);border-radius:12px;background:#f8fafc;cursor:pointer;transition:all .2s;user-select:none;-webkit-tap-highlight-color:transparent}
+.sw-row input{position:absolute;opacity:0;width:0;height:0}
+.sw-row .t{flex:1;min-width:0}
+.sw-row b{display:block;font-size:13px;font-weight:600}
+.sw-row small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+.sw-row .k{position:relative;flex-shrink:0;width:42px;height:24px;border-radius:12px;background:#cbd5e1;transition:background .2s}
+.sw-row .k::after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw-row:has(input:checked){background:rgba(5,150,105,.07);border-color:rgba(5,150,105,.35)}
+.sw-row:has(input:checked) .k{background:var(--green)}
+.sw-row:has(input:checked) .k::after{transform:translateX(18px)}
 </style>
 </head>
 
@@ -2834,11 +2716,12 @@ body.loading .upload-zone { opacity: 0.45; }
 
           <!-- Normal download -->
           <div id="panelNormal">
-            <div class="radio-group" style="flex-wrap:wrap; row-gap:8px;">
-              <label class="radio-label"><input type="radio" name="dlType" value="with" checked> With Loc</label>
-              <label class="radio-label"><input type="radio" name="dlType" value="without"> No Loc</label>
-              <label class="radio-label"><input type="radio" name="dlType" value="full"> Backup</label>
-            </div>
+<label class="form-label">Download type</label>
+<div class="dl-seg">
+  <label><input type="radio" name="dlType" value="with" checked><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>With loc</label>
+  <label><input type="radio" name="dlType" value="without"><svg viewBox="0 0 24 24"><path d="M12.75 7.09a3 3 0 0 1 2.16 2.16"/><path d="M17.07 17.07c-1.63 2.17-3.53 3.91-4.47 4.73a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 1.43-4.57"/><path d="m2 2 20 20"/><path d="M8.48 2.82A8 8 0 0 1 20 10c0 1.18-.31 2.38-.81 3.53"/><path d="M9.13 9.13a3 3 0 0 0 3.74 3.74"/></svg>No loc</label>
+  <label><input type="radio" name="dlType" value="full"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>Backup</label>
+</div>
             <button class="btn-dl" onclick="handleDownload()" style="width:100%;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -2851,16 +2734,11 @@ body.loading .upload-zone { opacity: 0.45; }
           </div>
 
           <!-- Upload & Enrich panel -->
-<div id="panelUpload" style="display:none;">
-  <div style="display:flex;">
-    <label class="zcap-pill">
-      <span class="zcap-text">With Stock</span>
-      <span class="zcap-sw">
-        <input type="checkbox" id="enrichWithStock">
-        <span class="zcap-sl"></span>
-      </span>
-    </label>
-  </div>
+<div id="panelUpload" style="display:none;"><label class="sw-row">
+  <input type="checkbox" id="enrichWithStock">
+  <span class="t"><b>With stock</b><small>Add a Stock column along with Location</small></span>
+  <span class="k"></span>
+</label>
   <label class="upload-zone" id="uploadZone" onclick="if(!guard('enrich')){event.preventDefault();}">
               <input type="file" id="uploadFile" accept=".csv,.xlsx,.xls" style="display:none;"
                 onchange="handleUpload(this)">
@@ -2874,19 +2752,14 @@ body.loading .upload-zone { opacity: 0.45; }
               <span style="font-size:11px;color:var(--muted);margin-top:2px;">Any format — SAP column
                 auto-detect</span>
             </label>
-            <div id="uploadStatus" style="display:none;"></div>
           </div>
 
 <div id="panelStock" style="display:none;">
-  <div style="display:flex;">
-    <label class="zcap-pill">
-      <span class="zcap-text">Include ZCAP Items</span>
-      <span class="zcap-sw">
-        <input type="checkbox" id="stockIncludeZcap">
-        <span class="zcap-sl"></span>
-      </span>
-    </label>
-  </div>
+<label class="sw-row">
+  <input type="checkbox" id="stockIncludeZcap">
+  <span class="t"><b>Include ZCAP items</b><small>SAP codes starting with 5 will also update</small></span>
+  <span class="k"></span>
+</label>
   <label class="upload-zone" id="stockUploadZone" onclick="if(!guard('stock')){event.preventDefault();}">
     <input type="file" id="stockUploadFile" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleStockUpload(this)">
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -2991,7 +2864,7 @@ body.loading .upload-zone { opacity: 0.45; }
     </button>
     <button type="button" class="tl-chip" id="lcChip" onclick="openLocClean()">
       <span class="tl-e">🧹</span>
-      <span class="tl-tx"><span class="tl-t">Merge Location</span><span class="tl-s" id="lcChipSub">Checking…</span></span>
+      <span class="tl-tx"><span class="tl-t">Merge Locs</span><span class="tl-s" id="lcChipSub">Checking…</span></span>
       <span class="tl-v">›</span>
     </button>
   </div>
@@ -6396,6 +6269,7 @@ function deleteToolLink(i) {
       const file = input.files[0];
       if (!file) return;
   const withStock = document.getElementById('enrichWithStock').checked;
+  input.value = '';
 
       const reader = new FileReader();
 
@@ -6609,7 +6483,7 @@ function handleStockUpload(input) {
           total++;
           const sap = padSAP(rawSap);
           if (!includeZcap && sap.startsWith('5')) { skipped++; return; }
-          const rawStock = String(row[stockCol]).trim();
+          const rawStock = String(row[stockCol]).replace(/,/g, '').trim();
 if (!/^\d+(\.\d+)?$/.test(rawStock)) { skipped++; return; }
 const stockVal = parseFloat(rawStock);
 if (stockVal <= 0) { skipped++; return; }
