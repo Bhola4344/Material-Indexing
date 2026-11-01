@@ -7769,7 +7769,7 @@ window.renderTools = function () {
     const q = stkFind(String(it.sap).trim());
     h += `<button type="button" class="tl-chip${q ? ' q' : ''}${stkOpen ? ' on' : ''}" onclick="toolSticker()">
       <span class="tl-e">🏷️</span>
-      <span class="tl-tx"><span class="tl-t">Sticker / Shift</span><span class="tl-s">${q ? `<span class="sa-chip ok">${q.printed ? 'Printed' : 'In list'}</span>qty ${q.qty}` : 'Not in list'}</span></span>
+      <span class="tl-tx"><span class="tl-t">Tag / Shift</span><span class="tl-s">${q ? `<span class="sa-chip ok">${q.printed ? 'Printed' : 'In list'}</span>qty ${q.qty}` : 'Not in list'}</span></span>
       <span class="tl-v">▾</span></button>`;
   }
   row.innerHTML = h;
