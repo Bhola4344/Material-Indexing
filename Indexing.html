@@ -2197,23 +2197,23 @@ body.loading .upload-zone { opacity: 0.45; }
 .stx-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s}
 .stx.open .stx-body{grid-template-rows:1fr}
 .stx-body>div{overflow:hidden;min-height:0}
-.stx-form{padding:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+
 .stx-n{display:grid;grid-template-columns:36px 56px 36px;gap:4px}
 .stx-n button,.stx-n input,.stx-ib{height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:0;cursor:pointer}
 .stx-n button{font-size:20px;font-weight:700}
 .stx-n input{text-align:center;font:700 16px 'JetBrains Mono',monospace;border-width:2px;outline:0;cursor:text;-moz-appearance:textfield}
 .stx-n input::-webkit-inner-spin-button{-webkit-appearance:none}
-.stx-b{display:flex;gap:6px;margin-left:auto}
+
 .stx-ib{width:40px;font-size:16px}
-.stx-ib.p{background:var(--accent);border-color:var(--accent);color:#fff}
+
 .stx-ib.r{color:var(--red);border-color:rgba(220,38,38,.35)}
 .stx-rem{flex:1 1 100%;width:100%;height:40px;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'Inter',sans-serif;padding:0 12px;text-transform:uppercase;outline:0;-webkit-appearance:none}
 .stx-rem:focus{border-color:var(--accent)}
 .stx-rem::placeholder{font-weight:500;font-size:13px;text-transform:none;color:var(--muted)}
-.stx-seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px;margin:0 0 8px}
-.stx-pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc(50% - 3px);border-radius:9px;background:var(--accent);pointer-events:none;transition:transform .3s cubic-bezier(.34,1.3,.64,1)}
-.stx-seg.r .stx-pill{transform:translateX(100%)}
-.stx-seg button{position:relative;z-index:1;height:38px;border:0;background:transparent;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:6px;font:700 12.5px 'Inter',sans-serif;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .25s}
+.stx-seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);--i:0;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px;margin:0 0 8px}
+.stx-pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/3);border-radius:9px;background:var(--accent);pointer-events:none;transform:translateX(calc(var(--i)*100%));transition:transform .3s cubic-bezier(.34,1.3,.64,1)}
+
+.stx-seg button{position:relative;z-index:1;height:38px;border:0;background:transparent;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:4px;font:700 11.5px 'Inter',sans-serif;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .25s}
 .stx-seg button.on{color:#fff}
 .stx-seg i{font-style:normal;font-size:15px;line-height:1}
 .stx-seg b{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(220,38,38,.12);color:var(--red);font:700 11px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
@@ -2227,14 +2227,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .stx-ln .stx-ib{width:40px}
 .stx-ib.ok{color:var(--green);border-color:rgba(5,150,105,.4)}
 .stx-done{opacity:.65;border-color:rgba(5,150,105,.35)!important}
-.stx-form{flex-wrap:nowrap;gap:6px}
-.stx-form .stx-n{grid-template-columns:38px 48px 38px;gap:4px;flex-shrink:0}
-.stx-form .stx-n button,.stx-form .stx-n input,.stx-form .stx-ib{height:46px}
-.stx-form .stx-n button{font-size:24px}
-.stx-form .stx-n input{font-size:18px}
-.stx-form .stx-rem{order:2;flex:1 1 0;min-width:0;width:auto;padding:0 9px;height:46px}
-.stx-form .stx-b{order:3;margin-left:0;gap:6px;flex-shrink:0}
-.stx-form .stx-ib{width:46px;font-size:20px}
+
 /* tools row: alert + sticker chips */
 .tl-row{display:flex;gap:8px;margin-top:12px}
 .tl-chip{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:6px 10px;min-height:44px;text-align:left;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s,transform .1s}
@@ -2308,7 +2301,7 @@ body.loading .upload-zone { opacity: 0.45; }
 #saFilter .sa-fchip.sel{background:transparent}
 #saFilter .sa-fchip b,#saFilter .sa-fchip span{transition:color .25s}
 #saFilter .sa-fchip.sel b,#saFilter .sa-fchip.sel span{color:#fff}
-.stx-form .stx-ib.p.add{font-size:28px;font-weight:500;line-height:1}
+
 .tools-section:not(.qo)>:not(.tl-row){display:none!important}
 .tools-section>.tl-row{margin:0 0 10px}
 .tools-section:not(.qo)>.tl-row{margin:0}
@@ -2358,6 +2351,31 @@ body.loading .upload-zone { opacity: 0.45; }
 .sw-row:has(input:checked){background:rgba(5,150,105,.07);border-color:rgba(5,150,105,.35)}
 .sw-row:has(input:checked) .k{background:var(--green)}
 .sw-row:has(input:checked) .k::after{transform:translateX(18px)}
+/* ═══ Sticker + Shifting form ═══ */
+.sf{padding:12px}
+.sf-r1{display:flex;align-items:center;gap:6px}
+.sf-n{display:grid;grid-template-columns:34px 46px 34px;gap:4px;flex-shrink:0}
+.sf-n button,.sf-n input{height:46px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);padding:0;cursor:pointer}
+.sf-n button{font-size:22px;font-weight:700}
+.sf-n input{text-align:center;font:700 17px 'JetBrains Mono',monospace;border-width:2px;outline:0;cursor:text;-moz-appearance:textfield}
+.sf-n input::-webkit-inner-spin-button{-webkit-appearance:none}
+.sf-n input:focus{border-color:var(--accent)}
+.sf-st{flex-shrink:0;width:48px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);color:var(--accent);cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;-webkit-tap-highlight-color:transparent}
+.sf-st small{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.sf-st b{font:700 14px 'JetBrains Mono',monospace}
+.sf-st:active{background:rgba(37,99,235,.14)}
+.sf-rem{flex:1 1 0;min-width:0;height:46px;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 14px 'Inter',sans-serif;padding:0 10px;text-transform:uppercase;outline:0;-webkit-appearance:none}
+.sf-rem:focus{border-color:var(--accent)}
+.sf-rem::placeholder{font-weight:500;font-size:13px;text-transform:none;color:var(--muted)}
+.sf-r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.sf-r2 button{height:46px;border-radius:12px;font:700 13px 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.sf-r2 button:active{transform:scale(.98)}
+.sf-a1{background:var(--accent);border:0;color:#fff}
+.sf-a2{background:var(--green);border:0;color:#fff}
+.sf-fb{margin-top:8px;font-size:11.5px;color:var(--muted);min-height:16px}
+.sf-fb.a{color:var(--accent)}
+.sf-fb.g{color:var(--green)}
+.sf-lk{background:none;border:0;padding:0;font:600 11.5px 'Inter',sans-serif;color:var(--red);cursor:pointer}
 </style>
 </head>
 
@@ -2902,7 +2920,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbxtJgQmZf_0CLQX7j6-J8sDikigRtbJO1HkkWzlMS1Q547x0YUD9UCnavvljzRCIBUy/exec";
+    const API = "https://script.google.com/macros/s/AKfycbzZwUwlDlmVAswyn_3K98XXoAN9RckrekUEhNVwcsAk8ewXzjiSMsOW5mSuZMOJ-rFf/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycbyc_BkRKEin5Yo_F4ufq9g_pCl1pV0SVv2clc40LjvGADU1vFF2d_hQkDgVdMReP9ZCFw/exec";
 const PERMS = new Set(JSON.parse(sessionStorage.getItem('userPerms') || '[]'));
 const can = p => PERMS.has(p);
@@ -3475,7 +3493,7 @@ function loadPhys() {
   }).catch(() => {}).finally(() => { physSyncing = false; });
 }
 
-const PH_TAGS = ['Issue', 'Damage', 'Lost', 'Short', 'Not Received'];
+const PH_TAGS = ['Issue To ', 'Damage', 'Lost', 'Short', 'Not Received'];
 const phFmt = n => String(Math.round(n * 1000) / 1000);
 
 function openPhys(sn) {
@@ -4009,6 +4027,7 @@ function downloadActiveNotifTab() {
   else if (activeNotifTab === 'alert') downloadStockAlerts();
   else if (activeNotifTab === 'phys') downloadPhys();
   else if (activeNotifTab === 'mov') downloadMoving();
+  else if (stkSub === 'sh') shfCsv();
   else downloadBinList();
 }
 
@@ -7456,6 +7475,90 @@ try { stkQ = JSON.parse(localStorage.getItem('stkQueue')) || []; } catch (e) {}
 const skE = id => document.getElementById(id);
 const stkFind = s => stkQ.find(x => x.sap === s);
 const stkItem = s => itemMaster.find(i => String(i.sap).trim() === s);
+// ═══ MATERIAL SHIFTING (inspection rack → bin, Sheet synced) ═══
+let shfQ = [], shfBusy = 0, shfVer = 0, shfT = 0;
+try { shfQ = JSON.parse(localStorage.getItem('shfQueue')) || []; } catch (e) {}
+const shfSave = () => { try { localStorage.setItem('shfQueue', JSON.stringify(shfQ)); } catch (e) {} };
+
+function shfSend(p) {
+  shfBusy++; shfVer++; shfT = Date.now();
+  shfSave();
+  binSend(p).finally(() => shfBusy--);
+}
+function syncShf() {
+  if (!can('binview') && !can('binprint')) return;
+  const v = shfVer;
+  fetch(`${API}?action=getShifts`).then(r => r.json()).then(rows => {
+    if (!Array.isArray(rows) || shfBusy || v !== shfVer || Date.now() - shfT < 5000) return;
+    const a = document.activeElement;
+    if (a && a.closest && a.closest('#notifList,#stickerBox')) return;
+    shfQ = rows.map(r => ({ id: +r.id, sap: String(r.sap).trim(), name: r.name, qty: +r.qty || 1, loc: r.loc || '', rem: r.rem || '', by: r.by || '', ts: +r.ts || 0 }))
+      .sort((a, b) => b.ts - a.ts);
+    shfSave();
+    shfUI();
+  }).catch(() => {});
+}
+
+function shfFill() {
+  if (!currentItem) return;
+  stkQn(Math.max(1, Math.round(lvStockNum(currentItem))));
+  skE('skQ').value = stkDq;
+}
+function shfUI() {
+  renderStats();
+  if (notifOpen) renderTabBadges();
+  if (notifOpen && activeNotifTab === 'bin') renderBinList();
+  if (currentItem && !addItemMode) renderStickerBox();
+}
+function shfAdd() {
+  if (!can('binprint') || !currentItem) return;
+  const qty = stkDq > 0 ? stkDq : 1;
+  const r = {
+    id: Date.now(), sap: String(currentItem.sap).trim(), name: currentItem.name, qty,
+    loc: String(currentItem.location || '').trim(),
+    rem: (skE('skR').value || '').trim().toUpperCase(), by: userName, ts: Date.now()
+  };
+  shfQ.unshift(r);
+  shfSend({ action: 'setShift', id: r.id, sap: r.sap, name: r.name, qty: r.qty, loc: r.loc, rem: r.rem, by: r.by, ts: r.ts });
+  stkDr = '';
+  sfFb = 'Shifted ' + qty + ' ✓ Bins → Shifting me gaya';
+  shfUI();
+  logAct('i_bin', 'Material shifted · ' + r.name, 'SAP ' + r.sap + ' · qty ' + qty);
+  showToast('Shifted ' + qty + ' ✓ Bins → Shifting me gaya', 'green');
+}
+function shfDel(id) {
+  shfQ = shfQ.filter(r => r.id !== id);
+  shfSend({ action: 'clearShift', id });
+  shfUI();
+}
+function shfClear() {
+  shfQ = [];
+  shfSend({ action: 'clearShifts' });
+  shfUI();
+}
+function shfCsv() {
+  if (!shfQ.length) { showToast('Koi shifting record nahi hai', 'amber'); return; }
+  const rows = [['SAP', 'Description', 'Qty', 'Shifted To', 'Date', 'Shifted By', 'Remark']];
+  shfQ.forEach(r => rows.push([r.sap, r.name, r.qty, r.loc, phTime(r.ts), r.by, r.rem || '']));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = 'material_shifting.csv';
+  a.click();
+  showToast('Downloaded: material_shifting.csv', 'blue');
+}
+function renderShfList() {
+  const n = shfQ.length, tot = shfQ.reduce((a, r) => a + r.qty, 0);
+  skE('notifCountBadge').textContent = n;
+  skE('notifSub').textContent = n ? 'Rack se bin me shifted' : 'Sab up to date';
+  skE('binBar').innerHTML = n ? `<div class="pa-bar"><div class="pa-txt"><b>${n}</b> Records<br/><span>${tot} qty shifted</span></div><div class="pa-grp"><button class="pa-btn" onclick="shfCsv()">⬇ CSV</button><button class="pa-clr" onclick="shfClear()">✓ Clear All</button></div></div>` : '';
+  skE('notifList').innerHTML = n ? shfQ.map(r => `<div class="notif-row">
+      <div class="notif-row-top"><div class="notif-name">${lmEsc(r.name)}</div><div class="sa-cap fa"><span class="s">Shifted</span><span class="o"><b>${r.qty}</b></span></div></div>
+      <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(r.sap)}${r.loc ? ' · 📍 ' + lmEsc(r.loc) : ''}</div>
+      <div class="sa-nft"><span>🕒 <b>${phTime(r.ts)}</b> · 👤 <b>${lmEsc(r.by)}</b></span><button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="shfDel(${r.id})">✓ Clear</button></div>
+      ${r.rem ? `<div class="ph-remtxt">💬 ${lmEsc(r.rem)}</div>` : ''}
+    </div>`).join('') : '<div class="notif-empty">✅ Koi shifting record nahi hai</div>';
+}
 
 function stkSend(p) {
   stkBusy++; stkVer++;
@@ -7486,15 +7589,16 @@ function syncStk() {
 }
 
 
-function stkDel(sap) { stkQ = stkQ.filter(x => x.sap !== sap); stkSend({ action: 'removeSticker', sap }); stkUI(); }
+function stkDel(sap) { sfFb = null; stkQ = stkQ.filter(x => x.sap !== sap); stkSend({ action: 'removeSticker', sap }); stkUI(); }
 function stkQty(sap, v) { const q = stkFind(sap); if (!q) return; q.qty = Math.max(1, Math.min(999, parseInt(v) || 1)); q.printed = false; stkPut(q); stkUI(); }
 function stkClearDone() { stkQ.filter(q => q.printed).forEach(q => stkDel(q.sap)); }
+const STK_SUBS = ['bp', 'sp', 'sh'];
 function stkTab(k) {
   stkSub = k;
   const sg = skE('stxSeg');
   if (sg) {
-    sg.classList.toggle('r', k === 'sp');
-    sg.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', (i === 1) === (k === 'sp')));
+    sg.style.setProperty('--i', STK_SUBS.indexOf(k));
+    sg.querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', STK_SUBS[i] === k));
   }
   setTimeout(renderBinList, 180);
 }
@@ -7502,7 +7606,7 @@ function stkTab(k) {
 // bell → Bins → Sticker Print
 function stkSwitch() {
   const b = (k, i, l, n) => `<button type="button" class="${stkSub === k ? 'on' : ''}" onclick="stkTab('${k}')"><i>${i}</i>${l}${n ? `<b>${n}</b>` : ''}</button>`;
-  return `<div class="stx-seg${stkSub === 'sp' ? ' r' : ''}" id="stxSeg"><span class="stx-pill"></span>${b('bp', '🖨️', 'Bin print', binPending.length)}${b('sp', '🏷️', 'Sticker print', stkQ.length)}</div>`;
+  return `<div class="stx-seg" id="stxSeg" style="--i:${STK_SUBS.indexOf(stkSub)}"><span class="stx-pill"></span>${b('bp', '🖨️', 'Bin', binPending.length)}${b('sp', '🏷️', 'Sticker', stkQ.length)}${b('sh', '🔁', 'Shifting', shfQ.length)}</div>`;
 }
 
 function renderStkList() {
@@ -7568,7 +7672,8 @@ window.renderItem = function () {
 const _rbl = renderBinList;
 window.renderBinList = function () {
   const l = skE('notifList'), s = l.scrollTop;
-  if (stkSub === 'sp') renderStkList();
+    if (stkSub === 'sp') renderStkList();
+  else if (stkSub === 'sh') renderShfList();
   else _rbl.apply(this, arguments);
   skE('binBar').insertAdjacentHTML('afterbegin', stkSwitch());
   l.scrollTop = s;
@@ -7576,25 +7681,25 @@ window.renderBinList = function () {
 const _rs = renderStats;
 window.renderStats = function () {
   _rs.apply(this, arguments);
-  if (!can('binview') || !stkQ.length) return;
+  if (!can('binview') || !(stkQ.length + shfQ.length)) return;
   const b = skE('bellBadge');
-  b.textContent = (+b.textContent || 0) + stkQ.length;
+  b.textContent = (+b.textContent || 0) + stkQ.length + shfQ.length;
   b.classList.remove('hidden');
   skE('bellBtn').classList.add('has-alert');
 };
 const _rtb = renderTabBadges;
 window.renderTabBadges = function () {
   _rtb.apply(this, arguments);
-  if (!stkQ.length) return;
+  if (!(stkQ.length + shfQ.length)) return;
   const b = skE('notifTabBinBadge');
-  b.textContent = binPending.length + stkQ.length;
+  b.textContent = binPending.length + stkQ.length + shfQ.length;
   b.classList.remove('hidden');
 };
 const _sb = syncBin;
-window.syncBin = function () { syncStk(); return _sb.apply(this, arguments); };
+window.syncBin = function () { syncStk(); syncShf(); return _sb.apply(this, arguments); };
 
 // ── Sticker UI (new design) ──
-let stkOpen = 0, stkFor = '', stkDq = 1, stkDr = '';
+let stkOpen = 0, stkFor = '', stkDq = 1, stkDr = '', sfFb = null;
 let stkQR = localStorage.getItem('stkQR') !== '0';
 function stkQrT(v) { stkQR = v; try { localStorage.setItem('stkQR', v ? '1' : '0'); } catch (e) {} renderBinList(); }
 
@@ -7603,7 +7708,7 @@ function renderStickerBox() {
   if (!b || !currentItem) return;
   if (!can('binprint')) { b.innerHTML = ''; renderTools(); return; }
   const s = String(currentItem.sap).trim(), q = stkFind(s);
-  if (stkFor !== s) { stkFor = s; stkOpen = 0; }
+  if (stkFor !== s) { stkFor = s; stkOpen = 0; sfFb = null; }
   if (!stkOpen) { stkDq = q ? q.qty : 1; stkDr = q ? q.rem : ''; }
   const old = skE('stx');
   if (old && !stkOpen && old.classList.contains('open')) {
@@ -7613,10 +7718,18 @@ function renderStickerBox() {
     renderTools();
     return;
   }
-  b.innerHTML = `<div class="stx${q ? ' q' : ''}${stkOpen ? ' open' : ''}" id="stx"><div class="stx-body"><div><div class="stx-form">
-      <div class="stx-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
-      <div class="stx-b">${q ? `<button class="stx-ib r" onclick="stkOpen=0;stkDel('${s}')">🗑️</button><button class="stx-ib p" onclick="stkAdd()">💾</button>` : `<button class="stx-ib p add" onclick="stkAdd()" aria-label="Add">+</button>`}</div>
-      <input class="stx-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
+  const stock = Math.round(lvStockNum(currentItem));
+  b.innerHTML = `<div class="stx${q ? ' q' : ''}${stkOpen ? ' open' : ''}" id="stx"><div class="stx-body"><div><div class="sf">
+      <div class="sf-r1">
+        <div class="sf-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
+        ${stock > 0 ? `<button class="sf-st" onclick="shfFill()" aria-label="Fill full stock"><small>Stock</small><b>${stock}</b></button>` : ''}
+        <input class="sf-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
+      </div>
+      <div class="sf-r2">
+        <button class="sf-a1" onclick="stkAdd()">🏷️ ${q ? 'Update' : 'Sticker'}</button>
+        <button class="sf-a2" onclick="shfAdd()">✓ Shifted</button>
+      </div>
+      <div class="sf-fb${sfFb ? ' g' : q ? ' a' : ''}">${sfFb ? lmEsc(sfFb) : q ? `Sticker list me ${q.qty} · <button class="sf-lk" onclick="stkDel('${s}')">Remove</button>` : 'Sticker aur Shifted alag-alag kaam karte hain'}</div>
     </div></div></div></div>`;
   renderTools();
 }
@@ -7625,6 +7738,7 @@ function stkTog() {
   const x = skE('stx');
   if (!x) return;
   stkOpen = stkOpen ? 0 : 1;
+  sfFb = null;
   x.classList.toggle('open', !!stkOpen);
   if (!stkOpen) setTimeout(() => { if (!stkOpen) renderStickerBox(); }, 320);
   renderTools();
@@ -7635,7 +7749,8 @@ function stkAdd() {
   if (!can('binprint') || !currentItem) return;
   const sap = String(currentItem.sap).trim(), q = { sap, qty: stkDq, rem: skE('skR').value.trim().toUpperCase(), printed: false };
   stkQ = stkQ.filter(x => x.sap !== sap); stkQ.push(q);
-  stkOpen = 0; stkPut(q); stkUI();
+  sfFb = null;
+  stkPut(q); stkUI();
   logAct('i_bin', 'Sticker queued · ' + currentItem.name, 'SAP ' + sap + ' · qty ' + q.qty);
   showToast('Sticker list me add ho gaya ✓', 'green');
 }
@@ -7654,7 +7769,7 @@ window.renderTools = function () {
     const q = stkFind(String(it.sap).trim());
     h += `<button type="button" class="tl-chip${q ? ' q' : ''}${stkOpen ? ' on' : ''}" onclick="toolSticker()">
       <span class="tl-e">🏷️</span>
-      <span class="tl-tx"><span class="tl-t">Sticker</span><span class="tl-s">${q ? `<span class="sa-chip ok">${q.printed ? 'Printed' : 'In list'}</span>qty ${q.qty}` : 'Not in list'}</span></span>
+      <span class="tl-tx"><span class="tl-t">Sticker / Shift</span><span class="tl-s">${q ? `<span class="sa-chip ok">${q.printed ? 'Printed' : 'In list'}</span>qty ${q.qty}` : 'Not in list'}</span></span>
       <span class="tl-v">▾</span></button>`;
   }
   row.innerHTML = h;
