@@ -1879,7 +1879,8 @@ body.loading .header-stripe::before {
 .lm-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(37,99,235,.28);}
 .lm-loc{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;}
 .lm-sub{font-size:11px;color:var(--muted);margin-top:1px;}
-.lm-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--muted);font-size:14px;}
+.lm-close{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;cursor:pointer;color:var(--muted);font-size:14px;position:relative;z-index:5;touch-action:manipulation;flex-shrink:0;}
+.lm-close::before{content:'';position:absolute;inset:-6px}
 .lm-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 12px 8px;}
 
 .lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
@@ -2404,7 +2405,7 @@ body.loading .upload-zone { opacity: 0.45; }
         <div class="lm-sub" id="lmSub"></div>
       </div>
     </div>
-    <button class="lm-close" onclick="closeLocModal()">✕</button>
+    <button class="lm-close" type="button" onpointerdown="event.preventDefault();closeLocModal()" aria-label="Close">✕</button>
   </div>
   <div class="lm-list" id="lmList"></div>
   <div class="lm-foot"></div>
@@ -5446,7 +5447,10 @@ function lmHasStock(i) {
 
 
 
+let lmClosedAt = 0;
 function closeLocModal() {
+  lmClosedAt = Date.now();
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   locModalOpen = false;
   document.getElementById('lmBackdrop').classList.remove('open');
   document.getElementById('lmModal').classList.remove('open');
@@ -7377,6 +7381,7 @@ function build() {
   window.addEventListener('resize', () => { if (locModalOpen) positionLocModal(); });
 
   window.openLocModal = function () {
+    if (Date.now() - lmClosedAt < 450) return;   // cross ke tap ka ghost click modal dobara na khole
     if (!guard('phys')) return;
     if (!currentItem || !currentItem.location || !String(currentItem.location).trim()) return;
     lmLoc = String(currentItem.location).trim().toUpperCase();
