@@ -2378,6 +2378,15 @@ body.loading .upload-zone { opacity: 0.45; }
 .sf-fb.a{color:var(--accent)}
 .sf-fb.g{color:var(--green)}
 .sf-lk{background:none;border:0;padding:0;font:600 11.5px 'Inter',sans-serif;color:var(--red);cursor:pointer}
+.nr-pills{display:flex;align-items:center;gap:6px;min-width:0}
+.nr-sap{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;line-height:1;padding:5px 10px;border-radius:20px;color:var(--accent2);background:rgba(8,145,178,.08);border:1.5px solid rgba(8,145,178,.4);white-space:nowrap}
+.nr-noloc{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;line-height:1;padding:4px 10px 4px 8px;border-radius:20px;color:var(--red);background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.35);white-space:nowrap}
+.nr-hr{border:0;border-top:1.5px dashed var(--border);margin:10px 0 8px}
+.nr-sg{display:flex;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--muted)}
+.nr-sg::before{content:'Maybe:\00a0'}
+.nr-sg span{cursor:pointer}
+.nr-sg span:not(:last-child)::after{content:',\00a0'}
+.nr-sg span:active{color:var(--accent)}
 </style>
 </head>
 
@@ -4428,12 +4437,39 @@ function highlightNotif(text, q) {
   return String(text).replace(_notifHighlightRe, '<mark>$1</mark>');
 }
 
+function buildSugIndex() {
+  const byCat = {}, glob = {};
+  itemMaster.forEach(i => {
+    const l = String(i.location || '').trim().toUpperCase();
+    if (!l) return;
+    glob[l] = (glob[l] || 0) + 1;
+    const c = getCategory(i.name);
+    if (!c) return;
+    const m = byCat[c] || (byCat[c] = {});
+    m[l] = (m[l] || 0) + 1;
+  });
+  return { byCat, globTop: Object.keys(glob).sort((a, b) => glob[b] - glob[a]) };
+}
+function locSuggestFor(item, idx, n) {
+  const out = [], add = l => { if (l && !out.includes(l) && out.length < n) out.push(l); };
+  const m = idx.byCat[getCategory(item.name)];
+  if (m) Object.keys(m).sort((a, b) => m[b] - m[a]).forEach(add);
+  locHist.forEach(add);
+  idx.globTop.forEach(add);
+  return out;
+}
+function pickLocSug(sn, loc) {
+  const inp = document.getElementById('ninp-' + sn);
+  if (inp) { inp.value = loc; inp.focus(); }
+}
+
 function renderNotifList() {
   if (activeNotifTab !== 'stock') return;
   const myToken = ++notifRenderToken;
   const list = document.getElementById('notifList');
   const savedScroll = list.scrollTop;
   buildNotifHighlightRe(notifSearchQuery);
+  const sugIdx = buildSugIndex();
   const allItems = getStockNoLocationItems();
   const totalCount = allItems.length;
 
@@ -4463,7 +4499,7 @@ function renderNotifList() {
         <span class="notif-stock-chip ${phChipCls(item.sn)}" id="nchip-${item.sn}" onclick="openPhys(${item.sn})">📦 ${phStock(item)} ✎</span>
       </div>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
-        <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--accent2);">${highlightNotif(item.sap, notifSearchQuery)}</span>
+        <div class="nr-pills"><span class="nr-sap">${highlightNotif(item.sap, notifSearchQuery)}</span><span class="nr-noloc">✕ No Loc</span></div>
         <button class="notif-photo-btn" onclick="viewPhotoFor(${item.sn})" aria-label="View photo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
@@ -4485,6 +4521,8 @@ function renderNotifList() {
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save
 </button>
       </div>
+      <hr class="nr-hr">
+      <div class="nr-sg">${locSuggestFor(item, sugIdx, 3).map(l => `<span data-l="${lmEsc(l)}" onclick="pickLocSug(${item.sn},this.dataset.l)">${lmEsc(l)}</span>`).join('')}</div>
     </div>
   `;
 
