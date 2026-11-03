@@ -3439,7 +3439,7 @@ function downloadStockAlerts() {
 const PH_KEY = 'physList';
 let physList = [];
 try { physList = JSON.parse(localStorage.getItem(PH_KEY)) || []; } catch (e) { physList = []; }
-let physOps = {}, physFilter = 'all', physSyncing = false;
+let physOps = {}, physFilter = 'all', physSyncing = false, physAsk = null;
 const PH = { sn: 0, sys: 0, val: 0 };
 function phEl(id) { return document.getElementById(id); }
 function phSaveLocal() { try { localStorage.setItem(PH_KEY, JSON.stringify(physList)); } catch (e) {} }
@@ -3618,7 +3618,10 @@ function savePhys() {
             val < sys ? 'red' : val > sys ? 'blue' : 'green');
 }
 
-function setPhysFilter(f) { physFilter = f; renderPhysList(); }
+function askClrPhys(sn) { physAsk = sn; renderPhysList(); }
+function askClrAllPhys() { physAsk = 'all'; renderPhysList(); }
+function cancelClrPhys() { physAsk = null; renderPhysList(); }
+function setPhysFilter(f) { physFilter = f; physAsk = null; renderPhysList(); }
 function renderPhysList() {
   const all = physList, sh = all.filter(p => p.phys < p.sys).length, ex = all.length - sh;
   document.getElementById('notifCountBadge').textContent = all.length;
@@ -3631,7 +3634,9 @@ function renderPhysList() {
   const show = all.filter(p => physFilter === 'all' || (physFilter === 's' ? p.phys < p.sys : p.phys > p.sys));
   const list = document.getElementById('notifList');
   if (!all.length) { list.innerHTML = '<div class="notif-empty">✅ No pending adjustments</div>'; return; }
-  const bar = `<div class="pa-bar"><div class="pa-txt">${all.length} pending</div><div class="pa-grp"><button class="pa-clr" onclick="clrAllPhys()">✓ Clear All</button></div></div>`;
+  const bar = physAsk === 'all'
+    ? `<div class="pa-bar"><div class="pa-txt">Saari ${all.length} adjustments clear karein?</div><div class="pa-grp"><button class="bin-done-btn" onclick="cancelClrPhys()">No</button><button class="pa-clr" style="background:var(--red)" onclick="clrAllPhys()">Yes, clear all</button></div></div>`
+    : `<div class="pa-bar"><div class="pa-txt">${all.length} pending</div><div class="pa-grp"><button class="pa-clr" onclick="askClrAllPhys()">✓ Clear All</button></div></div>`;
   if (!show.length) { list.innerHTML = bar + '<div class="notif-empty">Is filter me kuch nahi</div>'; return; }
   list.innerHTML = bar + show.map(p => {
     const s = p.phys < p.sys, d = Math.abs(p.phys - p.sys);
@@ -3640,13 +3645,20 @@ function renderPhysList() {
       <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(p.sap)} · 📍 ${lmEsc(p.loc)}</div>
       <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b></span></div>
       ${p.remark ? `<div class="ph-remtxt">💬 ${lmEsc(p.remark)}</div>` : ''}
-      <div class="ph-act"><small>🕒 ${phTime(p.ts)}</small><div>
-        <button class="bin-done-btn" onclick="openPhys(${p.sn})">✎ Edit</button>
-        <button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="clrPhys(${p.sn})">✓ Clear</button>
-      </div></div></div>`;
+      ${physAsk === p.sn
+        ? `<div class="ph-act"><small>Ye adjustment clear karein?</small><div>
+            <button class="bin-done-btn" onclick="cancelClrPhys()">No</button>
+            <button class="bin-done-btn" style="border-color:var(--red);color:var(--red);" onclick="clrPhys(${p.sn})">Yes, clear</button>
+          </div></div>`
+        : `<div class="ph-act"><small>🕒 ${phTime(p.ts)}</small><div>
+            <button class="bin-done-btn" onclick="openPhys(${p.sn})">✎ Edit</button>
+            <button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="askClrPhys(${p.sn})">✓ Clear</button>
+          </div></div>`}
+    </div>`;
   }).join('');
 }
 function phAfterClear() {
+  physAsk = null;
   phSaveLocal(); renderStats(); phPaint();
   if (notifOpen) { renderTabBadges(); renderPhysList(); }
 }
@@ -4390,6 +4402,7 @@ function toggleNotif() {
 
 function closeNotif() {
   notifOpen = false;
+physAsk = null;
   document.getElementById('notifPanel').classList.remove('open');
   document.getElementById('notifBackdrop').classList.remove('open');
 }
