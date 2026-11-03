@@ -16,7 +16,7 @@
   <meta name="theme-color" content="#2563eb">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -1633,7 +1633,12 @@ body.loading .header-stripe::before {
 @keyframes rowClear { to { opacity: 0; transform: scale(0.9) translateX(30px); max-height: 0; padding: 0; margin: 0; border-width: 0; } }
 .notif-row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .notif-name { font-size: 12.5px; font-weight: 600; line-height: 1.35; flex: 1; }
-.notif-stock-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgba(8,145,178,0.1); color: var(--accent2); white-space: nowrap; border: 1px solid rgba(8,145,178,0.2); }
+.nr-stk{--c:var(--accent2);--b:rgba(8,145,178,.45);--t:rgba(8,145,178,.12);display:flex;height:20px;border-radius:20px;overflow:hidden;flex-shrink:0;white-space:nowrap;border:1.5px solid var(--b);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nr-stk.ds{--c:var(--red);--b:rgba(220,38,38,.45);--t:rgba(220,38,38,.12)}
+.nr-stk.de{--c:var(--accent);--b:rgba(37,99,235,.45);--t:rgba(37,99,235,.12)}
+.nr-stk .s{display:flex;align-items:center;gap:3px;padding:0 6px 0 8px;background:var(--t);color:var(--c);font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.nr-stk .o{display:flex;align-items:center;gap:3px;padding:0 8px 0 7px;background:var(--surface);color:var(--c);font:700 11.5px 'JetBrains Mono',monospace}
+.nr-stk .o em{font-style:normal;font-size:10px;opacity:.7}
 .notif-row-body { display: flex; gap: 6px; align-items: center; justify-content: flex-start; }
 .notif-inline-input { flex: 3 1 0; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text); outline: none; transition: border-color 0.2s; min-width: 0; }
 .notif-inline-input:focus { border-color: var(--accent); background: var(--surface); }
@@ -1644,16 +1649,9 @@ body.loading .header-stripe::before {
 #notifBackdrop { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.35); z-index: 490; }
 #notifBackdrop.open { display: block; }
 
-.notif-photo-btn {
-  width: 24px; height: 24px; border-radius: 7px;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--muted);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0; transition: all .15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.notif-photo-btn:active { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,0.06); }
-.notif-photo-btn svg { width: 13px; height: 13px; }
+.notif-photo-btn{height:20px;display:inline-flex;align-items:center;gap:4px;padding:0 10px 0 8px;border-radius:20px;border:1.5px solid rgba(37,99,235,.4);background:rgba(37,99,235,.07);color:var(--accent);font:700 9px 'Inter',sans-serif;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;flex-shrink:0;transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.notif-photo-btn:active{transform:scale(.95);background:rgba(37,99,235,.14)}
+.notif-photo-btn svg{width:11px;height:11px}
 
 .dlbar-footer-v2 {
   text-align: center;
@@ -2070,9 +2068,6 @@ body.loading .upload-zone { opacity: 0.45; }
 /* ─── Physical Adjust ─── */
 .info-box.ds{--c:var(--red);--bc:#F5C6C6;background:rgba(220,38,38,.07)}
 .info-box.de{--c:var(--accent);--bc:#BFD3FB;background:rgba(37,99,235,.07)}
-.notif-stock-chip{cursor:pointer}
-.notif-stock-chip.ds{background:rgba(220,38,38,.1);color:var(--red);border-color:rgba(220,38,38,.3)}
-.notif-stock-chip.de{background:rgba(37,99,235,.1);color:var(--accent);border-color:rgba(37,99,235,.3)}
 .sa-fchip.ex{--c:var(--accent);--t:rgba(37,99,235,.09)}
 .sa-cap.sh{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
 .sa-cap.ex{--cb:rgba(37,99,235,.4);--ct:rgba(37,99,235,.12);--cc:var(--accent)}
@@ -2382,11 +2377,11 @@ body.loading .upload-zone { opacity: 0.45; }
 .nr-sap{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;line-height:1;padding:5px 10px;border-radius:20px;color:var(--accent2);background:rgba(8,145,178,.08);border:1.5px solid rgba(8,145,178,.4);white-space:nowrap}
 .nr-noloc{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;line-height:1;padding:4px 10px 4px 8px;border-radius:20px;color:var(--red);background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.35);white-space:nowrap}
 .nr-hr{border:0;border-top:1.5px dashed var(--border);margin:10px 0 8px}
-.nr-sg{display:flex;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--muted)}
-.nr-sg::before{content:'Maybe:\00a0'}
-.nr-sg span{cursor:pointer}
-.nr-sg span:not(:last-child)::after{content:',\00a0'}
-.nr-sg span:active{color:var(--accent)}
+.nr-sg{display:flex;flex-wrap:wrap;align-items:center;font:600 12px/16px 'JetBrains Mono',monospace;color:var(--muted)}
+.nr-sg::before{content:'💡 MAYBE :\00a0';font-size:12px;line-height:16px}
+.nr-sg span{cursor:pointer;line-height:16px;color:var(--accent);font-weight:400}
+.nr-sg span:not(:last-child)::after{content:',\00a0';color:var(--muted)}
+.nr-sg span:active{color:var(--accent2)}
 </style>
 </head>
 
@@ -3592,8 +3587,8 @@ function phChipUpdate(sn) {
   const it = itemMaster.find(i => String(i.sn) === String(sn));
   const c = document.getElementById('nchip-' + sn);
   if (!it || !c) return;
-  c.className = 'notif-stock-chip ' + phChipCls(sn);
-  c.textContent = '📦 ' + phStock(it) + ' ✎';
+  c.className = 'nr-stk ' + phChipCls(sn);
+  c.innerHTML = '<span class="s">📦 Stock</span><span class="o">' + lmEsc(phStock(it)) + '<em>✎</em></span>';
 }
 
 function savePhys() {
@@ -4496,7 +4491,7 @@ function renderNotifList() {
     <div class="notif-row" id="nrow-${item.sn}">
       <div class="notif-row-top">
         <div class="notif-name">${highlightNotif(item.name, notifSearchQuery)}</div>
-        <span class="notif-stock-chip ${phChipCls(item.sn)}" id="nchip-${item.sn}" onclick="openPhys(${item.sn})">📦 ${phStock(item)} ✎</span>
+<span class="nr-stk ${phChipCls(item.sn)}" id="nchip-${item.sn}" onclick="openPhys(${item.sn})"><span class="s">📦 Stock</span><span class="o">${phStock(item)}<em>✎</em></span></span>
       </div>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;">
         <div class="nr-pills"><span class="nr-sap">${highlightNotif(item.sap, notifSearchQuery)}</span><span class="nr-noloc">✕ No Loc</span></div>
@@ -4504,7 +4499,7 @@ function renderNotifList() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21 15 16 10 5 21"/>
-          </svg>
+          </svg>View
         </button>
       </div>
       <div class="notif-row-body">
