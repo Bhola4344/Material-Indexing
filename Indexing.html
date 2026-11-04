@@ -1883,8 +1883,6 @@ body.loading .header-stripe::before {
 
 .lm-name{font-size:12.5px;font-weight:600;line-height:1.35;flex:1;}
 
-.lm-sap{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent2);}
-
 .lm-foot{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);text-align:center;background:var(--surface2);}
 #lmList{scrollbar-width:none;-ms-overflow-style:none}
 #lmList::-webkit-scrollbar{display:none;width:0;height:0}
@@ -2302,7 +2300,9 @@ body.loading .upload-zone { opacity: 0.45; }
 .tools-section:not(.qo)>:not(.tl-row){display:none!important}
 .tools-section>.tl-row{margin:0 0 10px}
 .tools-section:not(.qo)>.tl-row{margin:0}
-#lcList{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+#lcList{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 12px calc(12px + env(safe-area-inset-bottom,0px));scrollbar-width:none;-ms-overflow-style:none}
+#lcList::-webkit-scrollbar{display:none;width:0;height:0}
+#lcSrch{display:none}
 .lc-g{border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:12px;background:var(--surface)}
 .lc-vs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .lc-v{position:relative;display:flex;flex-direction:column;align-items:flex-start;padding:8px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface2);font-family:inherit;cursor:pointer}
@@ -7115,10 +7115,10 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 .cc-chp{flex:1;height:24px;border:1.5px solid var(--border);background:var(--surface);border-radius:8px;color:var(--muted);font:700 10.5px 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;-webkit-tap-highlight-color:transparent;padding:0}
 .cc-chp b{font:700 13px 'JetBrains Mono',monospace}
 .cc-chp.sel{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
-.cc-row{border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;background:var(--surface);transition:border-color .2s,background .2s}
-.cc-row.s{border-color:rgba(220,38,38,.5);background:color-mix(in srgb,var(--red) 6%,var(--surface))}
-.cc-row.e{border-color:rgba(37,99,235,.5);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
-.cc-row.m{border-color:rgba(5,150,105,.45);background:color-mix(in srgb,var(--green) 6%,var(--surface))}
+.cc-row{border:1px solid var(--border);background:var(--surface);transition:border-color .2s,background .2s}
+.cc-row.s{background:color-mix(in srgb,var(--red) 6%,var(--surface))}
+.cc-row.e{background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.cc-row.m{background:color-mix(in srgb,var(--green) 6%,var(--surface))}
 .cc-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .cc-cpl{display:flex;height:22px;border-radius:20px;overflow:hidden;flex-shrink:0;border:1px solid color-mix(in srgb,var(--cc) 40%,transparent);animation:ccpop .25s cubic-bezier(.3,1.8,.5,1)}
 @keyframes ccpop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
@@ -7126,20 +7126,13 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 .cc-cpl .b{display:flex;align-items:center;padding:0 8px;background:var(--surface);color:var(--cc);font:700 12px 'JetBrains Mono',monospace}
 .cc-mt:active{transform:scale(.95)}
 .cc-mt.on{background:var(--green);color:#fff}
-.cc-act{display:grid;gap:6px;margin-top:8px}
 .cc-two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .cc-mt,.cc-nf{min-width:0;width:100%;height:36px;border-radius:10px;padding:0;font:700 12.5px 'Inter',sans-serif;background:transparent;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .cc-mt{border:1.5px solid var(--green);color:var(--green)}
 .cc-nf{border:1.5px solid rgba(220,38,38,.35);color:var(--red)}
-.cc-stp{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;gap:6px;min-width:0}
-.cc-stp button{height:36px;width:100%;padding:0;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:20px;font-weight:700;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.cc-stp input{width:100%;min-width:0;height:36px;text-align:center;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 16px 'JetBrains Mono',monospace;outline:none;padding:0 4px;-moz-appearance:textfield}
-@media(min-width:560px){
-.cc-act{grid-template-columns:1fr 1fr;gap:10px}
-.cc-nf{order:-1}
-.cc-mt,.cc-nf,.cc-stp button,.cc-stp input{height:38px}
-.cc-stp{grid-template-columns:38px minmax(0,1fr) 38px}
-}
+.cc-stp{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:6px;min-width:0}
+.cc-stp button{height:46px;width:100%;padding:0;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:22px;font-weight:700;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cc-stp input{width:100%;min-width:0;height:46px;text-align:center;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font:700 20px 'JetBrains Mono',monospace;outline:none;padding:0 4px;-moz-appearance:textfield}
 .cc-stp input::placeholder{font:500 12px 'Inter',sans-serif;color:var(--muted);opacity:.8}
 
 
@@ -7163,7 +7156,33 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 .am-c small{max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .am-c b{font:700 16px/1.1 'JetBrains Mono',monospace}
 .am-c b i{font:600 10px 'Inter',sans-serif;font-style:normal;color:var(--muted);margin-left:2px}
-@media(max-width:400px){.am-c{padding:0 2px}.am-c small{font-size:9.5px;letter-spacing:.2px}.am-c b{font-size:15px}}`;
+@media(max-width:400px){.am-c{padding:0 2px}.am-c small{font-size:9.5px;letter-spacing:.2px}.am-c b{font-size:15px}}
+.cc-row{border-radius:14px;padding:12px;margin-bottom:10px}
+.cc-row.m{--cc0:var(--green)}.cc-row.s{--cc0:var(--red)}.cc-row.e{--cc0:var(--accent)}
+.cc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cc-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:20px;font:600 12px 'JetBrains Mono',monospace;white-space:nowrap}
+.cc-chip small{font:700 9px 'Inter',sans-serif;letter-spacing:.6px;text-transform:uppercase;opacity:.8}
+.cc-chip.sap{color:var(--accent2);background:color-mix(in srgb,var(--accent2) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 35%,transparent)}
+.cc-chip.sy{color:var(--text);background:var(--surface2);border:1px solid var(--border)}
+.cc-chip.sy b{font-size:14px;font-weight:700;color:var(--green)}
+.cc-act{display:block;margin-top:12px}
+.cc-two{margin-top:8px}
+.cc-stp input.pre{color:var(--muted)}
+.cc-row.m .cc-stp input{border-color:var(--green)}
+.cc-row.s .cc-stp input{border-color:var(--red)}
+.cc-row.e .cc-stp input{border-color:var(--accent)}
+
+.lc-tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;--i:0;margin:0 12px 10px;padding:3px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;flex-shrink:0}
+.lc-pill{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/2);border-radius:9px;background:var(--accent);transform:translateX(calc(var(--i)*100%));transition:transform .3s cubic-bezier(.34,1.3,.64,1);pointer-events:none}
+.lc-tabs button{position:relative;z-index:1;height:38px;border:0;background:transparent;border-radius:9px;font:700 12px 'Inter',sans-serif;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .25s}
+.lc-tabs button.on{color:#fff}
+.lc-tabs b{min-width:20px;height:18px;padding:0 6px;border-radius:9px;background:rgba(220,38,38,.12);color:var(--red);font:700 11px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
+.lc-tabs button.on b{background:#fff;color:var(--accent)}
+.lc-al{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);margin-bottom:8px}
+.lc-al b{font:700 13.5px 'JetBrains Mono',monospace}
+.lc-al span{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+.lm-close.lc-dl{background:var(--accent);border-color:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;padding:0}
+.lm-close.lc-dl svg{width:17px;height:17px}`;
   document.head.appendChild(st);
 
   // drafts (same key as before, old drafts still work)
@@ -7278,9 +7297,11 @@ function rowN(i) {
   const s = stOf(i), v = vOf(i), b = baseOf(i);
   return `<div class="cc-row${s === 'p' ? '' : ' ' + s}" data-sn="${lmEsc(i.sn)}">
     <div class="cc-top"><div class="lm-name">${lmEsc(i.name)}</div><span class="cc-ch">${capH(i)}</span></div>
-    <div class="lm-sap" style="margin-top:3px">${lmEsc(i.sap)} · System ${fmt(b.sys)}</div>
-    <div class="cc-act"><div class="cc-two"><button type="button" class="cc-mt${s === 'm' ? ' on' : ''}" data-m>${s === 'm' ? '✓ Matched' : '✓ Match'}</button><button type="button" class="cc-nf" data-z title="Not found" aria-label="Not found">∅ Zero</button></div>
-    <div class="cc-stp"><button type="button" data-d="-1" aria-label="Minus">−</button><input type="number" inputmode="decimal" min="0" step="any" placeholder="Qty" value="${v === null ? '' : v}" aria-label="Physical qty"><button type="button" data-d="1" aria-label="Plus">+</button></div></div></div>`;
+    <div class="cc-meta"><span class="cc-chip sap">${lmEsc(i.sap)}</span><span class="cc-chip sy"><small>Book Stock</small><b>${fmt(b.sys)}</b></span></div>
+    <div class="cc-act">
+      <div class="cc-stp"><button type="button" data-d="-1" aria-label="Minus">−</button><input class="${v === null ? 'pre' : ''}" type="number" inputmode="decimal" min="0" step="any" value="${v === null ? fmt(b.sys) : v}" aria-label="Physical qty"><button type="button" data-d="1" aria-label="Plus">+</button></div>
+      <div class="cc-two"><button type="button" class="cc-mt${s === 'm' ? ' on' : ''}" data-m>${s === 'm' ? '✓ Matched' : '✓ Match'}</button><button type="button" class="cc-nf" data-z aria-label="Zero">∅ Zero</button></div>
+    </div></div>`;
 }
   function chgCount(list) {
     let n = 0;
@@ -7335,7 +7356,9 @@ function build() {
     const m = r.querySelector('.cc-mt');
     m.className = 'cc-mt' + (s === 'm' ? ' on' : '');
     m.textContent = s === 'm' ? '✓ Matched' : '✓ Match';
-    if (!keep) r.querySelector('input').value = v === null ? '' : v;
+    const inp = r.querySelector('input');
+    inp.classList.toggle('pre', v === null);
+    if (!keep) inp.value = v === null ? fmt(baseOf(i).sys) : v;
     sum();
   }
   function setDraft(sn, v, keep) {
@@ -7875,7 +7898,73 @@ function lcBadge() {
   c.classList.toggle('ok', n === 0);
 }
 
+let lcTab = 'all', lcQry = '';
+function lcSetTab(t) { lcTab = t; lcRender(); }
+
+function lcCounts() {
+  const cnt = {};
+  itemMaster.forEach(i => { const l = String(i.location || '').trim().toUpperCase(); if (l) cnt[l] = (cnt[l] || 0) + 1; });
+  return cnt;
+}
+
+const lcN = s => String(s).toUpperCase().replace(/[\s\-_.\/]/g, '');
+const lcZ = s => lcN(s).replace(/\d+/g, d => d.replace(/^0+(?=\d)/, ''));
+
+function lcAllRows() {
+  const box = skE('lcAllRows');
+  if (!box) return 0;
+  const cnt = lcCounts(), total = Object.keys(cnt).length;
+  const q = lcN(lcQry), qz = lcZ(lcQry);
+  const locs = Object.keys(cnt)
+    .filter(l => !q || lcN(l).includes(q) || lcZ(l).includes(qz))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  box.innerHTML = locs.length
+    ? locs.map(l => `<div class="lc-al"><b>📍 ${lmEsc(l)}</b><span>${cnt[l]} items</span></div>`).join('')
+    : '<div class="notif-empty">No location found</div>';
+  skE('lcSub').textContent = q ? locs.length + ' of ' + total + ' locations' : total + ' locations';
+  return total;
+}
+
 function lcRender() {
+  lcCur = lcList();
+  skE('lcTabs').style.setProperty('--i', lcTab === 'all' ? 0 : 1);
+  skE('lcTbAll').classList.toggle('on', lcTab === 'all');
+  skE('lcTbMg').classList.toggle('on', lcTab === 'merge');
+  skE('lcTbMgN').textContent = lcCur.length;
+  if (lcTab === 'all') {
+    skE('lcSrch').style.display = 'block';
+    if (skE('lcQ').value !== lcQry) skE('lcQ').value = lcQry;
+    skE('lcList').innerHTML = '<div id="lcAllRows"></div>';
+    skE('lcTbAllN').textContent = lcAllRows();
+  } else {
+    skE('lcSrch').style.display = 'none';
+    lcRenderMerge();
+    skE('lcTbAllN').textContent = Object.keys(lcCounts()).length;
+  }
+}
+
+function lcDownload() {
+  let rows, name;
+  if (lcTab === 'all') {
+    const cnt = lcCounts();
+    rows = [['Location', 'Items']];
+    Object.keys(cnt).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).forEach(l => rows.push([l, cnt[l]]));
+    name = 'all_locations.csv';
+  } else {
+    rows = [['Group', 'Location variant', 'Items']];
+    lcCur.forEach((g, gi) => g.vars.forEach(v => rows.push([gi + 1, v[0], v[1].length])));
+    name = 'duplicate_locations.csv';
+  }
+  if (rows.length < 2) { showToast('Nothing to download', 'amber'); return; }
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = name;
+  a.click();
+  showToast('Downloaded: ' + name, 'blue');
+}
+
+function lcRenderMerge() {
   lcCur = lcList();
   const n = lcCur.reduce((s, g) => s + g.vars.reduce((a, v) => a + v[1].length, 0), 0);
   skE('lcSub').textContent = lcCur.length ? lcCur.length + ' groups · ' + n + ' items' : 'No duplicates found';
@@ -7946,7 +8035,15 @@ document.body.insertAdjacentHTML('beforeend',
   '<div class="bp-back" id="lcBack" onclick="if(event.target===this)closeLocClean()"><div class="bp-modal" style="height:88vh">' +
   '<div class="lm-stripe"></div><div class="lm-head"><div class="lm-title"><div class="lm-icon">🧹</div><div>' +
   '<div class="lm-loc" style="font-family:inherit;font-size:14px">MERGE LOCATION</div><div class="lm-sub" id="lcSub"></div></div></div>' +
-  '<button class="lm-close" onclick="closeLocClean()">✕</button></div><div id="lcList"></div></div></div>');
+  '<div style="display:flex;gap:6px"><button class="lm-close lc-dl" onclick="lcDownload()" aria-label="Download list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>' +
+  '<button class="lm-close" onclick="closeLocClean()">✕</button></div></div>' +
+  '<div class="lc-tabs" id="lcTabs"><span class="lc-pill"></span>' +
+  '<button type="button" id="lcTbAll" class="on" onclick="lcSetTab(\'all\')">📍 All Locations <b id="lcTbAllN">0</b></button>' +
+  '<button type="button" id="lcTbMg" onclick="lcSetTab(\'merge\')">🧹 Duplicates <b id="lcTbMgN">0</b></button></div>' +
+  '<div class="cc-lb" id="lcSrch"><div class="cc-lbin"><span class="ic">🔍</span>' +
+  '<input id="lcQ" type="text" placeholder="Search or scan location" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="lcQry=this.value;lcAllRows()">' +
+  '<button type="button" onclick="openScanner(\'lcQ\')" aria-label="Scan location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></button></div></div>' +
+  '<div id="lcList"></div></div></div>');
 
 function openLocClean() {
   if (!guard('loc')) return;
@@ -7959,6 +8056,13 @@ function closeLocClean() {
   skE('lcBack').classList.remove('open');
   document.body.style.overflow = '';
 }
+const _cs2 = window.closeScanner;
+window.closeScanner = function () {
+  const r = _cs2.apply(this, arguments);
+  if (skE('lcBack').classList.contains('open')) document.body.style.overflow = 'hidden';
+  return r;
+};
+
 // Download type: sliding pill
 (function () {
   const seg = document.querySelector('.dl-seg');
