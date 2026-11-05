@@ -2382,6 +2382,23 @@ body.loading .upload-zone { opacity: 0.45; }
 .nr-sg span{cursor:pointer;line-height:16px;color:var(--accent);font-weight:400}
 .nr-sg span:not(:last-child)::after{content:',\00a0';color:var(--muted)}
 .nr-sg span:active{color:var(--accent2)}
+.lc-ax{margin-bottom:8px}
+.lc-ax .lc-al{margin-bottom:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s}
+.lc-ax .lc-al:active{background:var(--surface2)}
+.lc-ax.o .lc-al{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.lc-ch{display:inline-block;font-style:normal;margin-left:4px;color:var(--accent);transition:transform .25s}
+.lc-ax.o .lc-ch{transform:rotate(180deg)}
+.lc-ai{display:none;border:1px solid var(--accent);border-top:0;border-radius:0 0 12px 12px;background:var(--surface2);padding:4px 10px}
+.lc-ax.o .lc-ai{display:block}
+.lc-ir{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px dashed var(--border)}
+.lc-ir:last-child{border-bottom:0}
+.lc-in{min-width:0;flex:1}
+.lc-nm{font-size:12.5px;font-weight:600;line-height:1.35;word-break:break-word}
+.lc-sp{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2);margin-top:2px}
+.lc-sk{flex-shrink:0;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.lc-sk.has{background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2)}
+.lc-sk.no{background:rgba(220,38,38,.1);color:var(--red)}
+.lc-ie{padding:10px 0;text-align:center;font-size:12px;color:var(--muted)}
 </style>
 </head>
 
@@ -7875,20 +7892,107 @@ function toggleQT() {
 }
 if (!can('loc')) skE('lcChip').style.display = 'none';
 
-const lcKey = l => (String(l).toUpperCase().match(/[A-Z]+|\d+/g) || []).map(x => x.replace(/^0+(?=\d)/, '')).join('|');
 let lcCur = [], lcQ = Promise.resolve();
 
-function lcList() {
-  const by = {}, ig = JSON.parse(localStorage.getItem('locIgnore') || '[]');
-  itemMaster.forEach(i => {
-    const l = String(i.location || '').trim(), k = lcKey(l);
-    if (!k) return;
-    const g = by[k] = by[k] || {};
-    (g[l] = g[l] || []).push(i);
+// ── Location duplicate engine (fuzzy + fast) ──
+const LC_STOP = new Set(['NO', 'NUM', 'NUMBER', 'NOS']);
+
+function lcParts(l) {
+  const toks = String(l).toUpperCase().match(/[A-Z]+|\d+/g) || [];
+  const words = [], nums = [];
+  toks.forEach(t => {
+    if (/^\d+$/.test(t)) nums.push(t.replace(/^0+(?=\d)/, ''));
+    else if (!LC_STOP.has(t)) words.push(t);
   });
-  return Object.keys(by).filter(k => Object.keys(by[k]).length > 1 && !ig.includes(k))
-    .map(k => ({ k, vars: Object.entries(by[k]).sort((a, b) => b[1].length - a[1].length) }));
+  return { words, nums };
 }
+
+function lcDist(a, b) {
+  if (a === b) return 0;
+  const m = a.length, n = b.length;
+  if (!m || !n) return Math.max(m, n);
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+function lcWordSame(a, b) {
+  if (a === b) return true;
+  const s = a.length <= b.length ? a : b, g = a.length <= b.length ? b : a;
+  if (s.length >= 3 && g.startsWith(s) && g.length - s.length <= 2) return true;
+  if (s.length < 4) return false;
+  const lim = g.length >= 8 ? 2 : 1;
+  return lcDist(a, b) <= lim;
+}
+
+function lcSame(p, q) {
+  if (p.nums.join(',') !== q.nums.join(',')) return false;
+  if (p.words.length !== q.words.length) return lcWordSame(p.words.join(''), q.words.join(''));
+  return p.words.every((w, i) => lcWordSame(w, q.words[i]));
+}
+
+let lcCacheSig = '', lcCacheOut = null, lcCacheIg = '';
+
+function lcList() {
+  const igRaw = localStorage.getItem('locIgnore') || '[]';
+  const ig = JSON.parse(igRaw);
+
+  const spell = {};
+  let cnt = 0;
+  for (const i of itemMaster) {
+    const l = String(i.location || '').trim();
+    if (!l) continue;
+    (spell[l] = spell[l] || []).push(i);
+    cnt++;
+  }
+  const keys = Object.keys(spell);
+const sig = keys.length + ':' + cnt + ':' + keys.reduce((h, k) => {
+  for (let c = 0; c < k.length; c++) h = (h * 31 + k.charCodeAt(c)) | 0;
+  return (h * 31 + spell[k].length) | 0;
+}, 7);
+  if (sig === lcCacheSig && igRaw === lcCacheIg && lcCacheOut) return lcCacheOut;
+
+  const buckets = {};
+  keys.forEach(l => {
+    const p = lcParts(l);
+    if (!p.words.length && !p.nums.length) return;
+    const b = p.nums.join(',');
+    (buckets[b] = buckets[b] || []).push({ l, p, first: (p.words[0] || '')[0] || '' });
+  });
+
+  const out = [];
+  Object.values(buckets).forEach(arr => {
+    if (arr.length < 2) return;
+    const par = arr.map((_, i) => i);
+    const find = x => { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; };
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = i + 1; j < arr.length; j++) {
+        if (find(i) === find(j)) continue;
+        if (arr[i].first !== arr[j].first) continue;
+        if (Math.abs(arr[i].l.length - arr[j].l.length) > 4) continue;
+        if (lcSame(arr[i].p, arr[j].p)) par[find(i)] = find(j);
+      }
+    }
+    const g = {};
+    arr.forEach((x, i) => { (g[find(i)] = g[find(i)] || []).push(x.l); });
+    Object.values(g).filter(v => v.length > 1).forEach(v => {
+      const vars = v.map(l => [l, spell[l]]).sort((a, b) => b[1].length - a[1].length);
+      const k = v.map(l => l.toUpperCase().replace(/[^A-Z0-9]/g, '')).sort().join('~');
+      out.push({ k, vars });
+    });
+  });
+
+  lcCacheSig = sig; lcCacheIg = igRaw;
+  lcCacheOut = out.filter(g => !ig.includes(g.k));
+  return lcCacheOut;
+}
+
 
 function lcBadge() {
   if (!dataReady) return;
@@ -7910,6 +8014,41 @@ function lcCounts() {
 const lcN = s => String(s).toUpperCase().replace(/[\s\-_.\/]/g, '');
 const lcZ = s => lcN(s).replace(/\d+/g, d => d.replace(/^0+(?=\d)/, ''));
 
+const lcOpen = new Set();
+
+function lcItemsHTML(l) {
+  const items = itemMaster
+    .filter(i => String(i.location || '').trim().toUpperCase() === l)
+    .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+  if (!items.length) return '<div class="lc-ie">No items</div>';
+  return items.map(i => {
+    const v = phStock(i);
+    const has = v !== undefined && v !== null && String(v).trim() !== '';
+    const ok = has && parseFloat(v) > 0;
+    return `<div class="lc-ir">
+      <div class="lc-in"><div class="lc-nm">${lmEsc(i.name)}</div><div class="lc-sp">${lmEsc(i.sap)}</div></div>
+      <span class="lc-sk ${ok ? 'has' : 'no'}">${ok ? '📦 ' + lmEsc(v) : 'No Stock'}</span>
+    </div>`;
+  }).join('');
+}
+
+function lcToggleLoc(head) {
+  const w = head.parentNode, l = w.dataset.l, box = w.querySelector('.lc-ai');
+  const wasOpen = lcOpen.has(l);
+
+  // pehle sab band karo
+  lcOpen.clear();
+  skE('lcAllRows').querySelectorAll('.lc-ax.o').forEach(x => x.classList.remove('o'));
+
+  // agar ye pehle se khula nahi tha to ab kholo
+  if (!wasOpen) {
+    lcOpen.add(l);
+    box.innerHTML = lcItemsHTML(l);   // hamesha fresh data
+    w.classList.add('o');
+w.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
 function lcAllRows() {
   const box = skE('lcAllRows');
   if (!box) return 0;
@@ -7919,7 +8058,13 @@ function lcAllRows() {
     .filter(l => !q || lcN(l).includes(q) || lcZ(l).includes(qz))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   box.innerHTML = locs.length
-    ? locs.map(l => `<div class="lc-al"><b>📍 ${lmEsc(l)}</b><span>${cnt[l]} items</span></div>`).join('')
+    ? locs.map(l => {
+        const open = lcOpen.has(l);
+        return `<div class="lc-ax${open ? ' o' : ''}" data-l="${lmEsc(l)}">
+          <div class="lc-al" onclick="lcToggleLoc(this)"><b>📍 ${lmEsc(l)}</b><span>${cnt[l]} items <i class="lc-ch">▾</i></span></div>
+          <div class="lc-ai">${open ? lcItemsHTML(l) : ''}</div>
+        </div>`;
+      }).join('')
     : '<div class="notif-empty">No location found</div>';
   skE('lcSub').textContent = q ? locs.length + ' of ' + total + ' locations' : total + ' locations';
   return total;
@@ -8025,6 +8170,7 @@ function lcDo(gi) {
   addBinPending(fin, 'Item added here');
   locRemember(fin);
   logAct('i_loc', 'Locations merged', fin + ' · ' + todo.length + ' items');
+  lcCacheSig = '';
   renderStats();
   if (currentItem && !skE('updateLocation')) renderItem();
   showToast(todo.length + ' items moved to ' + fin + ' · syncing', 'green');
