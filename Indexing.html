@@ -3773,21 +3773,53 @@ function physSelClear() {
   physSelMark();
   physSelUI();
 }
-function physMsg() {
-  const L = physList.filter(p => physSel.has(String(p.sn)));
-  return 'Physical Adjustments (' + L.length + ' items)\n\n' + L.map((p, i) => {
-    const s = p.phys < p.sys;
-    return (i + 1) + '. ' + p.name + '\nSAP ' + p.sap + ' | ' + p.loc +
-      '\nSystem ' + p.sys + ' → Physical ' + p.phys + ' (' + (s ? 'Short -' : 'Excess +') + Math.abs(p.phys - p.sys) + ')' +
-      (p.remark ? '\nRemark: ' + p.remark : '');
-  }).join('\n\n');
+function phDate(ts) {
+  const d = new Date(ts), p = n => String(n).padStart(2, '0');
+  return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + d.getFullYear();
 }
+
+function physMsg(wa) {
+  const L = physList.filter(p => physSel.has(String(p.sn)));
+  const H = ['S.N', 'SAP', 'Description', 'Qty', 'Date'];
+  const rows = L.map((p, i) => [
+    String(i + 1), String(p.sap), String(p.name),
+    phFmt(Math.abs(p.phys - p.sys)), phDate(p.ts)
+  ]);
+  const w = H.map((h, c) => Math.max(h.length, ...rows.map(r => r[c].length)));
+  const line = r => r.map((v, c) => v.padEnd(w[c])).join(' | ');
+  const sep = w.map(n => '-'.repeat(n)).join('-|-');
+  const table = [line(H), sep, ...rows.map(line)].join('\n');
+
+  return 'Dear User,\n\n' +
+    'You have taken the following material from the Main Store. ' +
+    'Kindly provide the issue slip for the same at the earliest.\n\n' +
+    (wa ? '```\n' + table + '\n```' : table) +
+    '\n\nThanks & Regards,\nStore Team';
+}
+
 function physSend(t) {
   if (!physSel.size) return;
-  const e = encodeURIComponent(physMsg());
-  if (t === 'm') location.href = 'mailto:?subject=' + encodeURIComponent('Physical Adjustments (' + physSel.size + ' items)') + '&body=' + e;
-  else window.open('https://wa.me/?text=' + e, '_blank');
+  if (t !== 'm') {
+    window.open('https://wa.me/?text=' + encodeURIComponent(physMsg(true)), '_blank');
+    return;
+  }
+  const subj = 'Material Issue Slip Required: Main Store';
+  const text = physMsg(false).replace(/\n/g, '\r\n');
+  let url = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(text);
+
+  if (url.length > 1800) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('List copy ho gayi, mail body me paste karo', 'blue'))
+        .catch(() => showToast('Copy nahi hua, kam items select karo', 'amber'));
+    }
+    url = 'mailto:?subject=' + encodeURIComponent(subj);
+  }
+  const a = document.createElement('a');
+  a.href = url;
+  a.click();
 }
+
 (function () {
   const list = document.getElementById('notifList');
   let timer = null, fired = false, touch = false, x0 = 0, y0 = 0;
