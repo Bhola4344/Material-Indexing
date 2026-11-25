@@ -2069,12 +2069,38 @@ body.loading .upload-zone { opacity: 0.45; }
 .sa-fchip.ex{--c:var(--accent);--t:rgba(37,99,235,.09)}
 .sa-cap.sh{--cb:rgba(220,38,38,.4);--ct:rgba(220,38,38,.12);--cc:var(--red)}
 .sa-cap.ex{--cb:rgba(37,99,235,.4);--ct:rgba(37,99,235,.12);--cc:var(--accent)}
-.ph-act{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-.ph-act small{font-size:10.5px;color:var(--muted)}
+.sa-cap.tap{cursor:pointer;transition:transform .12s}
+.sa-cap.tap:active{transform:scale(.95)}
+.sa-cap em{font-style:normal;font-size:10px;opacity:.7}
+.ph-rm{color:var(--text)}
+.ph-remtxt{font-size:11.5px;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 9px;margin:6px 0 2px;line-height:1.4;word-break:break-word}
+.ph-row{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.ph-row.sel{border-color:var(--accent);background:rgba(37,99,235,.06)}
+.ph-cb{display:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;color:transparent;font-size:11px;font-weight:800;place-items:center}
+.sm .ph-cb{display:grid}
+.ph-row.sel .ph-cb{background:var(--accent);border-color:var(--accent);color:#fff}
+.ph-act{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px;padding-top:10px;border-top:1px dashed var(--border)}
 .ph-act>div{display:flex;gap:6px}
+.ph-tm{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
+.ph-tm svg{width:12px;height:12px}
+.ph-ask{font-size:12px;font-weight:600}
+.ph-b{height:36px;padding:0 13px;border-radius:10px;display:flex;align-items:center;gap:6px;font:700 12px 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.ph-b:active{transform:scale(.95)}
+.ph-b svg{width:14px;height:14px}
+.ph-b.ok{background:var(--green);border:1.5px solid var(--green);color:#fff;box-shadow:0 4px 12px rgba(5,150,105,.28)}
+.ph-b.no{background:var(--surface2);border:1.5px solid var(--border);color:var(--muted)}
+.ph-b.yes{background:var(--red);border:1.5px solid var(--red);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.28)}
+.ph-sbar{display:none;flex-shrink:0;padding:10px 12px;border-top:1px solid var(--border);background:var(--surface)}
+.ph-sbar.on{display:block}
+.ph-sh{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
+.ph-sh button{background:none;border:0;color:var(--accent);font:700 12px 'Inter',sans-serif;margin-left:12px;cursor:pointer}
+.ph-sh button.x{color:var(--red)}
+.ph-sb2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ph-sb2 button{height:44px;border:0;border-radius:12px;font:700 13px 'Inter',sans-serif;color:#fff;cursor:pointer}
+.ph-sb2 .ml{background:var(--accent)}
+.ph-sb2 .wa{background:#25d366}
 
 #notifPanel > *{flex-shrink:0;}
-.ph-remtxt{font-size:11.5px;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:6px 9px;margin:6px 0 2px;line-height:1.4;word-break:break-word}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
 #notifPanel {
   position: fixed; width: 100%; max-width: 600px;
@@ -2658,7 +2684,11 @@ body.loading .upload-zone { opacity: 0.45; }
 <div class="bin-bar" id="binBar"></div>
        </div>
 <div class="notif-list" id="notifList"></div>
-      <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
+      <div class="ph-sbar" id="physBar">
+  <div class="ph-sh"><span id="physSelN">0 selected</span><span><button type="button" onclick="physSelAll()">Select all</button><button type="button" class="x" onclick="physSelClear()">✕ Cancel</button></span></div>
+  <div class="ph-sb2"><button type="button" class="ml" onclick="physSend('m')">✉️ Mail</button><button type="button" class="wa" onclick="physSend('w')">💬 WhatsApp</button></div>
+</div>
+<div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
     </div>
   </div>
 
@@ -3457,6 +3487,8 @@ const PH_KEY = 'physList';
 let physList = [];
 try { physList = JSON.parse(localStorage.getItem(PH_KEY)) || []; } catch (e) { physList = []; }
 let physOps = {}, physFilter = 'all', physSyncing = false, physAsk = null;
+const physSel = new Set();
+const PH_SEND_MAX = 20;
 const PH = { sn: 0, sys: 0, val: 0 };
 function phEl(id) { return document.getElementById(id); }
 function phSaveLocal() { try { localStorage.setItem(PH_KEY, JSON.stringify(physList)); } catch (e) {} }
@@ -3640,6 +3672,8 @@ function askClrAllPhys() { physAsk = 'all'; renderPhysList(); }
 function cancelClrPhys() { physAsk = null; renderPhysList(); }
 function setPhysFilter(f) { physFilter = f; physAsk = null; renderPhysList(); }
 function renderPhysList() {
+  physSel.forEach(sn => { if (!physList.some(p => String(p.sn) === sn)) physSel.delete(sn); });
+  physSelUI();
   const all = physList, sh = all.filter(p => p.phys < p.sys).length, ex = all.length - sh;
   document.getElementById('notifCountBadge').textContent = all.length;
   document.getElementById('notifSub').textContent = all.length ? 'Short / Excess to SAP' : 'No pending';
@@ -3657,19 +3691,17 @@ function renderPhysList() {
   if (!show.length) { list.innerHTML = bar + '<div class="notif-empty">Is filter me kuch nahi</div>'; return; }
   list.innerHTML = bar + show.map(p => {
     const s = p.phys < p.sys, d = Math.abs(p.phys - p.sys);
-    return `<div class="notif-row" id="prow-${p.sn}">
-      <div class="notif-row-top"><div class="notif-name">${lmEsc(p.name)}</div><div class="sa-cap ${s ? 'sh' : 'ex'}"><span class="s">${s ? 'Short' : 'Excess'}</span><span class="o"><b>${s ? '−' : '+'}${d}</b></span></div></div>
+    return `<div class="notif-row ph-row${physSel.has(String(p.sn)) ? ' sel' : ''}" id="prow-${p.sn}" data-sn="${p.sn}">
+      <div class="notif-row-top"><span class="ph-cb">✓</span><div class="notif-name">${lmEsc(p.name)}</div><div class="sa-cap ${s ? 'sh' : 'ex'} tap" onclick="openPhys(${p.sn})"><span class="s">${s ? 'Short' : 'Excess'}</span><span class="o"><b>${s ? '−' : '+'}${d}</b><em>✎</em></span></div></div>
       <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(p.sap)} · 📍 ${lmEsc(p.loc)}</div>
-      <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b></span></div>
-      ${p.remark ? `<div class="ph-remtxt">💬 ${lmEsc(p.remark)}</div>` : ''}
+      <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b>${p.remark ? ` <span class="ph-rm">· 💬 ${lmEsc(p.remark)}</span>` : ''}</span></div>
       ${physAsk === p.sn
-        ? `<div class="ph-act"><small>Ye adjustment clear karein?</small><div>
-            <button class="bin-done-btn" onclick="cancelClrPhys()">No</button>
-            <button class="bin-done-btn" style="border-color:var(--red);color:var(--red);" onclick="clrPhys(${p.sn})">Yes, clear</button>
+        ? `<div class="ph-act"><span class="ph-ask">Clear this adjustment?</span><div>
+            <button class="ph-b no" onclick="cancelClrPhys()">No</button>
+            <button class="ph-b yes" onclick="clrPhys(${p.sn})">Yes, clear</button>
           </div></div>`
-        : `<div class="ph-act"><small>🕒 ${phTime(p.ts)}</small><div>
-            <button class="bin-done-btn" onclick="openPhys(${p.sn})">✎ Edit</button>
-            <button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="askClrPhys(${p.sn})">✓ Clear</button>
+        : `<div class="ph-act"><span class="ph-tm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${phTime(p.ts)}</span><div>
+            <button class="ph-b ok" onclick="askClrPhys(${p.sn})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Clear</button>
           </div></div>`}
     </div>`;
   }).join('');
@@ -3708,6 +3740,82 @@ function downloadPhys() {
   showToast('Downloaded: physical_adjustments.csv', 'blue');
 }
 
+// ─── Physical: multi-select + Mail / WhatsApp ───
+function physSelUI() {
+  const n = physSel.size;
+  document.getElementById('notifList').classList.toggle('sm', n > 0);
+  document.getElementById('physBar').classList.toggle('on', n > 0);
+  document.getElementById('physSelN').textContent = n + ' selected';
+}
+function physSelMark() {
+  document.querySelectorAll('#notifList .ph-row').forEach(r => r.classList.toggle('sel', physSel.has(r.dataset.sn)));
+}
+function physToggle(sn) {
+  sn = String(sn);
+  if (physSel.has(sn)) physSel.delete(sn);
+  else {
+    if (physSel.size >= PH_SEND_MAX) { showToast('Max ' + PH_SEND_MAX + ' items at a time', 'amber'); return; }
+    physSel.add(sn);
+  }
+  physSelMark();
+  physSelUI();
+}
+function physSelAll() {
+  const vis = [...document.querySelectorAll('#notifList .ph-row')].map(r => r.dataset.sn);
+  const all = vis.length && vis.every(sn => physSel.has(sn));
+  vis.forEach(sn => { if (all) physSel.delete(sn); else if (physSel.size < PH_SEND_MAX) physSel.add(sn); });
+  if (!all && vis.length > PH_SEND_MAX) showToast('Max ' + PH_SEND_MAX + ' items at a time', 'amber');
+  physSelMark();
+  physSelUI();
+}
+function physSelClear() {
+  physSel.clear();
+  physSelMark();
+  physSelUI();
+}
+function physMsg() {
+  const L = physList.filter(p => physSel.has(String(p.sn)));
+  return 'Physical Adjustments (' + L.length + ' items)\n\n' + L.map((p, i) => {
+    const s = p.phys < p.sys;
+    return (i + 1) + '. ' + p.name + '\nSAP ' + p.sap + ' | ' + p.loc +
+      '\nSystem ' + p.sys + ' → Physical ' + p.phys + ' (' + (s ? 'Short -' : 'Excess +') + Math.abs(p.phys - p.sys) + ')' +
+      (p.remark ? '\nRemark: ' + p.remark : '');
+  }).join('\n\n');
+}
+function physSend(t) {
+  if (!physSel.size) return;
+  const e = encodeURIComponent(physMsg());
+  if (t === 'm') location.href = 'mailto:?subject=' + encodeURIComponent('Physical Adjustments (' + physSel.size + ' items)') + '&body=' + e;
+  else window.open('https://wa.me/?text=' + e, '_blank');
+}
+(function () {
+  const list = document.getElementById('notifList');
+  let timer = null, fired = false, touch = false, x0 = 0, y0 = 0;
+  const rowOf = e => activeNotifTab === 'phys' ? e.target.closest('.ph-row') : null;
+  list.addEventListener('pointerdown', e => {
+    const r = rowOf(e);
+    if (!r) return;
+    touch = e.pointerType !== 'mouse'; fired = false; x0 = e.clientX; y0 = e.clientY;
+    clearTimeout(timer);
+    if (touch && !physSel.size) timer = setTimeout(() => {
+      fired = true;
+      try { navigator.vibrate && navigator.vibrate(30); } catch (x) {}
+      physToggle(r.dataset.sn);
+    }, 450);
+  });
+  list.addEventListener('pointermove', e => {
+    if (timer && Math.hypot(e.clientX - x0, e.clientY - y0) > 10) { clearTimeout(timer); timer = null; }
+  });
+  ['pointerup', 'pointercancel'].forEach(v => list.addEventListener(v, () => { clearTimeout(timer); timer = null; }));
+  list.addEventListener('contextmenu', e => { if (rowOf(e)) e.preventDefault(); });
+  list.addEventListener('click', e => {
+    if (fired) { fired = false; e.stopPropagation(); e.preventDefault(); return; }
+    const r = rowOf(e);
+    if (!r) return;
+    const ui = e.target.closest('button, .sa-cap');
+    if (physSel.size || (!touch && !ui)) { e.stopPropagation(); e.preventDefault(); physToggle(r.dataset.sn); }
+  }, true);
+})();
 
 // ═══════════ LEDGER → MOVING STOCK ═══════════
 const MOV_CATS = { fa: 'Fast Moving', sl: 'Slow Moving', nm: 'Non Moving', dd: 'Dead Stock' };
@@ -4071,6 +4179,7 @@ function downloadActiveNotifTab() {
 }
 
 function switchNotifTab(tab) {
+  if (tab !== 'phys') physSelClear();
   activeNotifTab = tab;
   notifRenderToken++;
   const order = visTabs();
@@ -4418,6 +4527,7 @@ function toggleNotif() {
 }
 
 function closeNotif() {
+  physSelClear();
   notifOpen = false;
 physAsk = null;
   document.getElementById('notifPanel').classList.remove('open');
@@ -6975,7 +7085,7 @@ const WRAP = {
   openBinPrint:'binprint', openBinPrintAll:'binprint',
   markBinDone:'binprint', clearPrintedBins:'binprint', bpMarkDone:'binprint',
   addToolLink:'tools', deleteToolLink:'tools', toggleAddForm:'tools',
-  openPhys:'phys', savePhys:'phys', clrPhys:'phys', clrAllPhys:'phys',
+  openPhys:'phys', savePhys:'phys', clrPhys:'phys', clrAllPhys:'phys', physSend:'phys',
   handleLedgerUpload:'ledger',
   openScanner:'scan', toggleNotif:'notif', downloadActiveNotifTab:'dlnotif'
 };
