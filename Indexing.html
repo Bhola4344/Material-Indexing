@@ -2095,9 +2095,8 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-sh{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
 .ph-sh button{background:none;border:0;color:var(--accent);font:700 12px 'Inter',sans-serif;margin-left:12px;cursor:pointer}
 .ph-sh button.x{color:var(--red)}
-.ph-sb2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ph-sb2{display:grid;grid-template-columns:1fr;gap:8px}
 .ph-sb2 button{height:44px;border:0;border-radius:12px;font:700 13px 'Inter',sans-serif;color:#fff;cursor:pointer}
-.ph-sb2 .ml{background:var(--accent)}
 .ph-sb2 .wa{background:#25d366}
 
 #notifPanel > *{flex-shrink:0;}
@@ -2686,7 +2685,7 @@ body.loading .upload-zone { opacity: 0.45; }
 <div class="notif-list" id="notifList"></div>
       <div class="ph-sbar" id="physBar">
   <div class="ph-sh"><span id="physSelN">0 selected</span><span><button type="button" onclick="physSelAll()">Select all</button><button type="button" class="x" onclick="physSelClear()">✕ Cancel</button></span></div>
-  <div class="ph-sb2"><button type="button" class="ml" onclick="physSend('m')">✉️ Mail</button><button type="button" class="wa" onclick="physSend('w')">💬 WhatsApp</button></div>
+<div class="ph-sb2"><button type="button" class="wa" onclick="physSend()">💬 Send on WhatsApp</button></div>
 </div>
 <div class="notif-footer" id="notifFooter">Tap Save ✓ to assign — list updates live</div>
     </div>
@@ -3773,51 +3772,78 @@ function physSelClear() {
   physSelMark();
   physSelUI();
 }
-function phDate(ts) {
-  const d = new Date(ts), p = n => String(n).padStart(2, '0');
-  return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + d.getFullYear();
-}
 
-function physMsg(wa) {
+function physCanvas() {
   const L = physList.filter(p => physSel.has(String(p.sn)));
-  const H = ['S.N', 'SAP', 'Description', 'Qty', 'Date'];
-  const rows = L.map((p, i) => [
-    String(i + 1), String(p.sap), String(p.name),
-    phFmt(Math.abs(p.phys - p.sys)), phDate(p.ts)
-  ]);
-  const w = H.map((h, c) => Math.max(h.length, ...rows.map(r => r[c].length)));
-  const line = r => r.map((v, c) => v.padEnd(w[c])).join(' | ');
-  const sep = w.map(n => '-'.repeat(n)).join('-|-');
-  const table = [line(H), sep, ...rows.map(line)].join('\n');
+  const dt = ts => {
+    const d = new Date(ts), p = n => String(n).padStart(2, '0');
+    return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + String(d.getFullYear()).slice(2);
+  };
+  const H = ['No', 'SAP Code', 'Description', 'Qty', 'Date'];
+  const rows = L.map((p, i) => [String(i + 1), String(p.sap), String(p.name), phFmt(Math.abs(p.phys - p.sys)), dt(p.ts)]);
+  const W = [40, 120, 320, 56, 86], TW = W.reduce((a, b) => a + b, 0);
+  const S = 2, M = 12, TH = 36, RH = 32;
 
-  return 'Dear User,\n\n' +
-    'You have taken the following material from the Main Store. ' +
-    'Kindly provide the issue slip for the same at the earliest.\n\n' +
-    (wa ? '```\n' + table + '\n```' : table) +
-    '\n\nThanks & Regards,\nStore Team';
+  const cv = document.createElement('canvas');
+  cv.width = (TW + M * 2) * S;
+  cv.height = (M * 2 + TH + RH * (rows.length + 1)) * S;
+  const c = cv.getContext('2d');
+  c.scale(S, S);
+  c.fillStyle = '#fff';
+  c.fillRect(0, 0, cv.width, cv.height);
+  c.textBaseline = 'middle';
+
+  c.fillStyle = '#000';
+  c.font = 'bold 15px Arial';
+  c.textAlign = 'left';
+  c.fillText('Main Store - Material Issue Slip Required', M, M + TH / 2);
+
+  let y = M + TH;
+  const fit = (t, mw) => {
+    if (c.measureText(t).width <= mw) return t;
+    while (t.length > 1 && c.measureText(t + '…').width > mw) t = t.slice(0, -1);
+    return t + '…';
+  };
+  const draw = (r, head) => {
+    let x = M;
+    if (head) { c.fillStyle = '#e5e7eb'; c.fillRect(M, y, TW, RH); }
+    r.forEach((v, i) => {
+      c.strokeStyle = '#000';
+      c.lineWidth = 1;
+      c.strokeRect(x + 0.5, y + 0.5, W[i], RH);
+      c.fillStyle = '#000';
+      c.font = (head ? 'bold ' : '') + '13px Arial';
+      const t = fit(String(v), W[i] - 12);
+      const ctr = i !== 2;
+      c.textAlign = ctr ? 'center' : 'left';
+      c.fillText(t, ctr ? x + W[i] / 2 : x + 6, y + RH / 2 + 1);
+      x += W[i];
+    });
+    y += RH;
+  };
+  draw(H, true);
+  rows.forEach(r => draw(r, false));
+  return cv;
 }
 
-function physSend(t) {
+async function physSend() {
   if (!physSel.size) return;
-  if (t !== 'm') {
-    window.open('https://wa.me/?text=' + encodeURIComponent(physMsg(true)), '_blank');
-    return;
-  }
-  const subj = 'Material Issue Slip Required: Main Store';
-  const text = physMsg(false).replace(/\n/g, '\r\n');
-  let url = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(text);
+  const cv = physCanvas();
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const file = new File([blob], 'physical_adjustment.png', { type: 'image/png' });
+  const text = 'Dear User,\n\nYou have taken the following material from the Main Store. ' +
+    'Kindly provide the issue slip for the same at the earliest.\n\nThanks & Regards,\nStore Team';
 
-  if (url.length > 1800) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text)
-        .then(() => showToast('List copy ho gayi, mail body me paste karo', 'blue'))
-        .catch(() => showToast('Copy nahi hua, kam items select karo', 'amber'));
-    }
-    url = 'mailto:?subject=' + encodeURIComponent(subj);
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text }); physSelClear(); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
   }
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
+  a.download = file.name;
   a.click();
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  showToast('Image saved. Attach it in WhatsApp', 'blue');
 }
 
 (function () {
@@ -8344,6 +8370,7 @@ function closeLocClean() {
   skE('lcBack').classList.remove('open');
   document.body.style.overflow = '';
 }
+
 const _cs2 = window.closeScanner;
 window.closeScanner = function () {
   const r = _cs2.apply(this, arguments);
