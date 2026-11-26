@@ -2084,9 +2084,9 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-tm{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
 .ph-tm svg{width:12px;height:12px}
 .ph-ask{font-size:12px;font-weight:600}
-.ph-b{height:36px;padding:0 13px;border-radius:10px;display:flex;align-items:center;gap:6px;font:700 12px 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.ph-b{height:30px;padding:0 11px;border-radius:8px;display:flex;align-items:center;gap:6px;font:700 12px 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
 .ph-b:active{transform:scale(.95)}
-.ph-b svg{width:14px;height:14px}
+.ph-b svg{width:12px;height:12px}
 .ph-b.ok{background:var(--green);border:1.5px solid var(--green);color:#fff;box-shadow:0 4px 12px rgba(5,150,105,.28)}
 .ph-b.no{background:var(--surface2);border:1.5px solid var(--border);color:var(--muted)}
 .ph-b.yes{background:var(--red);border:1.5px solid var(--red);color:#fff;box-shadow:0 4px 12px rgba(220,38,38,.28)}
@@ -3831,7 +3831,7 @@ async function physSend() {
   const cv = physCanvas();
   const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
   const file = new File([blob], 'physical_adjustment.png', { type: 'image/png' });
-  const text = 'Dear User,\n\nYou have taken the following material from the Main Store. ' +
+  const text = 'Dear User,\n\nYou have taken the above material from the Main Store. ' +
     'Kindly provide the issue slip for the same at the earliest.\n\nThanks & Regards,\nStore Team';
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
