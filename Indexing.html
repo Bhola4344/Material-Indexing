@@ -3602,6 +3602,10 @@ function phSet(v, fromInput) {
     s.textContent = 'No difference'; s.disabled = true;
   }
 }
+// "Issue To bhola ram" -> "Issue To Bhola Ram" (har word ka first letter capital)
+function phCapName(s) {
+  return s.replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase());
+}
 function phSyncTags() {
   const v = phEl('phRem').value.trim().toLowerCase();
   document.querySelectorAll('#phTags .ph-tg').forEach(b => b.classList.toggle('on', v === b.dataset.t.toLowerCase()));
@@ -3644,7 +3648,9 @@ function savePhys() {
   if (!it) return;
   const sys = PH.sys, val = PH.val, ts = Date.now();
   const sap = String(it.sap).trim();
-  const remark = (phEl('phRem').value || '').trim().slice(0, 200);
+  let remark = (phEl('phRem').value || '').trim().slice(0, 200);
+// "Issue To " ke baad ka naam capital karo
+remark = remark.replace(/^(issue\s*to)\s+(.+)$/i, (m, p, n) => 'Issue To ' + phCapName(n));
 
   physList = physList.filter(p => String(p.sn) !== String(it.sn));
   if (val !== sys) {
@@ -3779,9 +3785,13 @@ function physCanvas() {
     const d = new Date(ts), p = n => String(n).padStart(2, '0');
     return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + String(d.getFullYear()).slice(2);
   };
-  const H = ['No', 'SAP Code', 'Description', 'Qty', 'Date'];
-  const rows = L.map((p, i) => [String(i + 1), String(p.sap), String(p.name), phFmt(Math.abs(p.phys - p.sys)), dt(p.ts)]);
-  const W = [40, 120, 320, 56, 86], TW = W.reduce((a, b) => a + b, 0);
+  const takenBy = r => {
+    const m = String(r || '').match(/^issue\s*to\s+(.+)$/i);
+    return m ? phCapName(m[1].trim()) : '';
+  };
+  const H = ['No', 'SAP Code', 'Description', 'Qty', 'Date', 'Taken By'];
+  const rows = L.map((p, i) => [String(i + 1), String(p.sap), String(p.name), phFmt(Math.abs(p.phys - p.sys)), dt(p.ts), takenBy(p.remark)]);
+  const W = [40, 120, 300, 56, 86, 110], TW = W.reduce((a, b) => a + b, 0);
   const S = 2, M = 12, TH = 36, RH = 32;
 
   const cv = document.createElement('canvas');
