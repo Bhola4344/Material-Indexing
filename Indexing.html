@@ -2098,6 +2098,22 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-sb2{display:grid;grid-template-columns:1fr;gap:8px}
 .ph-sb2 button{height:44px;border:0;border-radius:12px;font:700 13px 'Inter',sans-serif;color:#fff;cursor:pointer}
 .ph-sb2 .wa{background:#25d366}
+/* Physical: single bar (search + pending + clear all) */
+.ph-tb{position:sticky;top:-6px;z-index:2;background:var(--surface);padding:6px 0 8px;margin-top:-6px}
+.ph-s{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:0 5px 0 10px;height:44px;transition:border-color .2s}
+.ph-s:focus-within{border-color:var(--accent);background:var(--surface)}
+.ph-s input{flex:1;min-width:0;border:0;outline:0;background:none;font:500 13px 'Inter',sans-serif;color:var(--text)}
+.ph-sch{display:contents}
+.ph-sx{display:none;border:0;background:var(--border);border-radius:50%;width:18px;height:18px;font-size:10px;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0}
+.ph-s.has .ph-sx{display:block}
+.ph-n{flex-shrink:0;display:flex;align-items:center;gap:5px;height:32px;padding:0 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font:700 13px 'JetBrains Mono',monospace;color:var(--accent)}
+.ph-n small{font:700 8px 'Inter',sans-serif;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+.ph-ca{flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid transparent;background:var(--green);color:#fff;font:700 12px 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
+.ph-ca.y{background:var(--red)}
+.ph-ca.n{background:var(--surface);border-color:var(--border);color:var(--muted)}
+.ph-cf{display:none;flex:1;align-items:center;justify-content:space-between;gap:6px;font-size:12px;font-weight:600}
+.ph-s.cf .ph-cf{display:flex}
+.ph-s.cf .ph-sch{display:none}
 
 #notifPanel > *{flex-shrink:0;}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
@@ -2424,6 +2440,10 @@ body.loading .upload-zone { opacity: 0.45; }
 .lc-sk.has{background:rgba(8,145,178,.1);color:var(--accent2);border:1px solid rgba(8,145,178,.2)}
 .lc-sk.no{background:rgba(220,38,38,.1);color:var(--red)}
 .lc-ie{padding:10px 0;text-align:center;font-size:12px;color:var(--muted)}
+
+.ph-ca.p{background:var(--accent)}
+.ph-pg{font-size:11px;color:var(--muted);font-weight:600;margin:6px 2px 0}
+.bin-bar .ph-s{margin:0}
 </style>
 </head>
 
@@ -3607,8 +3627,18 @@ function phCapName(s) {
   return s.replace(/(^|\s)([a-z])/g, (m, a, b) => a + b.toUpperCase());
 }
 function phSyncTags() {
-  const v = phEl('phRem').value.trim().toLowerCase();
-  document.querySelectorAll('#phTags .ph-tg').forEach(b => b.classList.toggle('on', v === b.dataset.t.toLowerCase()));
+  const r = phEl('phRem');
+  const m = r.value.match(/^(issue\s*to)\s+(.*)$/i);
+  if (m) {
+    const fixed = 'Issue To ' + phCapName(m[2]);
+    if (r.value !== fixed) {
+      const pos = r.selectionStart;      // cursor jagah par rahe
+      r.value = fixed;
+      try { r.setSelectionRange(pos, pos); } catch (e) {}
+    }
+  }
+  const v = r.value.trim().toLowerCase();
+  document.querySelectorAll('#phTags .ph-tg').forEach(b => b.classList.toggle('on', v === b.dataset.t.trim().toLowerCase()));
 }
 
 // quick chips + remark tags + hold-to-repeat
@@ -3621,9 +3651,17 @@ phEl('phQk').addEventListener('click', e => {
 phEl('phTags').addEventListener('click', e => {
   const b = e.target.closest('.ph-tg'); if (!b) return;
   const r = phEl('phRem');
-  r.value = r.value.trim().toLowerCase() === b.dataset.t.toLowerCase() ? '' : b.dataset.t;
+  const t = b.dataset.t;
+  r.value = r.value.trim().toLowerCase() === t.trim().toLowerCase() ? '' : t;
   phSyncTags();
+  // sirf "Issue To" par cursor input me, end me
+  if (r.value && /^issue\s*to/i.test(t)) {
+    r.focus();
+    const n = r.value.length;
+    try { r.setSelectionRange(n, n); } catch (e) {}
+  }
 });
+
 phEl('phSheet').querySelectorAll('.ph-stp button').forEach(btn => {
   let t1, t2; const d = +btn.dataset.d;
   const stop = () => { clearTimeout(t1); clearInterval(t2); };
@@ -3676,6 +3714,10 @@ function askClrPhys(sn) { physAsk = sn; renderPhysList(); }
 function askClrAllPhys() { physAsk = 'all'; renderPhysList(); }
 function cancelClrPhys() { physAsk = null; renderPhysList(); }
 function setPhysFilter(f) { physFilter = f; physAsk = null; renderPhysList(); }
+let physQ = '';
+function phSearch(v) { physQ = v; renderPhysList(); }
+function phSearchClr() { physQ = ''; document.getElementById('phQ').value = ''; renderPhysList(); document.getElementById('phQ').focus(); }
+
 function renderPhysList() {
   physSel.forEach(sn => { if (!physList.some(p => String(p.sn) === sn)) physSel.delete(sn); });
   physSelUI();
@@ -3687,16 +3729,17 @@ function renderPhysList() {
     { k:'s',   c:'crit', n:sh,         l:'Short' },
     { k:'e',   c:'ex',   n:ex,         l:'Excess' }
   ], physFilter);
-  const show = all.filter(p => physFilter === 'all' || (physFilter === 's' ? p.phys < p.sys : p.phys > p.sys));
+
+  const q = physQ.trim().toLowerCase();
+  const show = all.filter(p =>
+    (physFilter === 'all' || (physFilter === 's' ? p.phys < p.sys : p.phys > p.sys)) &&
+    (!q || (p.name + ' ' + p.sap + ' ' + p.loc + ' ' + (p.remark || '')).toLowerCase().includes(q)));
   const list = document.getElementById('notifList');
   if (!all.length) { list.innerHTML = '<div class="notif-empty">✅ No pending adjustments</div>'; return; }
-  const bar = physAsk === 'all'
-    ? `<div class="pa-bar"><div class="pa-txt">Saari ${all.length} adjustments clear karein?</div><div class="pa-grp"><button class="bin-done-btn" onclick="cancelClrPhys()">No</button><button class="pa-clr" style="background:var(--red)" onclick="clrAllPhys()">Yes, clear all</button></div></div>`
-    : `<div class="pa-bar"><div class="pa-txt">${all.length} pending</div><div class="pa-grp"><button class="pa-clr" onclick="askClrAllPhys()">✓ Clear All</button></div></div>`;
-  if (!show.length) { list.innerHTML = bar + '<div class="notif-empty">Is filter me kuch nahi</div>'; return; }
-  list.innerHTML = bar + show.map(p => {
+
+  const rows = show.length ? show.map(p => {
     const s = p.phys < p.sys, d = Math.abs(p.phys - p.sys);
-    return `<div class="notif-row ph-row${physSel.has(String(p.sn)) ? ' sel' : ''}" id="prow-${p.sn}" data-sn="${p.sn}">
+    return `<div class="notif-row ph-row${physSel.has(String(p.sn)) ? ' sel' : ''}" data-sn="${p.sn}">
       <div class="notif-row-top"><span class="ph-cb">✓</span><div class="notif-name">${lmEsc(p.name)}</div><div class="sa-cap ${s ? 'sh' : 'ex'} tap" onclick="openPhys(${p.sn})"><span class="s">${s ? 'Short' : 'Excess'}</span><span class="o"><b>${s ? '−' : '+'}${d}</b><em>✎</em></span></div></div>
       <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(p.sap)} · 📍 ${lmEsc(p.loc)}</div>
       <div class="sa-nft"><span>System <b>${p.sys}</b> → Physical <b>${p.phys}</b>${p.remark ? ` <span class="ph-rm">· 💬 ${lmEsc(p.remark)}</span>` : ''}</span></div>
@@ -3709,7 +3752,26 @@ function renderPhysList() {
             <button class="ph-b ok" onclick="askClrPhys(${p.sn})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Clear</button>
           </div></div>`}
     </div>`;
-  }).join('');
+  }).join('') : '<div class="notif-empty">Kuch nahi mila</div>';
+
+  // bar sirf ek baar banta hai (typing me focus na toote), baad me sirf rows/count update
+  if (!document.getElementById('phS')) {
+    list.innerHTML = `<div class="ph-tb"><div class="ph-s" id="phS"><div class="ph-sch"><span>🔍</span>
+      <input id="phQ" placeholder="Search item, SAP, loc..." autocomplete="off" spellcheck="false" oninput="phSearch(this.value)">
+      <button type="button" class="ph-sx" onclick="phSearchClr()">✕</button>
+      <span class="ph-n"><b id="phN"></b><small>Pending</small></span>
+      <button type="button" class="ph-ca" onclick="askClrAllPhys()">✓ Clear All</button></div>
+      <div class="ph-cf"><span>Saari <b id="phN2"></b> clear karein?</span><span style="display:flex;gap:6px">
+        <button type="button" class="ph-ca n" onclick="cancelClrPhys()">No</button>
+        <button type="button" class="ph-ca y" onclick="clrAllPhys()">Yes, clear</button></span></div>
+    </div></div><div id="phRows"></div>`;
+    document.getElementById('phQ').value = physQ;
+  }
+  document.getElementById('phS').classList.toggle('has', !!physQ);
+  document.getElementById('phS').classList.toggle('cf', physAsk === 'all');
+  document.getElementById('phN').textContent = all.length;
+  document.getElementById('phN2').textContent = all.length;
+  document.getElementById('phRows').innerHTML = rows;
 }
 function phAfterClear() {
   physAsk = null;
@@ -4357,32 +4419,56 @@ function binPrintAllBar() {
   return `<div class="pa-bar"><div class="pa-txt"><b>${binPending.length}</b> Bins<br/><span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
 }
 
-function renderBinList() {
-  document.getElementById('binBar').innerHTML = binPrintAllBar();
-  document.getElementById('notifCountBadge').textContent = binPending.length;
-  document.getElementById('notifSub').textContent = binPending.length === 0
-    ? 'Sab up to date'
-    : 'Print and update';
+let binQry = '';
+function binSearch(v) { binQry = v; renderBinList(); }
+function binSearchClr() { binQry = ''; const i = document.getElementById('binQ'); i.value = ''; renderBinList(); i.focus(); }
 
-  const list = document.getElementById('notifList');
-  if (!binPending.length) {
-    list.innerHTML = `<div class="notif-empty">✅ Koi pending bin list nahi hai</div>`;
-    return;
+function renderBinList() {
+  const bar = document.getElementById('binBar'), list = document.getElementById('notifList');
+  const n = binPending.length;
+  document.getElementById('notifCountBadge').textContent = n;
+  document.getElementById('notifSub').textContent = n === 0 ? 'Sab up to date' : 'Print and update';
+  if (!n) { bar.innerHTML = ''; list.innerHTML = `<div class="notif-empty">✅ Koi pending bin list nahi hai</div>`; return; }
+
+  const q = binQry.trim().toLowerCase();
+  const hl = t => { t = lmEsc(t); return q ? t.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>') : t; };
+  const cnt = {};
+  itemMaster.forEach(i => { const l = i.location && String(i.location).trim().toUpperCase(); if (l) cnt[l] = (cnt[l] || 0) + 1; });
+  const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil((cnt[String(p.loc).trim().toUpperCase()] || 0) / BP_ROWS)), 0);
+  const done = binPending.filter(p => p.printed).length;
+
+  // bar sirf ek baar banta hai (typing me focus na toote), baad me sirf count/buttons update
+  if (!document.getElementById('binS')) {
+    bar.innerHTML = `<div class="ph-s" id="binS"><span>🔍</span>
+      <input id="binQ" placeholder="Search bin location..." autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="binSearch(this.value)">
+      <button type="button" class="ph-sx" onclick="binSearchClr()">✕</button>
+      <span class="ph-n"><b id="binN"></b><small>Bins</small></span>
+      <button type="button" class="ph-ca" id="binC" onclick="clearPrintedBins()"></button>
+      <button type="button" class="ph-ca p" onclick="openBinPrintAll()">🖨️ Print All</button></div>
+      <div class="ph-pg" id="binP"></div>`;
+    document.getElementById('binQ').value = binQry;
   }
-  list.innerHTML = binPending.slice().sort((a,b)=>b.ts-a.ts).map(p => `
+  document.getElementById('binS').classList.toggle('has', !!binQry);
+  document.getElementById('binN').textContent = n;
+  document.getElementById('binP').textContent = n + ' bins · ' + pages + ' pages';
+  const c = document.getElementById('binC');
+  c.style.display = done ? '' : 'none';
+  c.textContent = '✓ ' + done;
+
+  const show = binPending.filter(p => !q || (p.loc + ' ' + p.reason).toLowerCase().includes(q)).sort((a, b) => b.ts - a.ts);
+  list.innerHTML = show.length ? show.map(p => `
     <div class="notif-row" id="brow-${p.loc}">
       <div class="bin-row-top">
         <div>
-          <div class="bin-loc">${p.loc}</div>
-          <div class="bin-reason">${p.reason}</div>
+          <div class="bin-loc">${hl(p.loc)}</div>
+          <div class="bin-reason">${hl(p.reason)}</div>
         </div>
-                <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:6px;">
           <button class="bin-done-btn" onclick="openBinPrint('${p.loc}')">🖨️ Print</button>
           ${p.printed ? `<button class="bin-done-btn" style="border-color:var(--green);color:var(--green);" onclick="markBinDone('${p.loc}')">✓ Clear</button>` : ''}
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('') : '<div class="notif-empty">Kuch nahi mila</div>';
 }
 
 function markBinDone(loc) {
@@ -7949,7 +8035,8 @@ window.renderBinList = function () {
     if (stkSub === 'sp') renderStkList();
   else if (stkSub === 'sh') renderShfList();
   else _rbl.apply(this, arguments);
-  skE('binBar').insertAdjacentHTML('afterbegin', stkSwitch());
+  const sg = skE('stxSeg'), h = stkSwitch();
+  if (stkSub === 'bp' && sg) sg.outerHTML = h; else skE('binBar').insertAdjacentHTML('afterbegin', h);
   l.scrollTop = s;
 };
 const _rs = renderStats;
