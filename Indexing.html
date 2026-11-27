@@ -2099,7 +2099,13 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-sb2 button{height:44px;border:0;border-radius:12px;font:700 13px 'Inter',sans-serif;color:#fff;cursor:pointer}
 .ph-sb2 .wa{background:#25d366}
 /* Physical: single bar (search + pending + clear all) */
-.ph-tb{position:sticky;top:-6px;z-index:2;background:var(--surface);padding:6px 0 8px;margin-top:-6px}
+.ph-tb{position:sticky;top:0;z-index:2;background:var(--surface);padding:0 0 6px;margin-top:0}
+#notifPanel.on-phys .notif-slot{height:auto;margin-bottom:4px}
+#notifPanel.on-phys .notif-list{padding-top:0}
+.ph-tb .ph-cfl{display:none}
+.ph-tb.cf .ph-cfl{display:flex}
+.ph-tb.cf .ph-nl{display:none}
+.bn-ib.red{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 3px 10px rgba(220,38,38,.25)}
 .ph-s{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:0 5px 0 10px;height:44px;transition:border-color .2s}
 .ph-s:focus-within{border-color:var(--accent);background:var(--surface)}
 .ph-s input{flex:1;min-width:0;border:0;outline:0;background:none;font:500 13px 'Inter',sans-serif;color:var(--text)}
@@ -2441,9 +2447,18 @@ body.loading .upload-zone { opacity: 0.45; }
 .lc-sk.no{background:rgba(220,38,38,.1);color:var(--red)}
 .lc-ie{padding:10px 0;text-align:center;font-size:12px;color:var(--muted)}
 
-.ph-ca.p{background:var(--accent)}
-.ph-pg{font-size:11px;color:var(--muted);font-weight:600;margin:6px 2px 0}
 .bin-bar .ph-s{margin:0}
+.bn-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;min-height:34px}
+.bn-tx{min-width:0;height:32px;padding:0 11px;border-radius:8px;border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.06);color:var(--accent);display:flex;align-items:center;gap:4px;font:700 12px 'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bn-tx b{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--accent)}
+.bn-act{display:flex;gap:6px;flex-shrink:0}
+.bn-ib{height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;gap:5px;font:700 12px 'Inter',sans-serif;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.bn-ib:active{transform:scale(.95)}
+.bn-ib svg{width:15px;height:15px;flex-shrink:0}
+.bn-ib.pri{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.25)}
+.bn-ib.ok{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.4);color:var(--green)}
+.bn-ib.on{background:rgba(37,99,235,.08);border-color:var(--accent);color:var(--accent)}
+.bn-bd{min-width:18px;height:16px;padding:0 5px;border-radius:8px;background:var(--green);color:#fff;font:700 10.5px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
 </style>
 </head>
 
@@ -3756,19 +3771,20 @@ function renderPhysList() {
 
   // bar sirf ek baar banta hai (typing me focus na toote), baad me sirf rows/count update
   if (!document.getElementById('phS')) {
-    list.innerHTML = `<div class="ph-tb"><div class="ph-s" id="phS"><div class="ph-sch"><span>🔍</span>
+    list.innerHTML = `<div class="ph-tb" id="phTb"><div class="ph-s" id="phS"><span>🔍</span>
       <input id="phQ" placeholder="Search item, SAP, loc..." autocomplete="off" spellcheck="false" oninput="phSearch(this.value)">
-      <button type="button" class="ph-sx" onclick="phSearchClr()">✕</button>
-      <span class="ph-n"><b id="phN"></b><small>Pending</small></span>
-      <button type="button" class="ph-ca" onclick="askClrAllPhys()">✓ Clear All</button></div>
-      <div class="ph-cf"><span>Saari <b id="phN2"></b> clear karein?</span><span style="display:flex;gap:6px">
-        <button type="button" class="ph-ca n" onclick="cancelClrPhys()">No</button>
-        <button type="button" class="ph-ca y" onclick="clrAllPhys()">Yes, clear</button></span></div>
-    </div></div><div id="phRows"></div>`;
+      <button type="button" class="ph-sx" onclick="phSearchClr()">✕</button></div>
+      <div class="bn-line ph-nl"><div class="bn-tx"><b id="phN"></b> pending</div><div class="bn-act">
+        <button type="button" class="bn-ib ok" onclick="askClrAllPhys()" title="Clear all" aria-label="Clear all">${BN_I.ok}Clear All</button>
+      </div></div>
+      <div class="bn-line ph-cfl"><div class="bn-tx">Clear all <b id="phN2"></b>?</div><div class="bn-act">
+        <button type="button" class="bn-ib" onclick="cancelClrPhys()">No</button>
+        <button type="button" class="bn-ib red" onclick="clrAllPhys()">Yes, clear</button>
+      </div></div></div><div id="phRows"></div>`;
     document.getElementById('phQ').value = physQ;
   }
   document.getElementById('phS').classList.toggle('has', !!physQ);
-  document.getElementById('phS').classList.toggle('cf', physAsk === 'all');
+  document.getElementById('phTb').classList.toggle('cf', physAsk === 'all');
   document.getElementById('phN').textContent = all.length;
   document.getElementById('phN2').textContent = all.length;
   document.getElementById('phRows').innerHTML = rows;
@@ -4362,6 +4378,7 @@ function renderActiveNotifTab() {
   document.getElementById('binBar').style.visibility = isBin ? 'visible' : 'hidden';
 document.querySelector('.notif-slot').style.height = isBin ? 'auto' : '';
 document.getElementById('binBar').style.display = isBin ? '' : 'none';
+document.getElementById('notifPanel').classList.toggle('on-phys', activeNotifTab === 'phys');
 
   if (activeNotifTab === 'stock') {
     iconBadge.textContent = '📊';
@@ -4419,6 +4436,12 @@ function binPrintAllBar() {
   return `<div class="pa-bar"><div class="pa-txt"><b>${binPending.length}</b> Bins<br/><span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
 }
 
+const BN_I = {
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  pr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+  qr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>',
+  dl: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+};
 let binQry = '';
 function binSearch(v) { binQry = v; renderBinList(); }
 function binSearchClr() { binQry = ''; const i = document.getElementById('binQ'); i.value = ''; renderBinList(); i.focus(); }
@@ -4438,22 +4461,20 @@ function renderBinList() {
   const done = binPending.filter(p => p.printed).length;
 
   // bar sirf ek baar banta hai (typing me focus na toote), baad me sirf count/buttons update
-  if (!document.getElementById('binS')) {
-    bar.innerHTML = `<div class="ph-s" id="binS"><span>🔍</span>
+  if (!document.getElementById('binS')) {    bar.innerHTML = `<div class="ph-s" id="binS"><span>🔍</span>
       <input id="binQ" placeholder="Search bin location..." autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="binSearch(this.value)">
-      <button type="button" class="ph-sx" onclick="binSearchClr()">✕</button>
-      <span class="ph-n"><b id="binN"></b><small>Bins</small></span>
-      <button type="button" class="ph-ca" id="binC" onclick="clearPrintedBins()"></button>
-      <button type="button" class="ph-ca p" onclick="openBinPrintAll()">🖨️ Print All</button></div>
-      <div class="ph-pg" id="binP"></div>`;
+      <button type="button" class="ph-sx" onclick="binSearchClr()">✕</button></div>
+      <div class="bn-line"><div class="bn-tx" id="binP"></div><div class="bn-act">
+        <button type="button" class="bn-ib ok" id="binC" onclick="clearPrintedBins()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd" id="binCn"></span></button>
+        <button type="button" class="bn-ib pri" onclick="openBinPrintAll()" title="Print all" aria-label="Print all">${BN_I.pr}Print All</button>
+      </div></div>`;
     document.getElementById('binQ').value = binQry;
   }
   document.getElementById('binS').classList.toggle('has', !!binQry);
-  document.getElementById('binN').textContent = n;
-  document.getElementById('binP').textContent = n + ' bins · ' + pages + ' pages';
+  document.getElementById('binP').innerHTML = '<b>' + n + '</b> bins · <b>' + pages + '</b> pages';
   const c = document.getElementById('binC');
   c.style.display = done ? '' : 'none';
-  c.textContent = '✓ ' + done;
+  document.getElementById('binCn').textContent = done;
 
   const show = binPending.filter(p => !q || (p.loc + ' ' + p.reason).toLowerCase().includes(q)).sort((a, b) => b.ts - a.ts);
   list.innerHTML = show.length ? show.map(p => `
@@ -7911,7 +7932,9 @@ function renderShfList() {
   const n = shfQ.length, tot = shfQ.reduce((a, r) => a + r.qty, 0);
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Rack se bin me shifted' : 'Sab up to date';
-  skE('binBar').innerHTML = n ? `<div class="pa-bar"><div class="pa-txt"><b>${n}</b> Records<br/><span>${tot} qty shifted</span></div><div class="pa-grp"><button class="pa-btn" onclick="shfCsv()">⬇ CSV</button><button class="pa-clr" onclick="shfClear()">✓ Clear All</button></div></div>` : '';
+  skE('binBar').innerHTML = n ? `<div class="bn-line"><div class="bn-tx"><b>${n}</b> records · <b>${tot}</b> qty shifted</div><div class="bn-act">
+    <button type="button" class="bn-ib" onclick="shfCsv()" title="Download CSV" aria-label="Download CSV">${BN_I.dl}CSV</button>
+    <button type="button" class="bn-ib ok" onclick="shfClear()" title="Clear all" aria-label="Clear all">${BN_I.ok}Clear All</button></div></div>` : '';
   skE('notifList').innerHTML = n ? shfQ.map(r => `<div class="notif-row">
       <div class="notif-row-top"><div class="notif-name">${lmEsc(r.name)}</div><div class="sa-cap fa"><span class="s">Shifted</span><span class="o"><b>${r.qty}</b></span></div></div>
       <div class="sa-nsap" style="margin-bottom:6px">${lmEsc(r.sap)}${r.loc ? ' · 📍 ' + lmEsc(r.loc) : ''}</div>
@@ -7973,8 +7996,10 @@ function renderStkList() {
   const n = stkQ.length, tot = stkQ.reduce((a, q) => a + q.qty, 0), done = stkQ.filter(q => q.printed).length;
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Print and clear' : 'Sab up to date';
-  const qrT = `<label class="bp-mini"><span>QR</span><span class="bp-sw"><input type="checkbox" ${stkQR ? 'checked' : ''} onchange="stkQrT(this.checked)"><i></i></span></label>`;
-  skE('binBar').innerHTML = n ? `<div class="pa-bar"><div class="pa-txt"><b>${n}</b> Items<br/><span>${tot} Stickers · ${Math.ceil(tot / 16)} Pages</span></div><div class="pa-grp" style="align-items:center">${qrT}${done ? `<button class="pa-clr" onclick="stkClearDone()">✓ Clear (${done})</button>` : ''}<button class="pa-btn" onclick="stkPrint()">🖨️ Print All</button></div></div>` : '';
+  skE('binBar').innerHTML = n ? `<div class="bn-line"><div class="bn-tx"><b>${n}</b> items · <b>${tot}</b> stickers · ${Math.ceil(tot / 16)} pages</div><div class="bn-act">
+    <button type="button" class="bn-ib${stkQR ? ' on' : ''}" onclick="stkQrT(${!stkQR})" title="QR on stickers: ${stkQR ? 'on' : 'off'}" aria-label="QR on stickers">${BN_I.qr}QR</button>
+    ${done ? `<button type="button" class="bn-ib ok" onclick="stkClearDone()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd">${done}</span></button>` : ''}
+    <button type="button" class="bn-ib pri" onclick="stkPrint()" title="Print all" aria-label="Print all">${BN_I.pr}Print All</button></div></div>` : '';
   skE('notifList').innerHTML = n ? stkQ.slice().sort((a, b) => b.ts - a.ts).map(q => {
     const it = stkItem(q.sap), s = q.sap;
     return `<div class="notif-row${q.printed ? ' stx-done' : ''}">
