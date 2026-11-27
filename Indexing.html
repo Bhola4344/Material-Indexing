@@ -615,14 +615,6 @@ body.loading .header-stripe::before {
 #scannerOverlay.cam-ready .scan-frame { visibility: visible; }
 #scannerOverlay.cam-ready .scan-frame .corner,
 #scannerOverlay.cam-ready .scan-line { animation-play-state: running; }
-    .scanner-hint {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.65);
-      font-size: 12px;
-      padding: 14px;
-      padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    }
-
    
     .cand-row {
       display: flex;
@@ -1529,16 +1521,6 @@ body.loading .header-stripe::before {
       background: rgba(37, 99, 235, 0.05);
     }
 
-    #uploadStatus {
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-    }
-
 .logo-short {
   display: none;
 }
@@ -1622,9 +1604,9 @@ body.loading .header-stripe::before {
 .bell-badge.hidden { display: none; }
 
 .notif-close { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); font-size: 18px; flex-shrink: 0; }
-.notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px; }
-.notif-list::-webkit-scrollbar { width: 4px; }
-.notif-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.notif-list { max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 12px; }
+.notif-list{scrollbar-width:none;-ms-overflow-style:none}
+.notif-list::-webkit-scrollbar{display:none;width:0;height:0}
 .notif-row { border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; margin-bottom: 6px; background: var(--surface); transition: border-color 0.2s; }
 .notif-row:last-child { margin-bottom: 0; }
 .notif-row { content-visibility: auto; contain-intrinsic-size: auto 110px; }
@@ -1663,10 +1645,6 @@ body.loading .header-stripe::before {
   color: var(--muted);
   font-weight: 700;
   letter-spacing: 0.5px;
-}
-
-.notif-stripe {
-  display: none;
 }
 
 .notif-header-v3 {
@@ -1833,13 +1811,6 @@ body.loading .header-stripe::before {
   visibility: hidden;
 }
 .notif-slot > .bin-bar { visibility: hidden; margin: 0; }
-.bin-bar .pa-bar { margin: 0; padding: 6px 8px; }
-.bin-bar .pa-btn, .bin-bar .pa-clr { padding: 7px 10px; }
-.bin-bar .pa-txt { white-space: nowrap; line-height: 1.25; flex-shrink: 0; }
-.bin-bar .pa-txt b { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
-.bin-bar .pa-txt span { font-size: 11px; }
-.bin-bar .pa-grp { min-width: 0; }
-.bin-bar .pa-btn, .bin-bar .pa-clr { font-size: 11.5px; padding: 7px 9px; }
 /* ─── Notif Tabs & Bin List ─── */
 .notif-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 12px 10px;padding:0;overflow:visible;}
 .notif-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:46px;padding:4px 2px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap;min-width:0;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;}
@@ -1848,30 +1819,17 @@ body.loading .header-stripe::before {
 .notif-tab.active .tab-badge{border-color:var(--accent);}
 .notif-tab .tab-badge.hidden{display:none;}
 
-.notif-stripe.bin{background:linear-gradient(90deg,var(--accent),var(--accent2));}
-.notif-icon-badge.bin{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 4px 10px rgba(37,99,235,0.28);}
-
 .bin-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .bin-loc{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
 .bin-reason{font-size:10.5px;color:var(--muted);margin-top:2px;}
 .bin-done-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
 .bin-done-btn:active{border-color:var(--green);color:var(--green);}
-.pa-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;padding:8px 10px;border-radius:10px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.2);}
-.pa-txt{font-size:12px;font-weight:600;color:var(--text);}
-.pa-txt span{font-weight:500;color:var(--muted);}
-.pa-grp{display:flex;gap:6px;}
-.pa-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif;}
-.pa-btn:active{background:#1d4ed8;}
-.pa-clr{background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:'Inter',sans-serif;}
-.pa-clr:active{background:#047857;}
-
 /* ─── Location Modal ─── */
 
 .lm-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:900;opacity:0;pointer-events:none;transition:opacity .2s;}
 .lm-backdrop.open{opacity:1;pointer-events:auto;}
 .lm-modal{position:fixed;left:0;top:0;width:100%;max-width:600px;height:var(--lm-h,80vh);background:var(--surface);border-radius:14px;box-shadow:0 16px 44px rgba(15,23,42,.25);z-index:901;display:flex;flex-direction:column;overflow:hidden;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(40px) scale(.98);transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s linear .28s;}
 .lm-modal.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .2s ease,transform .28s cubic-bezier(.4,0,.2,1),visibility 0s;}
-.lm-stripe{display:none;}
 .lm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 10px;}
 .lm-title{display:flex;align-items:center;gap:10px;}
 .lm-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(37,99,235,.28);}
@@ -2109,18 +2067,8 @@ body.loading .upload-zone { opacity: 0.45; }
 .ph-s{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:0 5px 0 10px;height:44px;transition:border-color .2s}
 .ph-s:focus-within{border-color:var(--accent);background:var(--surface)}
 .ph-s input{flex:1;min-width:0;border:0;outline:0;background:none;font:500 13px 'Inter',sans-serif;color:var(--text)}
-.ph-sch{display:contents}
 .ph-sx{display:none;border:0;background:var(--border);border-radius:50%;width:18px;height:18px;font-size:10px;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0}
 .ph-s.has .ph-sx{display:block}
-.ph-n{flex-shrink:0;display:flex;align-items:center;gap:5px;height:32px;padding:0 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font:700 13px 'JetBrains Mono',monospace;color:var(--accent)}
-.ph-n small{font:700 8px 'Inter',sans-serif;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
-.ph-ca{flex-shrink:0;height:32px;padding:0 12px;border-radius:8px;border:1px solid transparent;background:var(--green);color:#fff;font:700 12px 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
-.ph-ca.y{background:var(--red)}
-.ph-ca.n{background:var(--surface);border-color:var(--border);color:var(--muted)}
-.ph-cf{display:none;flex:1;align-items:center;justify-content:space-between;gap:6px;font-size:12px;font-weight:600}
-.ph-s.cf .ph-cf{display:flex}
-.ph-s.cf .ph-sch{display:none}
-
 #notifPanel > *{flex-shrink:0;}
 #notifPanel > .notif-list{flex:1 1 auto;min-height:0;flex-shrink:1;max-height:none;}
 #notifPanel {
@@ -2193,11 +2141,6 @@ body.loading .upload-zone { opacity: 0.45; }
   padding: 0 12px 6px;
   text-shadow: 0 1px 4px rgba(0,0,0,.8);
 }
-.scanner-hint {
-  background: none;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,.8);
-}
 .scan-frame .corner { filter: drop-shadow(0 0 3px rgba(0,0,0,.45)); }
 
 /* scanned list halka glass jaisa */
@@ -2259,8 +2202,6 @@ body.loading .upload-zone { opacity: 0.45; }
 .stx-seg i{font-style:normal;font-size:15px;line-height:1}
 .stx-seg b{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(220,38,38,.12);color:var(--red);font:700 11px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
 .stx-seg button.on b{background:#fff;color:var(--accent)}
-.bin-bar .pa-bar{flex-wrap:wrap;row-gap:6px}
-.bin-bar .bp-mini{height:30px}
 .stx-ln{display:flex;align-items:center;gap:4px}
 .stx-ln .stx-n{grid-template-columns:28px 38px 28px;gap:3px;flex-shrink:0}
 .stx-ln .stx-rem{flex:1 1 0;min-width:0;width:auto;padding:0 9px;font-size:14px}
@@ -2451,6 +2392,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .bn-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;min-height:34px}
 .bn-tx{min-width:0;height:32px;padding:0 11px;border-radius:8px;border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.06);color:var(--accent);display:flex;align-items:center;gap:4px;font:700 12px 'Inter',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bn-tx b{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--accent)}
+
 .bn-act{display:flex;gap:6px;flex-shrink:0}
 .bn-ib{height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;gap:5px;font:700 12px 'Inter',sans-serif;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}
 .bn-ib:active{transform:scale(.95)}
@@ -2459,6 +2401,12 @@ body.loading .upload-zone { opacity: 0.45; }
 .bn-ib.ok{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.4);color:var(--green)}
 .bn-ib.on{background:rgba(37,99,235,.08);border-color:var(--accent);color:var(--accent)}
 .bn-bd{min-width:18px;height:16px;padding:0 5px;border-radius:8px;background:var(--green);color:#fff;font:700 10.5px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;justify-content:center}
+.bn-box{height:36px;min-height:0;padding:0 4px 0 10px;gap:6px;border:1px solid rgba(37,99,235,.4);background:rgba(37,99,235,.06);border-radius:8px;overflow:hidden}
+.bn-box .bn-tx{height:auto;padding:0;border:0;background:none;flex:1 1 0}
+.bn-box .bn-act{gap:4px}
+.bn-box .bn-ib{height:26px;padding:0 7px;gap:3px;font-size:11px;border-radius:6px;box-shadow:none}
+.bn-box .bn-ib svg{width:14px;height:14px}
+.bn-box .bn-bd{min-width:16px;height:14px;padding:0 4px;font-size:10px}
 </style>
 </head>
 
@@ -2477,7 +2425,6 @@ body.loading .upload-zone { opacity: 0.45; }
 <!-- Location Modal -->
 <div class="lm-backdrop" id="lmBackdrop"></div>
 <div class="lm-modal" id="lmModal">
-  <div class="lm-stripe"></div>
   <div class="lm-head">
     <div class="lm-title">
       <div class="lm-icon">📍</div>
@@ -2668,7 +2615,6 @@ body.loading .upload-zone { opacity: 0.45; }
       <span class="bell-badge hidden" id="bellBadge">0</span>
     </button>
         <div id="notifPanel">
-    <div class="notif-stripe" id="notifStripe"></div>
     <div class="notif-header-v3">
       <div class="notif-title-block">
         <div class="notif-icon-badge" id="notifIconBadge">📊</div>
@@ -2700,7 +2646,7 @@ body.loading .upload-zone { opacity: 0.45; }
 <button class="notif-tab" id="notifTabBin" onclick="switchNotifTab('bin')"><i>🖨️</i>Bins<span class="tab-badge hidden" id="notifTabBinBadge">0</span></button>
 <button class="notif-tab" id="notifTabAlert" onclick="switchNotifTab('alert')"><i>🚨</i>Alerts<span class="tab-badge hidden" id="notifTabAlertBadge">0</span></button>
 <button class="notif-tab" id="notifTabPhys" onclick="switchNotifTab('phys')"><i>⚖️</i>Physical<span class="tab-badge hidden" id="notifTabPhysBadge">0</span></button>
-<button class="notif-tab" id="notifTabMov" onclick="switchNotifTab('mov')"><i>📈</i>Moving</button>
+<button class="notif-tab" id="notifTabMov" onclick="switchNotifTab('mov')"><i>📈</i>Moving<span class="tab-badge hidden" id="notifTabMovBadge">0</span></button>
     </div>
 <div class="notif-slot">
 <div class="sa-fch" id="saFilter"></div>
@@ -3774,10 +3720,10 @@ function renderPhysList() {
     list.innerHTML = `<div class="ph-tb" id="phTb"><div class="ph-s" id="phS"><span>🔍</span>
       <input id="phQ" placeholder="Search item, SAP, loc..." autocomplete="off" spellcheck="false" oninput="phSearch(this.value)">
       <button type="button" class="ph-sx" onclick="phSearchClr()">✕</button></div>
-      <div class="bn-line ph-nl"><div class="bn-tx"><b id="phN"></b> pending</div><div class="bn-act">
+      <div class="bn-line bn-box ph-nl"><div class="bn-tx"><b id="phN"></b> pending</div><div class="bn-act">
         <button type="button" class="bn-ib ok" onclick="askClrAllPhys()" title="Clear all" aria-label="Clear all">${BN_I.ok}Clear All</button>
       </div></div>
-      <div class="bn-line ph-cfl"><div class="bn-tx">Clear all <b id="phN2"></b>?</div><div class="bn-act">
+      <div class="bn-line bn-box ph-cfl"><div class="bn-tx">Clear all <b id="phN2"></b>?</div><div class="bn-act">
         <button type="button" class="bn-ib" onclick="cancelClrPhys()">No</button>
         <button type="button" class="bn-ib red" onclick="clrAllPhys()">Yes, clear</button>
       </div></div></div><div id="phRows"></div>`;
@@ -4210,6 +4156,7 @@ function loadMoving() {
     movList = rows.map(movNorm);
     movLocalTs = 0;
     movSave();
+    if (notifOpen) renderTabBadges();
     if (notifOpen && activeNotifTab === 'mov') renderMovList();
   }).catch(() => {});
 }
@@ -4354,22 +4301,18 @@ function renderTabBadges() {
   const pB = document.getElementById('notifTabPhysBadge');
   pB.textContent = physList.length;
   pB.classList.toggle('hidden', physList.length === 0);
+  const mB = document.getElementById('notifTabMovBadge');
+  const movCount = movList.filter(m => m.k === 'nm' || m.k === 'dd').length;
+  mB.textContent = movCount;
+  mB.classList.toggle('hidden', movCount === 0);
 }
 
 function renderActiveNotifTab() {
   const searchWrap = document.getElementById('notifSearchWrap');
-  const stripe = document.getElementById('notifStripe');
   const iconBadge = document.getElementById('notifIconBadge');
   const titleText = document.getElementById('notifTitleText');
-  const countChip = document.getElementById('notifCountChip');
-  const dlBtn = document.getElementById('notifDlBtn');
   const footer = document.getElementById('notifFooter');
   const isBin = activeNotifTab === 'bin';
-
-  stripe.classList.toggle('bin', isBin);
-  iconBadge.classList.toggle('bin', isBin);
-  countChip.classList.toggle('bin', isBin);
-  dlBtn.classList.toggle('bin', isBin);
   const showChips = activeNotifTab === 'alert' || activeNotifTab === 'phys' || activeNotifTab === 'mov';
   document.getElementById('saFilter').classList.toggle('mv', activeNotifTab === 'mov');
   document.querySelector('#notifCountChip .lbl').textContent = activeNotifTab === 'mov' ? 'Items' : 'Pending';
@@ -4422,20 +4365,6 @@ function clearPrintedBins() {
   renderTabBadges();
   renderActiveNotifTab();
 }
-
-function binPrintAllBar() {
-  if (binPending.length < 2) return '';
-    const cnt = {};
-  itemMaster.forEach(i => {
-    const l = i.location && String(i.location).trim().toUpperCase();
-    if (l) cnt[l] = (cnt[l] || 0) + 1;
-  });
-  const pages = binPending.reduce((s, p) => s + Math.max(1, Math.ceil((cnt[String(p.loc).trim().toUpperCase()] || 0) / BP_ROWS)), 0);
-  const printedN = binPending.filter(p => p.printed).length;
-  const clrLabel = printedN === binPending.length ? '✓ Clear All' : `✓ Clear (${printedN})`;
-  return `<div class="pa-bar"><div class="pa-txt"><b>${binPending.length}</b> Bins<br/><span>${pages} Pages</span></div><div class="pa-grp">${printedN ? `<button class="pa-clr" onclick="clearPrintedBins()">${clrLabel}</button>` : ''}<button class="pa-btn" onclick="openBinPrintAll()">🖨️ Print All</button></div></div>`;
-}
-
 const BN_I = {
   ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   pr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
@@ -4464,14 +4393,14 @@ function renderBinList() {
   if (!document.getElementById('binS')) {    bar.innerHTML = `<div class="ph-s" id="binS"><span>🔍</span>
       <input id="binQ" placeholder="Search bin location..." autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="binSearch(this.value)">
       <button type="button" class="ph-sx" onclick="binSearchClr()">✕</button></div>
-      <div class="bn-line"><div class="bn-tx" id="binP"></div><div class="bn-act">
+      <div class="bn-line bn-box"><div class="bn-tx" id="binP"></div><div class="bn-act">
         <button type="button" class="bn-ib ok" id="binC" onclick="clearPrintedBins()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd" id="binCn"></span></button>
         <button type="button" class="bn-ib pri" onclick="openBinPrintAll()" title="Print all" aria-label="Print all">${BN_I.pr}Print All</button>
       </div></div>`;
     document.getElementById('binQ').value = binQry;
   }
   document.getElementById('binS').classList.toggle('has', !!binQry);
-  document.getElementById('binP').innerHTML = '<b>' + n + '</b> bins · <b>' + pages + '</b> pages';
+  document.getElementById('binP').innerHTML = '<b>' + n + '</b> Bin · <b>' + pages + '</b> Page';
   const c = document.getElementById('binC');
   c.style.display = done ? '' : 'none';
   document.getElementById('binCn').textContent = done;
@@ -5972,11 +5901,9 @@ function checkTorchSupport() {
   if (!html5QrCode) return;
   try {
     const capabilities = html5QrCode.getRunningTrackCapabilities();
-    console.log('Camera capabilities:', capabilities); // debug — baad me hata dena
     torchSupported = !!(capabilities && capabilities.torch);
     document.getElementById('torchBtn').style.visibility = torchSupported ? 'visible' : 'hidden';
   } catch (e) {
-    console.log('Torch check error:', e); // debug — baad me hata dena
     torchSupported = false;
     document.getElementById('torchBtn').style.visibility = 'hidden';
   }
@@ -7460,7 +7387,6 @@ if (can('admin') && sessionStorage.getItem('userRole') === 'admin') {
 .am-c b i{font:600 10px 'Inter',sans-serif;font-style:normal;color:var(--muted);margin-left:2px}
 @media(max-width:400px){.am-c{padding:0 2px}.am-c small{font-size:9.5px;letter-spacing:.2px}.am-c b{font-size:15px}}
 .cc-row{border-radius:14px;padding:12px;margin-bottom:10px}
-.cc-row.m{--cc0:var(--green)}.cc-row.s{--cc0:var(--red)}.cc-row.e{--cc0:var(--accent)}
 .cc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .cc-chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:20px;font:600 12px 'JetBrains Mono',monospace;white-space:nowrap}
 .cc-chip small{font:700 9px 'Inter',sans-serif;letter-spacing:.6px;text-transform:uppercase;opacity:.8}
@@ -8469,7 +8395,7 @@ function lcDo(gi) {
 
 document.body.insertAdjacentHTML('beforeend',
   '<div class="bp-back" id="lcBack" onclick="if(event.target===this)closeLocClean()"><div class="bp-modal" style="height:88vh">' +
-  '<div class="lm-stripe"></div><div class="lm-head"><div class="lm-title"><div class="lm-icon">🧹</div><div>' +
+  '<div class="lm-head"><div class="lm-title"><div class="lm-icon">🧹</div><div>' +
   '<div class="lm-loc" style="font-family:inherit;font-size:14px">MERGE LOCATION</div><div class="lm-sub" id="lcSub"></div></div></div>' +
   '<div style="display:flex;gap:6px"><button class="lm-close lc-dl" onclick="lcDownload()" aria-label="Download list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>' +
   '<button class="lm-close" onclick="closeLocClean()">✕</button></div></div>' +
