@@ -2407,6 +2407,61 @@ body.loading .upload-zone { opacity: 0.45; }
 .bn-box .bn-ib{height:26px;padding:0 7px;gap:3px;font-size:11px;border-radius:6px;box-shadow:none}
 .bn-box .bn-ib svg{width:14px;height:14px}
 .bn-box .bn-bd{min-width:16px;height:14px;padding:0 4px;font-size:10px}
+
+/* ─── Import list modal ─── */
+.im-btn{flex-shrink:0;width:46px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);font-size:18px;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.im-btn:active{background:rgba(37,99,235,.14)}
+.im-back{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;z-index:970;align-items:flex-end;justify-content:center}
+.im-back.open{display:flex}
+.im-modal{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.im-hd{display:flex;gap:10px;align-items:center;padding:14px 14px 8px;flex-shrink:0}
+.im-ic{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.im-tt{flex:1;min-width:0}
+.im-tt b{display:block;font-size:14px}
+.im-tt span{font-size:11px;color:var(--muted)}
+.im-x{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0}
+.im-tmp{margin:0 14px 8px;font-size:11.5px;padding:6px 10px;border-radius:8px;background:rgba(180,83,9,.1);color:var(--amber);font-weight:600;flex-shrink:0}
+.im-bd{padding:0 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.im-drop{border:1.5px dashed var(--border);border-radius:12px;padding:8px;background:var(--surface2)}
+.im-drop textarea{width:100%;height:110px;border:0;background:transparent;outline:0;resize:none;font:12px 'JetBrains Mono',monospace;color:var(--text)}
+.im-up{width:100%;height:40px;margin-top:8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font:600 13px 'Inter',sans-serif;color:var(--text);cursor:pointer}
+.im-go{width:100%;height:44px;margin-top:8px;border-radius:12px;border:0;background:var(--accent);color:#fff;font:700 14px 'Inter',sans-serif;cursor:pointer}
+.im-err{font-size:12.5px;color:var(--red);font-weight:600;min-height:18px;margin-top:8px}
+.im-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+.im-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 14px 8px;flex-shrink:0}
+.im-c{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--surface2);color:var(--muted)}
+.im-c.g{background:rgba(5,150,105,.12);color:var(--green)}
+.im-c.a{background:rgba(180,83,9,.12);color:var(--amber)}
+.im-c.r{background:rgba(220,38,38,.1);color:var(--red)}
+.im-c.b{background:rgba(37,99,235,.1);color:var(--accent)}
+.im-bar{display:flex;align-items:center;justify-content:space-between;padding:0 14px 6px;font-size:13px;flex-shrink:0}
+.im-bar label{display:flex;gap:8px;align-items:center;font-weight:600}
+.im-lk{background:none;border:0;font:700 12px 'Inter',sans-serif;color:var(--red);cursor:pointer}
+.im-ls{flex:1;min-height:0;overflow-y:auto;padding:0 14px;overscroll-behavior:contain}
+.im-it{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px;background:var(--surface)}
+.im-it.bad{background:var(--surface2);opacity:.75}
+.im-it.dn{border-color:rgba(5,150,105,.4);background:rgba(5,150,105,.06)}
+.im-t1{display:flex;gap:8px;align-items:flex-start}
+.im-nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;line-height:1.4;word-break:break-word}
+.im-del{width:28px;height:28px;border-radius:8px;border:1px solid rgba(220,38,38,.3);background:transparent;cursor:pointer;flex-shrink:0;padding:0}
+.im-t2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 0 26px}
+.im-sp{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2)}
+.im-t3{display:flex;justify-content:space-between;align-items:center;margin:8px 0 0 26px}
+.im-t3>span{font-size:11.5px;color:var(--muted);font-weight:600}
+.im-q{display:flex;gap:4px;align-items:center}
+.im-q button{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);font-size:18px;font-weight:700;cursor:pointer;padding:0}
+.im-q input{width:62px;height:34px;text-align:center;border:2px solid var(--border);border-radius:9px;background:var(--surface);font:700 15px 'JetBrains Mono',monospace;outline:0;padding:0;color:var(--text)}
+.im-q input:focus{border-color:var(--accent)}
+.im-ft{border-top:1px solid var(--border);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);flex-shrink:0}
+.im-info{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.im-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.im-two button{height:44px;border-radius:12px;font:700 13px 'Inter',sans-serif;cursor:pointer}
+.im-two button:disabled{opacity:.5;cursor:not-allowed}
+.im-s{background:rgba(37,99,235,.08);border:1.5px solid rgba(37,99,235,.4);color:var(--accent)}
+.im-h{background:rgba(5,150,105,.08);border:1.5px solid rgba(5,150,105,.4);color:var(--green)}
+.im-msg{font-size:12.5px;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(5,150,105,.1);color:var(--green);font-weight:600}
+.im-cf{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.im-cf button{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font:700 12px 'Inter',sans-serif;cursor:pointer}
 </style>
 </head>
 
@@ -2466,6 +2521,7 @@ body.loading .upload-zone { opacity: 0.45; }
   </div>
 </div>
 <div id="bpPrintRoot"></div>
+<div class="im-back" id="imBack"><div class="im-modal" id="imModal"></div></div>
 
 <!-- Physical Adjust Sheet -->
 <div class="ph-bk" id="phBk" onclick="closePhys()"></div>
@@ -3413,6 +3469,24 @@ function ctIcons(i) {
   return `<span class="rc">${call}${mail}</span>`;
 }
 
+let alertQ = '', movQ = '';
+function nsShell(list, p, q, fn) {
+  if (!document.getElementById(p + 'S')) {
+    list.innerHTML = `<div class="ph-tb"><div class="ph-s" id="${p}S"><span>🔍</span>
+      <input id="${p}Q" placeholder="Search item, SAP, loc..." autocomplete="off" spellcheck="false" oninput="${fn}(this.value)">
+      <button type="button" class="ph-sx" onclick="${fn}Clr()">✕</button></div></div><div id="${p}Rows"></div>`;
+    document.getElementById(p + 'Q').value = q;
+  }
+  document.getElementById(p + 'S').classList.toggle('has', !!q);
+  return document.getElementById(p + 'Rows');
+}
+const nsHit = (q, s) => !q || s.toLowerCase().includes(q.trim().toLowerCase());
+
+function alSearch(v) { alertQ = v; renderAlertList(); }
+function alSearchClr() { alertQ = ''; document.getElementById('alQ').value = ''; renderAlertList(); document.getElementById('alQ').focus(); }
+function mvSearch(v) { movQ = v; renderMovList(); }
+function mvSearchClr() { movQ = ''; document.getElementById('mvQ').value = ''; renderMovList(); document.getElementById('mvQ').focus(); }
+
 function renderAlertList() {
   const all = getStockAlertItems();
   const crit = all.filter(i => lvState(i).k === 'crit').length, re = all.length - crit;
@@ -3423,10 +3497,12 @@ function renderAlertList() {
     { k:'crit', c:'crit', n:crit,       l:'Critical' },
     { k:'re',   c:'re',   n:re,         l:'Reorder' }
   ], alertFilter);
-  const show = all.filter(i => alertFilter === 'all' || lvState(i).k === alertFilter);
+  const show = all.filter(i => (alertFilter === 'all' || lvState(i).k === alertFilter) &&
+    nsHit(alertQ, i.name + ' ' + i.sap + ' ' + (i.location || '')));
   const list = document.getElementById('notifList');
-  if (!show.length) { list.innerHTML = `<div class="notif-empty">✅ No stock alerts</div>`; return; }
-  list.innerHTML = show.map(i => {
+  if (!all.length) { list.innerHTML = `<div class="notif-empty">✅ No stock alerts</div>`; return; }
+  const box = nsShell(list, 'al', alertQ, 'alSearch');
+  box.innerHTML = !show.length ? '<div class="notif-empty">Kuch nahi mila</div>' : show.map(i => {
     const l = lvOf(i), s = lvState(i), q = lvStockNum(i);
     return `<div class="notif-row sa-nrow ${s.k}" onclick="openAlertItem(${i.sn})">
       <div class="notif-row-top"><div class="notif-name">${lmEsc(i.name)}</div><div class="sa-cap ${s.k}"><span class="s">${s.label}</span><span class="o">Order <b>${Math.max(0, l.max - q)}</b></span></div></div>
@@ -4181,9 +4257,13 @@ function renderMovList() {
   if (!movList.length) { list.innerHTML = '<div class="notif-empty">📈 Abhi koi ledger data nahi. Download & Upload → Ledger se upload karein.</div>'; return; }
 
   const now = Date.now(), fmt = ms => new Date(ms).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  const show = movList.filter(m => movFilter === 'all' || m.k === movFilter)
-    .sort((a, b) => movFilter === 'fa' ? b.last - a.last : a.last - b.last);   // fast: latest pehle, baaki: sabse purana pehle
-  if (!show.length) { list.innerHTML = '<div class="notif-empty">Is category me kuch nahi</div>'; return; }
+  const show = movList.filter(m => {
+    if (movFilter !== 'all' && m.k !== movFilter) return false;
+    const it = movItem(m.sap);
+    return nsHit(movQ, (it ? it.name : m.name) + ' ' + m.sap + ' ' + (it && it.location || ''));
+  }).sort((a, b) => movFilter === 'fa' ? b.last - a.last : a.last - b.last);
+  const box = nsShell(list, 'mv', movQ, 'mvSearch');
+  if (!show.length) { box.innerHTML = '<div class="notif-empty">Kuch nahi mila</div>'; return; }
 
   const rows = show.slice(0, movLimit).map(m => {
     const it = movItem(m.sap);
@@ -4197,7 +4277,7 @@ function renderMovList() {
   }).join('');
   const more = show.length > movLimit
     ? `<button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:6px" onclick="movLimit+=150;renderMovList()">Show more (${show.length - movLimit})</button>` : '';
-  list.innerHTML = rows + more;
+  box.innerHTML = rows + more;
 }
 
 function downloadMoving() {
@@ -4321,7 +4401,7 @@ function renderActiveNotifTab() {
   document.getElementById('binBar').style.visibility = isBin ? 'visible' : 'hidden';
 document.querySelector('.notif-slot').style.height = isBin ? 'auto' : '';
 document.getElementById('binBar').style.display = isBin ? '' : 'none';
-document.getElementById('notifPanel').classList.toggle('on-phys', activeNotifTab === 'phys');
+document.getElementById('notifPanel').classList.toggle('on-phys', ['phys','alert','mov'].includes(activeNotifTab));
 
   if (activeNotifTab === 'stock') {
     iconBadge.textContent = '📊';
@@ -7858,7 +7938,7 @@ function renderShfList() {
   const n = shfQ.length, tot = shfQ.reduce((a, r) => a + r.qty, 0);
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Rack se bin me shifted' : 'Sab up to date';
-  skE('binBar').innerHTML = n ? `<div class="bn-line"><div class="bn-tx"><b>${n}</b> records · <b>${tot}</b> qty shifted</div><div class="bn-act">
+skE('binBar').innerHTML = n ? `<div class="bn-line bn-box"><div class="bn-tx"><b>${n}</b> Record · <b>${tot}</b> Qty</div><div class="bn-act">
     <button type="button" class="bn-ib" onclick="shfCsv()" title="Download CSV" aria-label="Download CSV">${BN_I.dl}CSV</button>
     <button type="button" class="bn-ib ok" onclick="shfClear()" title="Clear all" aria-label="Clear all">${BN_I.ok}Clear All</button></div></div>` : '';
   skE('notifList').innerHTML = n ? shfQ.map(r => `<div class="notif-row">
@@ -7922,7 +8002,7 @@ function renderStkList() {
   const n = stkQ.length, tot = stkQ.reduce((a, q) => a + q.qty, 0), done = stkQ.filter(q => q.printed).length;
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Print and clear' : 'Sab up to date';
-  skE('binBar').innerHTML = n ? `<div class="bn-line"><div class="bn-tx"><b>${n}</b> items · <b>${tot}</b> stickers · ${Math.ceil(tot / 16)} pages</div><div class="bn-act">
+skE('binBar').innerHTML = n ? `<div class="bn-line bn-box"><div class="bn-tx"><b>${n}</b> Sticker · <b>${Math.ceil(tot / 16)}</b> Page</div><div class="bn-act">
     <button type="button" class="bn-ib${stkQR ? ' on' : ''}" onclick="stkQrT(${!stkQR})" title="QR on stickers: ${stkQR ? 'on' : 'off'}" aria-label="QR on stickers">${BN_I.qr}QR</button>
     ${done ? `<button type="button" class="bn-ib ok" onclick="stkClearDone()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd">${done}</span></button>` : ''}
     <button type="button" class="bn-ib pri" onclick="stkPrint()" title="Print all" aria-label="Print all">${BN_I.pr}Print All</button></div></div>` : '';
@@ -8036,6 +8116,7 @@ function renderStickerBox() {
         <div class="sf-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
         ${stock > 0 ? `<button class="sf-st" onclick="shfFill()" aria-label="Fill full stock"><small>Stock</small><b>${stock}</b></button>` : ''}
         <input class="sf-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
+        <button type="button" class="im-btn" onclick="imOpen()" aria-label="Import received list">📋</button>
       </div>
       <div class="sf-r2">
         <button class="sf-a1" onclick="stkAdd()">🏷️ ${q ? 'Update' : 'Sticker'}</button>
@@ -8434,6 +8515,295 @@ window.closeScanner = function () {
   radios.forEach(r => r.addEventListener('change', sync));
   sync();
 })();
+
+
+// ═══ IMPORT LIST (temporary, Tag/Shift) ═══
+const IM = { step: 'paste', rows: [], sel: {}, cf: '', msg: '', err: '', ferr: '', txt: '', dup: 0, cut: 0, cols: null, busy: false, rem: '' };
+const IM_MAX = 50;
+const imEl = document.getElementById('imModal');
+
+function imOpen() {
+  if (!guard('binprint')) return;
+  IM.step = 'paste'; IM.rows = []; IM.sel = {}; IM.cf = ''; IM.msg = ''; IM.err = ''; IM.ferr = ''; IM.txt = '';
+  const r = skE('skR');
+  IM.rem = r ? r.value.trim().toUpperCase() : '';
+  document.getElementById('imBack').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  imRender();
+  logAct('i_bin', 'Import list opened', '');
+}
+
+function imClose(force) {
+  if (IM.busy) { showToast('Sending to sheet, please wait', 'amber'); return; }
+  const pending = IM.step === 'list' && IM.rows.some(r => !r.done);
+  if (!force && pending) { IM.cf = 'discard'; imFoot(); return; }
+  if (pending) logAct('i_bin', 'Import list discarded', IM.rows.length + ' items');
+  document.getElementById('imBack').classList.remove('open');
+  document.body.style.overflow = '';
+  IM.rows = []; IM.sel = {}; IM.step = 'paste'; IM.cf = '';
+}
+
+function imDetect(h) {
+  const H = h.map(x => String(x == null ? '' : x).toLowerCase().trim());
+  const f = fn => H.findIndex(fn);
+  let sap = f(x => x.includes('sap'));
+  if (sap < 0) sap = f(x => /material|item code|part|code/.test(x) && !/desc|text|name/.test(x));
+  const qty = f(x => /qty|quantity|received|recd/.test(x) && !/uom|unit/.test(x));
+  const desc = f(x => /desc|name|text/.test(x));
+  return { sap, qty, desc, head: h.map(x => String(x == null ? '' : x).trim()) };
+}
+
+const imCol = i => String.fromCharCode(65 + (i % 26));
+
+// No header found: guess SAP and Qty columns from the data itself
+function imGuess(data) {
+  const rows = data.slice(0, 200);
+  const w = Math.max(0, ...rows.map(r => r.length));
+  const dg = v => String(v == null ? '' : v).replace(/\.0$/, '').replace(/\D/g, '');
+  const known = new Set(itemMaster.map(i => String(i.sap).trim()));
+  let sap = -1, best = 0;
+
+  for (let c = 0; c < w; c++) {
+    let hit = 0, tot = 0;
+    rows.forEach(r => { const d = dg(r[c]); if (!d) return; tot++; if (known.has(padSAP(d))) hit++; });
+    if (tot && hit / tot > 0.3 && hit / tot > best) { best = hit / tot; sap = c; }
+  }
+  if (sap < 0) {
+    for (let c = 0; c < w; c++) {
+      let ok = 0, tot = 0;
+      rows.forEach(r => { const d = dg(r[c]); if (!d) return; tot++; if (d.length >= 9 && d.length <= 10) ok++; });
+      if (tot && ok / tot > 0.6 && ok / tot > best) { best = ok / tot; sap = c; }
+    }
+  }
+  if (sap < 0) return null;
+
+  let qty = -1;
+  for (let c = 0; c < w && qty < 0; c++) {
+    if (c === sap) continue;
+    let num = 0, big = 0, tot = 0;
+    rows.forEach(r => {
+      const v = String(r[c] == null ? '' : r[c]).replace(/,/g, '').trim();
+      if (!v) return; tot++;
+      if (/^-?\d+(\.\d+)?$/.test(v)) { num++; if (v.replace(/\D/g, '').length >= 9) big++; }
+    });
+    if (tot && num / tot > 0.7 && big / tot < 0.5) qty = c;
+  }
+  if (qty < 0) return null;
+  return { sap, qty, desc: -1, head: Array.from({ length: w }, (_, i) => 'Column ' + imCol(i)) };
+}
+
+function imBuild(data) {
+  let c = null, hr = -1;
+  for (let r = 0; r < Math.min(10, data.length); r++) {
+    const d = imDetect(data[r]);
+    if (d.sap > -1 && d.qty > -1) { c = d; hr = r; break; }
+  }
+  if (!c) {
+    c = imGuess(data);
+    if (!c) return 'Could not find the SAP code and qty columns';
+  }
+  const map = {}, order = [];
+  let dup = 0;
+  for (let i = hr + 1; i < data.length; i++) {
+    const row = data[i];
+    const dg = String(row[c.sap] == null ? '' : row[c.sap]).replace(/\.0$/, '').replace(/\D/g, '');
+    if (!dg) continue;
+    const sap = padSAP(dg);
+    const q = parseFloat(String(row[c.qty] == null ? '' : row[c.qty]).replace(/,/g, '')) || 0;
+    if (map[sap] !== undefined) { map[sap] += q; dup++; } else { map[sap] = q; order.push(sap); }
+  }
+  if (!order.length) return 'No valid rows found';
+  const master = {};
+  itemMaster.forEach(i => { master[String(i.sap).trim()] = i; });
+  IM.cut = Math.max(0, order.length - IM_MAX);
+  IM.rows = order.slice(0, IM_MAX).map((sap, i) => {
+    const it = master[sap];
+    return { id: i, sap, qty: Math.round(map[sap] * 1000) / 1000, inM: !!it, name: it ? it.name : 'Not in master',
+      loc: it && it.location ? String(it.location).trim() : '', stock: it ? lvStockNum(it) : 0, done: '' };
+  });
+  IM.sel = {};
+  IM.rows.forEach(r => { if (r.inM) IM.sel[r.id] = true; });
+  IM.dup = dup; IM.cols = c;
+  return '';
+}
+
+function imGo(data) {
+  const e = (!data || data.length < 1) ? 'Add at least one row' : imBuild(data);
+  if (e) { IM.err = e; imRender(); return; }
+  IM.err = ''; IM.step = 'list'; IM.msg = ''; IM.ferr = '';
+  logAct('i_bin', 'Import list loaded', IM.rows.length + ' items');
+  imRender();
+}
+
+function imFile(file) {
+  const rd = new FileReader();
+  rd.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      imGo(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' }));
+    } catch (x) { IM.err = 'Could not read the file'; imRender(); }
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+function imHead(sub) {
+  return `<div class="im-hd"><div class="im-ic">📋</div><div class="im-tt"><b>Import received list</b><span>${sub}</span></div><button type="button" class="im-x" data-a="x" aria-label="Close">✕</button></div>`;
+}
+
+function imSel() { return IM.rows.filter(r => IM.sel[r.id] && r.inM && !r.done); }
+function imQty(a) { return Math.round(a.reduce((s, r) => s + r.qty, 0) * 1000) / 1000; }
+
+function imRender() {
+  if (IM.step === 'paste') {
+    imEl.innerHTML = imHead('Paste from Excel or upload a file') +
+      `<div class="im-bd"><div class="im-drop"><textarea id="imTa" placeholder="Paste rows from Excel here (header is optional)">${lmEsc(IM.txt)}</textarea></div>
+      <button type="button" class="im-up" data-a="up">⬆️ Upload file (xlsx, xls, csv)</button>
+      <input type="file" id="imFi" accept=".csv,.txt,.xlsx,.xls" style="display:none">
+      <div class="im-err">${lmEsc(IM.err)}</div>
+      <button type="button" class="im-go" data-a="go">Show list</button>
+      <div class="im-hint">Header is optional. SAP code and qty columns are detected automatically. Rows with the same SAP code are merged. Max ${IM_MAX} items.</div></div>`;
+    return;
+  }
+  const nm = IM.rows.filter(r => !r.inM).length;
+  const nl = IM.rows.filter(r => r.inM && !r.loc && !r.done).length;
+  const dn = IM.rows.filter(r => r.done).length;
+  let h = imHead(IM.rows.length + ' items found') + '<div class="im-chips">';
+  h += `<span class="im-c">SAP: ${lmEsc(IM.cols.head[IM.cols.sap])}</span><span class="im-c">Qty: ${lmEsc(IM.cols.head[IM.cols.qty])}</span>`;
+  if (IM.dup) h += `<span class="im-c b">${IM.dup} duplicate merged</span>`;
+  if (IM.cut) h += `<span class="im-c a">First ${IM_MAX} only</span>`;
+  if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
+  if (nl) h += `<span class="im-c a">${nl} no location</span>`;
+  if (dn) h += `<span class="im-c g">${dn} done</span>`;
+  h += '</div>';
+  const act = IM.rows.filter(r => r.inM && !r.done);
+  const all = act.length && act.every(r => IM.sel[r.id]);
+  h += `<div class="im-bar"><label><input type="checkbox" id="imAll" ${all ? 'checked' : ''}> Select all</label><button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button></div><div class="im-ls">`;
+  IM.rows.forEach(r => {
+    const sl = !r.done && r.inM && stkFind(r.sap);
+    h += `<div class="im-it${r.done ? ' dn' : (!r.inM ? ' bad' : '')}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">🗑️</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
+    if (r.done) h += `<span class="im-c g">${r.done === 's' ? 'Added to sticker list' : 'Shifted'}</span>`;
+    else if (!r.inM) h += '<span class="im-c r">Not in master</span>';
+    else {
+      h += r.loc ? `<span class="im-c b">📍 ${lmEsc(r.loc)}</span>` : '<span class="im-c a">No location</span>';
+      h += `<span class="im-c">Stock ${r.stock}</span>`;
+      if (sl) h += '<span class="im-c a">Already in sticker list</span>';
+    }
+    h += '</div>';
+    if (!r.done && r.inM) h += `<div class="im-t3"><span>Qty</span><div class="im-q"><button type="button" data-a="m" data-id="${r.id}">−</button><input type="number" min="0" step="any" inputmode="decimal" data-q="${r.id}" value="${r.qty}"><button type="button" data-a="p" data-id="${r.id}">+</button></div></div>`;
+    h += '</div>';
+  });
+  if (!IM.rows.length) h += '<div class="notif-empty">All rows removed</div>';
+  h += '</div><div class="im-ft" id="imFt"></div>';
+  imEl.innerHTML = h;
+  imFoot();
+}
+
+function imFoot() {
+  const f = document.getElementById('imFt');
+  if (!f) return;
+  if (IM.cf) {
+    const t = IM.cf === 'discard' ? 'Discard this list? Nothing has been saved.' : 'Clear the whole list?';
+    f.innerHTML = `<div class="im-cf"><span>${t}</span><span style="display:flex;gap:6px"><button type="button" data-a="no">No</button><button type="button" data-a="yes" style="color:var(--red)">Yes</button></span></div>`;
+    return;
+  }
+  const a = imSel(), n = a.length, b = IM.busy ? ' disabled' : '';
+  f.innerHTML = `<div class="im-info">${n} selected, total qty ${imQty(a)}${IM.rem ? ' · Remark: ' + lmEsc(IM.rem) : ''}</div>
+    <div class="im-two"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker (${n})</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift (${n})</button></div>
+    ${IM.ferr ? `<div class="im-err">${lmEsc(IM.ferr)}</div>` : ''}${IM.msg ? `<div class="im-msg">${lmEsc(IM.msg)}</div>` : ''}`;
+}
+
+function imRun(k) {
+  if (!guard('binprint') || IM.busy) return;
+  const a = imSel();
+  IM.ferr = ''; IM.msg = '';
+  if (!a.length) { IM.ferr = 'Select at least one item'; imFoot(); return; }
+  if (a.some(r => r.qty <= 0)) { IM.ferr = 'An item has qty 0. Fix it or remove it'; imFoot(); return; }
+  let ok, skip, why;
+  if (k === 'h') {
+    ok = a.filter(r => r.loc); skip = a.length - ok.length; why = 'no location';
+    if (!ok.length) { IM.ferr = 'Selected items have no location, cannot shift'; imFoot(); return; }
+  } else {
+    ok = a.filter(r => !stkFind(r.sap)); skip = a.length - ok.length; why = 'already in sticker list';
+    if (!ok.length) { IM.ferr = 'Selected items are already in the sticker list'; imFoot(); return; }
+  }
+  const base = Date.now(), rem = IM.rem;
+  if (k === 's') {
+    ok.forEach(r => {
+      const q = { sap: r.sap, qty: Math.min(999, Math.max(1, Math.round(r.qty))), rem, printed: false };
+      stkQ.push(q);
+      stkPut(q);
+    });
+    stkUI();
+  } else {
+    ok.forEach((r, i) => {
+      const o = { id: base + i, sap: r.sap, name: r.name, qty: r.qty, loc: r.loc, rem, by: userName, ts: base + i };
+      shfQ.unshift(o);
+      shfSend({ action: 'setShift', id: o.id, sap: o.sap, name: o.name, qty: o.qty, loc: o.loc, rem: o.rem, by: o.by, ts: o.ts });
+    });
+    shfUI();
+  }
+  const tot = imQty(ok);
+  ok.forEach(r => { r.done = k; IM.sel[r.id] = false; });
+  logAct('i_bin', k === 's' ? 'Import sticker queued' : 'Import shifted', ok.length + ' items, qty ' + tot + (skip ? ', skipped ' + skip : ''));
+  const base_msg = (k === 's' ? ok.length + ' items added to sticker list' : ok.length + ' items shifted (qty ' + tot + ')') + (skip ? '. ' + skip + ' skipped (' + why + ')' : '');
+  IM.msg = base_msg + '. Sending to sheet…';
+  IM.busy = true;
+  imRender();
+  binQueue.then(() => {
+    IM.busy = false;
+    IM.msg = base_msg + '. Sent to sheet ✓';
+    if (document.getElementById('imBack').classList.contains('open')) imRender();
+  });
+}
+imEl.addEventListener('click', e => {
+  const t = e.target.closest('[data-a]');
+  if (!t) return;
+  const a = t.dataset.a, id = +t.dataset.id;
+  const row = IM.rows.find(r => r.id === id);
+  if (a === 'x') imClose(false);
+  else if (a === 'up') document.getElementById('imFi').click();
+  else if (a === 'go') {
+    const v = document.getElementById('imTa').value;
+    IM.txt = v;
+    if (!v.trim()) { IM.err = 'Paste a list or upload a file first'; imRender(); return; }
+    const L = v.split(/\r?\n/).filter(l => l.trim());
+    const sep = L[0].indexOf('\t') > -1 ? '\t' : ',';
+    imGo(L.map(l => l.split(sep)));
+  }
+  else if (a === 'clr') { IM.cf = 'clear'; imFoot(); }
+  else if (a === 'no') { IM.cf = ''; imFoot(); }
+  else if (a === 'yes') {
+    const d = IM.cf === 'discard';
+    IM.cf = '';
+    if (d) imClose(true);
+    else { logAct('i_bin', 'Import list cleared', IM.rows.length + ' items'); IM.rows = []; IM.sel = {}; IM.txt = ''; IM.step = 'paste'; imRender(); }
+  }
+  else if (a === 'del' && row) {
+    IM.rows = IM.rows.filter(r => r.id !== id); delete IM.sel[id]; IM.ferr = '';
+    logAct('i_bin', 'Import row removed', 'SAP ' + row.sap);
+    imRender();
+  }
+  else if (a === 'm' && row) { row.qty = Math.max(0, Math.round((row.qty - 1) * 1000) / 1000); IM.ferr = ''; imRender(); }
+  else if (a === 'p' && row) { row.qty = Math.round((row.qty + 1) * 1000) / 1000; IM.ferr = ''; imRender(); }
+  else if (a === 'st') imRun('s');
+  else if (a === 'sh') imRun('h');
+});
+
+imEl.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'imFi') { if (t.files[0]) imFile(t.files[0]); t.value = ''; return; }
+  if (t.id === 'imAll') { IM.rows.forEach(r => { if (r.inM && !r.done) IM.sel[r.id] = t.checked; }); IM.ferr = ''; imRender(); return; }
+  if (t.dataset.c !== undefined) { IM.sel[t.dataset.c] = t.checked; IM.ferr = ''; imRender(); }
+});
+
+imEl.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'imTa') { IM.txt = t.value; return; }
+  if (t.dataset.q !== undefined) {
+    const r = IM.rows.find(x => x.id === +t.dataset.q);
+    if (r) { r.qty = Math.max(0, parseFloat(t.value) || 0); IM.ferr = ''; imFoot(); }
+  }
+});
 
 renderStats();
 if (currentItem && !addItemMode) renderItem();
