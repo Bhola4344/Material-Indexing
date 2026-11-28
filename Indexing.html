@@ -2633,12 +2633,18 @@ body.loading .upload-zone { opacity: 0.45; }
 .im-lw{margin:10px 0 0 0}
 .im-li{position:relative;flex:1 1 0;min-width:0}
 .im-li .notif-inline-input{width:100%;height:42px;font-size:14px;padding-right:40px}
+.im-li .notif-inline-input::placeholder{font:500 13px 'Inter',sans-serif;text-transform:none;letter-spacing:0;color:var(--muted);opacity:.75;text-overflow:ellipsis}
 .im-li .loc-scan-btn-sm{right:6px;width:30px;height:30px}
 .im-li .loc-scan-btn-sm svg{width:18px;height:18px}
 
 .im-qw{margin-left:auto;display:flex;align-items:center;gap:6px}
 .im-ql{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
 .im-t2 .im-qw .im-q{margin-left:0}
+.im-tt span,.im-chips .im-c{text-transform:uppercase;letter-spacing:.3px}
+.im-chips .im-c[data-a]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s}
+.im-chips .im-c[data-a]:active{transform:scale(.94)}
+.im-chips .im-c.g.act{background:var(--green);border-color:var(--green);color:#fff}
+.im-chips .im-c.a.act{background:var(--amber);border-color:var(--amber);color:#fff}
 </style>
 </head>
 
@@ -8918,7 +8924,7 @@ function imBuild(data) {
 function imGo(data) {
   const e = (!data || data.length < 1) ? 'Add at least one row' : imBuild(data);
   if (e) { IM.err = e; imRender(); return; }
-  IM.err = ''; IM.step = 'list'; IM.msg = ''; IM.ferr = '';
+  IM.err = ''; IM.step = 'list'; IM.msg = ''; IM.ferr = ''; IM.sort = '';
   logAct('i_bin', 'Import list loaded', IM.rows.length + ' items');
   imRender();
 }
@@ -8937,7 +8943,7 @@ function imFile(file) {
 function imHead(sub, n) {
   const s = (i, t) => `<span class="${n > i ? 'ok' : n === i ? 'on' : ''}"><i>${n > i ? '✓' : i}</i>${t}</span>`;
   return `<div class="im-stripe"></div>
-  <div class="im-hd"><div class="im-ic">📋</div><div class="im-tt"><b>Import received list</b><span>${sub}</span></div><button type="button" class="im-x" data-a="x" aria-label="Close">✕</button></div>
+  <div class="im-hd"><div class="im-ic">📋</div><div class="im-tt"><b>MATERIAL RECEIVED LIST</b><span>${sub}</span></div><button type="button" class="im-x" data-a="x" aria-label="Close">✕</button></div>
   <div class="im-steps">${s(1, 'Paste')}<hr>${s(2, 'Review')}<hr>${s(3, 'Send')}</div>`;
 }
 
@@ -8990,11 +8996,11 @@ function imRender() {
   const ok = IM.rows.filter(r => r.inM && r.loc && !r.done).length;
   const dn = IM.rows.filter(r => r.done).length;
   let h = imHead(IM.rows.length + ' items found', dn ? 3 : 2) + '<div class="im-chipsrow"><div class="im-chips">';
-  if (ok) h += `<span class="im-c g">📍 ${ok} located</span>`;
+  if (ok) h += `<span class="im-c g${IM.sort === 'l' ? ' act' : ''}" data-a="sl">📍 ${ok} located</span>`;
   if (IM.dup) h += `<span class="im-c b">${IM.dup} duplicate merged</span>`;
   if (IM.cut) h += `<span class="im-c a">First ${IM_MAX} only</span>`;
   if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
-  if (nl) h += `<span class="im-c a">${nl} no location</span>`;
+  if (nl) h += `<span class="im-c a${IM.sort === 'n' ? ' act' : ''}" data-a="sn">${nl} no location</span>`;
   if (dn) h += `<span class="im-c g">${dn} done</span>`;
   h += '</div><span class="im-sel" id="imSelInfo"></span></div>';
   const act = IM.rows.filter(r => r.inM && !r.done && imHit(r));
@@ -9006,7 +9012,8 @@ function imRender() {
     </div>
     <div class="im-srch"><span>🔍</span><input id="imQ" type="text" placeholder="Search name, SAP, location" value="${lmEsc(IM.q || '')}" autocomplete="off" autocorrect="off" spellcheck="false"></div>
   </div><div class="im-ls">`;
-  IM.rows.forEach(r => {
+  const rank = r => IM.sort === 'l' ? (r.inM && r.loc ? 0 : 1) : IM.sort === 'n' ? (r.inM && !r.loc ? 0 : 1) : 0;
+  [...IM.rows].sort((a, b) => rank(a) - rank(b)).forEach(r => {
     const sl = !r.done && r.inM && stkFind(r.sap);
     const cls = r.done ? ' dn' : (!r.inM ? ' bad' : (r.loc ? '' : ' nl'));
     h += `<div class="im-it${cls}${IM.sel[r.id] && !r.done ? ' sel' : ''}" data-s="${lmEsc((r.name + ' ' + r.sap + ' ' + (r.loc || '')).toLowerCase())}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">✕</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
@@ -9160,6 +9167,13 @@ imEl.addEventListener('click', e => {
     if (qi) qi.value = row.qty;
     imFoot();
     imSave();
+  }
+  else if (a === 'sl' || a === 'sn') {
+    const k = a === 'sl' ? 'l' : 'n';
+    IM.sort = IM.sort === k ? '' : k;
+    imRender();
+    const ls = imEl.querySelector('.im-ls');
+    if (ls) ls.scrollTop = 0;
   }
   else if (a === 'st') imRun('s');
   else if (a === 'loc' && row) imSaveLoc(row);
