@@ -2623,11 +2623,11 @@ body.loading .upload-zone { opacity: 0.45; }
 .im-lw .notif-save-btn{flex:0 0 auto;width:auto;height:42px;padding:0 20px;border-radius:10px;font-size:14px}
 
 /* footer: 3 buttons in 1 row */
-.im-three{display:grid;grid-template-columns:1fr 1fr 1.7fr;gap:8px}
+.im-three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .im-three button{height:48px;border-radius:14px;font:700 13.5px 'Inter',sans-serif;cursor:pointer;transition:transform .1s;padding:0 4px;white-space:nowrap}
 .im-three button:active{transform:scale(.97)}
 .im-three button:disabled{opacity:.5;cursor:not-allowed}
-.im-three .im-bo{margin-top:0;width:auto}
+.im-three .im-bo{margin-top:0;width:auto;font-size:12.5px}
 /* ─── Import list: left margin hatao, scan inside input, Qty label ─── */
 .im-t2{margin:8px 0 0 0}
 .im-lw{margin:10px 0 0 0}
@@ -8996,11 +8996,11 @@ function imRender() {
   const ok = IM.rows.filter(r => r.inM && r.loc && !r.done).length;
   const dn = IM.rows.filter(r => r.done).length;
   let h = imHead(IM.rows.length + ' items found', dn ? 3 : 2) + '<div class="im-chipsrow"><div class="im-chips">';
-  if (ok) h += `<span class="im-c g${IM.sort === 'l' ? ' act' : ''}" data-a="sl">📍 ${ok} located</span>`;
+  if (ok) h += `<span class="im-c g${IM.sort === 'l' ? ' act' : ''}" data-a="sl">📍 ${ok} Loc</span>`;
   if (IM.dup) h += `<span class="im-c b">${IM.dup} duplicate merged</span>`;
   if (IM.cut) h += `<span class="im-c a">First ${IM_MAX} only</span>`;
   if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
-  if (nl) h += `<span class="im-c a${IM.sort === 'n' ? ' act' : ''}" data-a="sn">${nl} no location</span>`;
+  if (nl) h += `<span class="im-c a${IM.sort === 'n' ? ' act' : ''}" data-a="sn">✕ ${nl} No Loc</span>`;
   if (dn) h += `<span class="im-c g">${dn} done</span>`;
   h += '</div><span class="im-sel" id="imSelInfo"></span></div>';
   const act = IM.rows.filter(r => r.inM && !r.done && imHit(r));
@@ -9054,7 +9054,7 @@ function imFoot() {
   }
   const a = imSel(), n = a.length, b = IM.busy ? ' disabled' : '';
   f.innerHTML = `${IM.rem ? `<div class="im-info">Remark: ${lmEsc(IM.rem)}</div>` : ''}
-    <div class="im-three"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift</button><button type="button" class="im-bo" data-a="bo"${b}>🏷️ Sticker &amp; ✓ Shift</button></div>
+    <div class="im-three"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shifting</button><button type="button" class="im-bo" data-a="bo"${b}>⚡ Sticker + Shifting</button></div>
     ${IM.ferr ? `<div class="im-err">${lmEsc(IM.ferr)}</div>` : ''}${IM.msg ? `<div class="im-msg">${lmEsc(IM.msg)}</div>` : ''}`;
 }
 
