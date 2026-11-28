@@ -3186,7 +3186,7 @@ body.loading .upload-zone { opacity: 0.45; }
 
    <script>
    if (!sessionStorage.getItem('loggedIn')) throw new Error('Not logged in');
-    const API = "https://script.google.com/macros/s/AKfycbzZwUwlDlmVAswyn_3K98XXoAN9RckrekUEhNVwcsAk8ewXzjiSMsOW5mSuZMOJ-rFf/exec";
+const API = "https://script.google.com/macros/s/AKfycbz12V2C8FBZNv7EjGiV_o4c_sB5BuG0oMgW6gqpzmNMekL4tN0C2oE5VSAhDbwq0a6F/exec";
 const LOGIN_API = "https://script.google.com/macros/s/AKfycbyc_BkRKEin5Yo_F4ufq9g_pCl1pV0SVv2clc40LjvGADU1vFF2d_hQkDgVdMReP9ZCFw/exec";
 const PERMS = new Set(JSON.parse(sessionStorage.getItem('userPerms') || '[]'));
 const can = p => PERMS.has(p);
@@ -7325,6 +7325,7 @@ window.addEventListener('pageshow', e => {
       loadMoving();
       loadPhys();
       syncBin();
+      imPull();
 
       const prevPendingKey = getStockNoLocationItems().map(i => i.sn + ':' + i.location + ':' + i.curr_stock).sort().join(',');
 
@@ -8722,21 +8723,62 @@ const IM_KEY = 'importListState';
 const imEl = document.getElementById('imModal');
 
 // list localStorage me save rehti hai, jab tak "Clear list" na dabao
+let imLast = '', imPushT = null, imPulling = false;
+
+function imState() {
+  if (IM.step === 'list' && IM.rows.length)
+    return { step: 'list', rows: IM.rows, sel: IM.sel, dup: IM.dup, cut: IM.cut, cols: IM.cols, rem: IM.rem };
+  if (IM.txt && IM.txt.trim()) return { step: 'paste', txt: IM.txt };
+  return null;
+}
+
 function imSave() {
+  const s = imState(), j = JSON.stringify(s);
+  if (j !== imLast) {
+    imLast = j;
+    IM.ts = Date.now();
+    clearTimeout(imPushT);
+    imPushT = setTimeout(imPush, 1200);
+  }
   try {
-    if (IM.step === 'list' && IM.rows.length) {
-      localStorage.setItem(IM_KEY, JSON.stringify({ step: 'list', rows: IM.rows, sel: IM.sel, dup: IM.dup, cut: IM.cut, cols: IM.cols, rem: IM.rem }));
-    } else if (IM.txt && IM.txt.trim()) {
-      localStorage.setItem(IM_KEY, JSON.stringify({ step: 'paste', txt: IM.txt }));
-    } else {
-      localStorage.removeItem(IM_KEY);
-    }
+    if (s) localStorage.setItem(IM_KEY, JSON.stringify({ ...s, ts: IM.ts || 0 }));
+    else localStorage.removeItem(IM_KEY);
   } catch (e) {}
 }
+
+function imPush() {
+  imPushT = null;
+  fetch(API, { method: 'POST', body: JSON.stringify({ action: 'setImport', state: imState(), by: userName, ts: IM.ts }) })
+    .catch(() => {});
+}
+
+function imPull() {
+  if (IM.busy || imPulling || imPushT) return;
+  imPulling = true;
+  fetch(`${API}?action=getImport`).then(r => r.json()).then(d => {
+    if (!d || typeof d.ts !== 'number' || d.ts <= (IM.ts || 0)) return;
+    const a = document.activeElement;
+    if (a && imEl.contains(a) && /INPUT|TEXTAREA/.test(a.tagName)) return;
+    const s = d.state;
+    if (s && s.step === 'list' && Array.isArray(s.rows) && s.rows.length && s.cols) {
+      Object.assign(IM, { step: 'list', rows: s.rows, sel: s.sel || {}, dup: s.dup || 0, cut: s.cut || 0, cols: s.cols, rem: s.rem || '' });
+    } else {
+      IM.rows = []; IM.sel = {}; IM.step = 'paste'; IM.txt = (s && s.txt) || '';
+    }
+    IM.ts = d.ts;
+    imRefresh();
+    imLast = JSON.stringify(imState());
+    imSave();
+    if (document.getElementById('imBack').classList.contains('open')) imRender();
+  }).catch(() => {}).finally(() => { imPulling = false; });
+}
+setInterval(() => { if (document.getElementById('imBack').classList.contains('open')) imPull(); }, 8000);
+
 function imLoad() {
   try {
     const s = JSON.parse(localStorage.getItem(IM_KEY));
     if (!s) return;
+    IM.ts = s.ts || 0;
     if (s.step === 'list' && Array.isArray(s.rows) && s.rows.length && s.cols) {
       s.rows.forEach(r => {
         if (r.done === 's') { r.dS = true; r.done = ''; }
@@ -8764,6 +8806,7 @@ function imRefresh() {
   });
 }
 imLoad();
+imLast = JSON.stringify(imState());
 
 function imOpen() {
   if (!guard('binprint')) return;
@@ -8771,6 +8814,7 @@ function imOpen() {
   const cur = r ? r.value.trim().toUpperCase() : '';
   if (cur || IM.step !== 'list') IM.rem = cur;
   IM.cf = ''; IM.msg = ''; IM.err = ''; IM.ferr = '';
+  imPull();
   imRefresh();
   document.getElementById('imBack').classList.add('open');
   document.body.style.overflow = 'hidden';
