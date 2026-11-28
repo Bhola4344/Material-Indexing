@@ -2345,9 +2345,9 @@ body.loading .upload-zone { opacity: 0.45; }
 .sf-n input{text-align:center;font:700 17px 'JetBrains Mono',monospace;border-width:2px;outline:0;cursor:text;-moz-appearance:textfield}
 .sf-n input::-webkit-inner-spin-button{-webkit-appearance:none}
 .sf-n input:focus{border-color:var(--accent)}
-.sf-st{flex-shrink:0;width:48px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);color:var(--accent);cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;-webkit-tap-highlight-color:transparent}
-.sf-st small{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
-.sf-st b{font:700 14px 'JetBrains Mono',monospace}
+.sf-st{flex-shrink:0;width:40px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);color:var(--accent);cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;-webkit-tap-highlight-color:transparent}
+.sf-st small{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.2px}
+.sf-st b{font:700 13px 'JetBrains Mono',monospace}
 .sf-st:active{background:rgba(37,99,235,.14)}
 .sf-rem{flex:1 1 0;min-width:0;height:46px;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:600 14px 'Inter',sans-serif;padding:0 10px;text-transform:uppercase;outline:0;-webkit-appearance:none}
 .sf-rem:focus{border-color:var(--accent)}
@@ -2408,60 +2408,192 @@ body.loading .upload-zone { opacity: 0.45; }
 .bn-box .bn-ib svg{width:14px;height:14px}
 .bn-box .bn-bd{min-width:16px;height:14px;padding:0 4px;font-size:10px}
 
-/* ─── Import list modal ─── */
-.im-btn{flex-shrink:0;width:46px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);font-size:18px;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+/* ─── Import list modal (redesign) ─── */
+.im-btn{flex-shrink:0;width:38px;height:46px;border-radius:10px;border:1.5px dashed rgba(37,99,235,.5);background:rgba(37,99,235,.05);font-size:16px;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
 .im-btn:active{background:rgba(37,99,235,.14)}
-.im-back{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;z-index:970;align-items:flex-end;justify-content:center}
+.im-back{position:fixed;inset:0;background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:none;z-index:970;align-items:flex-end;justify-content:center}
 .im-back.open{display:flex}
-.im-modal{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
-.im-hd{display:flex;gap:10px;align-items:center;padding:14px 14px 8px;flex-shrink:0}
-.im-ic{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.im-modal{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:600px;height:calc(100vh - 8px);height:calc(100dvh - 8px);display:flex;flex-direction:column;overflow:hidden;animation:imUp .32s cubic-bezier(.32,1.1,.4,1)}
+@keyframes imUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.im-stripe{display:none}
+
+/* header */
+.im-hd{display:flex;gap:10px;align-items:center;padding:12px 14px 8px;flex-shrink:0}
+.im-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 10px rgba(37,99,235,.28)}
 .im-tt{flex:1;min-width:0}
-.im-tt b{display:block;font-size:14px}
-.im-tt span{font-size:11px;color:var(--muted)}
-.im-x{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0}
+.im-tt b{display:block;font-size:15px;font-weight:700;letter-spacing:-.2px}
+.im-tt span{font-size:11.5px;color:var(--muted)}
+.im-x{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;flex-shrink:0;font-size:14px}
+.im-x:active{border-color:var(--accent);color:var(--accent)}
+
+/* steps */
+.im-steps{display:flex;align-items:center;gap:8px;padding:4px 16px 12px;flex-shrink:0;font-size:11.5px;font-weight:600;color:var(--muted)}
+.im-steps span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.im-steps i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);display:grid;place-items:center;font:700 10.5px 'Inter',sans-serif;font-style:normal}
+.im-steps .on{color:var(--text)}
+.im-steps .on i{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+.im-steps .ok{color:var(--green)}
+.im-steps .ok i{background:var(--green);border-color:var(--green);color:#fff}
+.im-steps hr{flex:1;border:0;border-top:1.5px dashed var(--border);margin:0}
+
 .im-tmp{margin:0 14px 8px;font-size:11.5px;padding:6px 10px;border-radius:8px;background:rgba(180,83,9,.1);color:var(--amber);font-weight:600;flex-shrink:0}
-.im-bd{padding:0 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto}
-.im-drop{border:1.5px dashed var(--border);border-radius:12px;padding:8px;background:var(--surface2)}
-.im-drop textarea{width:100%;height:110px;border:0;background:transparent;outline:0;resize:none;font:12px 'JetBrains Mono',monospace;color:var(--text)}
-.im-up{width:100%;height:40px;margin-top:8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font:600 13px 'Inter',sans-serif;color:var(--text);cursor:pointer}
-.im-go{width:100%;height:44px;margin-top:8px;border-radius:12px;border:0;background:var(--accent);color:#fff;font:700 14px 'Inter',sans-serif;cursor:pointer}
+
+/* paste step (full height) */
+.im-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:2px 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.im-drop{flex:1;min-height:180px;display:flex;border:2px dashed rgba(37,99,235,.35);border-radius:16px;padding:10px;background:rgba(37,99,235,.03);transition:border-color .2s,background .2s}
+.im-drop:focus-within{border-color:var(--accent);background:rgba(37,99,235,.06)}
+.im-drop textarea{flex:1;width:100%;border:0;background:transparent;outline:0;resize:none;font:12px/1.6 'JetBrains Mono',monospace;color:var(--text)}
+.im-drop{position:relative}
+.im-drop textarea{position:relative;z-index:1}
+.im-emp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:14px;color:var(--muted);pointer-events:none}
+.im-big{font-size:34px;line-height:1}
+.im-emp b{font-size:14px;color:var(--text)}
+.im-emp p{font-size:12px}
+.im-ex{margin-top:6px;padding:6px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);font:11.5px/1.7 'JetBrains Mono',monospace;color:var(--muted)}
+.im-ex em{font-style:normal;color:var(--accent2)}
+.im-hn{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.im-hn span{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.im-two .im-up,.im-two .im-go{margin-top:0}
+.im-up{width:100%;height:44px;margin-top:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);font:600 13px 'Inter',sans-serif;color:var(--text);cursor:pointer}
+.im-up:active{border-color:var(--accent);color:var(--accent)}
+.im-go{width:100%;height:50px;margin-top:8px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font:700 15px 'Inter',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(37,99,235,.3)}
+.im-go:active{transform:scale(.98)}
 .im-err{font-size:12.5px;color:var(--red);font-weight:600;min-height:18px;margin-top:8px}
 .im-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
-.im-chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 14px 8px;flex-shrink:0}
-.im-c{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--surface2);color:var(--muted)}
+
+/* review step */
+.im-chips{display:flex;gap:6px;overflow-x:auto;margin:0;padding:0 14px 10px;flex-shrink:0;scrollbar-width:none}
+.im-chips::-webkit-scrollbar{display:none}
+.im-c{flex-shrink:0;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;background:var(--surface2);color:var(--muted)}
 .im-c.g{background:rgba(5,150,105,.12);color:var(--green)}
 .im-c.a{background:rgba(180,83,9,.12);color:var(--amber)}
 .im-c.r{background:rgba(220,38,38,.1);color:var(--red)}
 .im-c.b{background:rgba(37,99,235,.1);color:var(--accent)}
-.im-bar{display:flex;align-items:center;justify-content:space-between;padding:0 14px 6px;font-size:13px;flex-shrink:0}
-.im-bar label{display:flex;gap:8px;align-items:center;font-weight:600}
-.im-lk{background:none;border:0;font:700 12px 'Inter',sans-serif;color:var(--red);cursor:pointer}
-.im-ls{flex:1;min-height:0;overflow-y:auto;padding:0 14px;overscroll-behavior:contain}
-.im-it{border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px;background:var(--surface)}
+.im-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;font-size:13px;flex-shrink:0;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.im-bar label{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+.im-lk{background:none;border:0;font:700 12px 'Inter',sans-serif;color:var(--red);cursor:pointer;padding:4px}
+.im-ls{flex:1;min-height:0;overflow-y:auto;padding:10px 12px;background:var(--bg);overscroll-behavior:contain}
+
+/* custom round checkbox (JS same rahega) */
+.im-it input[type=checkbox],.im-bar input[type=checkbox]{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin:0;flex-shrink:0;border-radius:50%;border:2px solid #cbd5e1;background:var(--surface);display:grid;place-items:center;cursor:pointer;transition:all .15s}
+.im-it input[type=checkbox]:checked,.im-bar input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+.im-it input[type=checkbox]:checked::after,.im-bar input[type=checkbox]:checked::after{content:'✓';color:#fff;font-size:12px;font-weight:800;line-height:1}
+.im-it input[type=checkbox]:disabled{opacity:.35;cursor:not-allowed}
+
+/* item card */
+.im-it{border:1px solid var(--border);border-radius:14px;padding:11px 12px;margin-bottom:9px;background:var(--surface);box-shadow:var(--card-shadow);transition:border-color .15s,background .15s}
 .im-it.bad{background:var(--surface2);opacity:.75}
+.im-it.sel{border-color:rgba(37,99,235,.45);background:rgba(37,99,235,.05)}
 .im-it.dn{border-color:rgba(5,150,105,.4);background:rgba(5,150,105,.06)}
-.im-t1{display:flex;gap:8px;align-items:flex-start}
-.im-nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;line-height:1.4;word-break:break-word}
-.im-del{width:28px;height:28px;border-radius:8px;border:1px solid rgba(220,38,38,.3);background:transparent;cursor:pointer;flex-shrink:0;padding:0}
-.im-t2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 0 26px}
-.im-sp{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2)}
-.im-t3{display:flex;justify-content:space-between;align-items:center;margin:8px 0 0 26px}
-.im-t3>span{font-size:11.5px;color:var(--muted);font-weight:600}
-.im-q{display:flex;gap:4px;align-items:center}
-.im-q button{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);font-size:18px;font-weight:700;cursor:pointer;padding:0}
-.im-q input{width:62px;height:34px;text-align:center;border:2px solid var(--border);border-radius:9px;background:var(--surface);font:700 15px 'JetBrains Mono',monospace;outline:0;padding:0;color:var(--text)}
-.im-q input:focus{border-color:var(--accent)}
-.im-ft{border-top:1px solid var(--border);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);flex-shrink:0}
+.im-t1{display:flex;gap:10px;align-items:flex-start}
+.im-nm{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.4;word-break:break-word}
+.im-del{width:28px;height:28px;border-radius:8px;border:1px solid rgba(220,38,38,.25);background:transparent;cursor:pointer;flex-shrink:0;padding:0;font-size:12px}
+.im-t2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0 32px}
+.im-sp{font:600 10.5px 'JetBrains Mono',monospace;color:var(--accent2);background:rgba(8,145,178,.08);padding:2px 8px;border-radius:6px}
+.im-t3{display:flex;justify-content:space-between;align-items:center;margin:10px 0 0 32px}
+.im-t3>span{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.im-q{display:flex;gap:2px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:24px;padding:2px}
+.im-q button{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);box-shadow:0 1px 3px rgba(15,23,42,.14);font-size:18px;font-weight:700;color:var(--text);cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.im-q button:active{transform:scale(.9)}
+.im-q input{width:58px;height:34px;text-align:center;border:0;background:transparent;font:700 15px 'JetBrains Mono',monospace;outline:0;padding:0;color:var(--text);-moz-appearance:textfield}
+.im-q input::-webkit-inner-spin-button{-webkit-appearance:none}
+.im-lw{display:flex;gap:6px;align-items:center;margin:10px 0 0 32px}
+.im-li{position:relative;flex:3 1 0;min-width:0}
+.im-lw .notif-save-btn{flex:1 1 0}
+#locSug{z-index:980!important}
+
+/* footer */
+.im-ft{border-top:1px solid var(--border);padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);flex-shrink:0;box-shadow:0 -6px 18px rgba(15,23,42,.06)}
 .im-info{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600}
 .im-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.im-two button{height:44px;border-radius:12px;font:700 13px 'Inter',sans-serif;cursor:pointer}
+.im-two button{height:48px;border-radius:14px;font:700 13.5px 'Inter',sans-serif;cursor:pointer;transition:transform .1s}
+.im-two button:active{transform:scale(.97)}
 .im-two button:disabled{opacity:.5;cursor:not-allowed}
-.im-s{background:rgba(37,99,235,.08);border:1.5px solid rgba(37,99,235,.4);color:var(--accent)}
-.im-h{background:rgba(5,150,105,.08);border:1.5px solid rgba(5,150,105,.4);color:var(--green)}
+.im-s{background:rgba(37,99,235,.08);border:1.5px solid rgba(37,99,235,.45);color:var(--accent)}
+.im-h{background:var(--green);border:1.5px solid var(--green);color:#fff;box-shadow:0 6px 16px rgba(5,150,105,.28)}
+.im-bo{width:100%;height:46px;margin-top:8px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--accent),var(--green));color:#fff;font:700 13.5px 'Inter',sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(37,99,235,.25);transition:transform .1s}
+.im-bo:active{transform:scale(.98)}
+.im-bo:disabled{opacity:.5;cursor:not-allowed}
 .im-msg{font-size:12.5px;margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(5,150,105,.1);color:var(--green);font-weight:600}
 .im-cf{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:600}
-.im-cf button{height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font:700 12px 'Inter',sans-serif;cursor:pointer}
+.im-cf button{height:36px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font:700 12px 'Inter',sans-serif;cursor:pointer}
+.im-ls, .im-bd { scrollbar-width: none; -ms-overflow-style: none; }
+.im-ls::-webkit-scrollbar, .im-bd::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.im-t2 .im-q{margin-left:auto;padding:1px;gap:1px;border-radius:16px}
+.im-t2 .im-q button{width:24px;height:24px;font-size:15px;line-height:1}
+.im-t2 .im-q input{width:38px;height:24px;font-size:12.5px}
+.im-chipsrow{display:flex;align-items:flex-start;flex-shrink:0;padding-right:14px}
+.im-chipsrow .im-chips{flex:1;min-width:0;padding-right:8px}
+.im-sel{flex-shrink:0;padding:4px 0 10px;font:700 11px 'JetBrains Mono',monospace;color:var(--accent);white-space:nowrap}
+/* ─── Import list: chips + selected pill + buttons ─── */
+
+/* chips: SAP / Qty / located / no location */
+.im-c{
+  display:inline-flex;align-items:center;gap:4px;
+  height:26px;padding:0 11px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--surface);
+  font-size:11px;font-weight:700;color:var(--muted);
+}
+.im-c.g{border-color:rgba(5,150,105,.4);background:rgba(5,150,105,.08);color:var(--green)}
+.im-c.a{border-color:rgba(180,83,9,.4);background:rgba(180,83,9,.08);color:var(--amber)}
+.im-c.r{border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.07);color:var(--red)}
+.im-c.b{border-color:rgba(37,99,235,.4);background:rgba(37,99,235,.07);color:var(--accent)}
+
+/* "21 selected · qty 66" */
+.im-sel{
+  display:inline-flex;align-items:center;height:26px;
+  padding:0 11px;margin-bottom:10px;border-radius:20px;
+  border:1.5px solid rgba(37,99,235,.45);
+  background:rgba(37,99,235,.08);color:var(--accent);
+  font:700 11px 'JetBrains Mono',monospace;
+}
+
+/* Select all / Clear list bar */
+.im-bar{padding:8px 14px}
+.im-bar label{
+  height:34px;padding:0 13px 0 9px;gap:8px;
+  border:1.5px solid var(--border);border-radius:10px;
+  background:var(--surface);font:700 12px 'Inter',sans-serif;
+  -webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .15s,background .15s;
+}
+.im-bar label:active{transform:scale(.96)}
+.im-bar label:has(input:checked){
+  border-color:rgba(37,99,235,.5);background:rgba(37,99,235,.08);color:var(--accent);
+}
+.im-bar input[type=checkbox]{width:18px;height:18px}
+.im-bar input[type=checkbox]:checked::after{font-size:11px}
+
+.im-lk{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  height:34px;padding:0 13px;border-radius:10px;
+  border:1.5px solid rgba(220,38,38,.4);background:rgba(220,38,38,.06);
+  color:var(--red);font:700 12px 'Inter',sans-serif;
+  -webkit-tap-highlight-color:transparent;transition:transform .12s,background .15s;
+}
+.im-lk:active{transform:scale(.96);background:rgba(220,38,38,.14)}
+/* Import list item row: SAP / Stock / Location chips same look */
+.im-t2 .im-sp,
+.im-t2 .im-c{
+  display:inline-flex;align-items:center;gap:4px;
+  height:26px;padding:0 11px;border-radius:20px;
+  border:1.5px solid var(--border);
+  font-size:11px;font-weight:700;line-height:1;
+}
+
+/* SAP code: cyan tint */
+.im-t2 .im-sp{
+  font-family:'JetBrains Mono',monospace;font-weight:600;
+  color:var(--accent2);
+  background:rgba(8,145,178,.08);
+  border-color:rgba(8,145,178,.4);
+}
+
+/* Stock: neutral tint */
+.im-t2 .im-c:not(.g):not(.a):not(.r):not(.b){
+  background:var(--surface2);
+  border-color:var(--border);
+  color:var(--text);
+}
 </style>
 </head>
 
@@ -7981,6 +8113,26 @@ function syncStk() {
 function stkDel(sap) { sfFb = null; stkQ = stkQ.filter(x => x.sap !== sap); stkSend({ action: 'removeSticker', sap }); stkUI(); }
 function stkQty(sap, v) { const q = stkFind(sap); if (!q) return; q.qty = Math.max(1, Math.min(999, parseInt(v) || 1)); q.printed = false; stkPut(q); stkUI(); }
 function stkClearDone() { stkQ.filter(q => q.printed).forEach(q => stkDel(q.sap)); }
+
+// sticker list ke saare items ko unki qty ke saath Shifting me bhejo (sticker list same rahegi)
+function stkShiftAll() {
+  if (!guard('binprint') || !stkQ.length) return;
+  const base = Date.now();
+  let n = 0, tot = 0, skip = 0;
+  stkQ.forEach(q => {
+    const it = stkItem(q.sap);
+    const loc = it && it.location ? String(it.location).trim() : '';
+    if (!it || !loc) { skip++; return; }
+    const o = { id: base + n, sap: q.sap, name: it.name, qty: q.qty, loc, rem: q.rem || '', by: userName, ts: base + n };
+    shfQ.unshift(o);
+    shfSend({ action: 'setShift', id: o.id, sap: o.sap, name: o.name, qty: o.qty, loc: o.loc, rem: o.rem, by: o.by, ts: o.ts });
+    n++; tot += q.qty;
+  });
+  if (!n) { showToast('No item has a location, cannot shift', 'amber'); return; }
+  shfUI();
+  logAct('i_bin', 'Sticker list shifted', n + ' items, qty ' + tot + (skip ? ', skipped ' + skip : ''));
+  showToast(n + ' items shifted (qty ' + tot + ')' + (skip ? ' · ' + skip + ' skipped (no location)' : ''), 'green');
+}
 const STK_SUBS = ['bp', 'sp', 'sh'];
 function stkTab(k) {
   stkSub = k;
@@ -8003,6 +8155,7 @@ function renderStkList() {
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Print and clear' : 'Sab up to date';
 skE('binBar').innerHTML = n ? `<div class="bn-line bn-box"><div class="bn-tx"><b>${n}</b> Sticker · <b>${Math.ceil(tot / 16)}</b> Page</div><div class="bn-act">
+    <button type="button" class="bn-ib" onclick="stkShiftAll()" title="Shift all" aria-label="Shift all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><path d="M7 21l-4-4 4-4"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>Shift</button>
     <button type="button" class="bn-ib${stkQR ? ' on' : ''}" onclick="stkQrT(${!stkQR})" title="QR on stickers: ${stkQR ? 'on' : 'off'}" aria-label="QR on stickers">${BN_I.qr}QR</button>
     ${done ? `<button type="button" class="bn-ib ok" onclick="stkClearDone()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd">${done}</span></button>` : ''}
     <button type="button" class="bn-ib pri" onclick="stkPrint()" title="Print all" aria-label="Print all">${BN_I.pr}Print All</button></div></div>` : '';
@@ -8115,8 +8268,8 @@ function renderStickerBox() {
       <div class="sf-r1">
         <div class="sf-n"><button onclick="stkB(-1)">−</button><input id="skQ" type="number" min="1" max="999" inputmode="numeric" value="${stkDq}" oninput="stkQn(this.value)"><button onclick="stkB(1)">+</button></div>
         ${stock > 0 ? `<button class="sf-st" onclick="shfFill()" aria-label="Fill full stock"><small>Stock</small><b>${stock}</b></button>` : ''}
-        <input class="sf-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
         <button type="button" class="im-btn" onclick="imOpen()" aria-label="Import received list">📋</button>
+        <input class="sf-rem" id="skR" maxlength="40" placeholder="Remark" autocomplete="off" value="${lmEsc(stkDr)}" oninput="stkDr=this.value">
       </div>
       <div class="sf-r2">
         <button class="sf-a1" onclick="stkAdd()">🏷️ ${q ? 'Update' : 'Sticker'}</button>
@@ -8503,7 +8656,7 @@ function closeLocClean() {
 const _cs2 = window.closeScanner;
 window.closeScanner = function () {
   const r = _cs2.apply(this, arguments);
-  if (skE('lcBack').classList.contains('open')) document.body.style.overflow = 'hidden';
+  if (skE('lcBack').classList.contains('open') || skE('imBack').classList.contains('open')) document.body.style.overflow = 'hidden';
   return r;
 };
 
@@ -8517,30 +8670,76 @@ window.closeScanner = function () {
 })();
 
 
-// ═══ IMPORT LIST (temporary, Tag/Shift) ═══
+// ═══ IMPORT LIST (Tag/Shift) ═══
 const IM = { step: 'paste', rows: [], sel: {}, cf: '', msg: '', err: '', ferr: '', txt: '', dup: 0, cut: 0, cols: null, busy: false, rem: '' };
 const IM_MAX = 50;
+const IM_KEY = 'importListState';
 const imEl = document.getElementById('imModal');
+
+// list localStorage me save rehti hai, jab tak "Clear list" na dabao
+function imSave() {
+  try {
+    if (IM.step === 'list' && IM.rows.length) {
+      localStorage.setItem(IM_KEY, JSON.stringify({ step: 'list', rows: IM.rows, sel: IM.sel, dup: IM.dup, cut: IM.cut, cols: IM.cols, rem: IM.rem }));
+    } else if (IM.txt && IM.txt.trim()) {
+      localStorage.setItem(IM_KEY, JSON.stringify({ step: 'paste', txt: IM.txt }));
+    } else {
+      localStorage.removeItem(IM_KEY);
+    }
+  } catch (e) {}
+}
+function imLoad() {
+  try {
+    const s = JSON.parse(localStorage.getItem(IM_KEY));
+    if (!s) return;
+    if (s.step === 'list' && Array.isArray(s.rows) && s.rows.length && s.cols) {
+      s.rows.forEach(r => {
+        if (r.done === 's') { r.dS = true; r.done = ''; }
+        else if (r.done === 'h') { r.dH = true; r.done = ''; }
+        else if (r.done === 'b') { r.dS = true; r.dH = true; }
+      });
+      Object.assign(IM, { step: 'list', rows: s.rows, sel: s.sel || {}, dup: s.dup || 0, cut: s.cut || 0, cols: s.cols, rem: s.rem || '' });
+    } else if (s.txt) {
+      IM.txt = s.txt;
+    }
+  } catch (e) {}
+}
+// kholte waqt master se naya name / location / stock le lo
+function imRefresh() {
+  if (IM.step !== 'list' || !itemMaster.length) return;
+  const m = {};
+  itemMaster.forEach(i => { m[String(i.sap).trim()] = i; });
+  IM.rows.forEach(r => {
+    const it = m[r.sap];
+    if (!it) return;
+    r.inM = true;
+    r.name = it.name;
+    r.loc = it.location ? String(it.location).trim() : '';
+    r.stock = lvStockNum(it);
+  });
+}
+imLoad();
 
 function imOpen() {
   if (!guard('binprint')) return;
-  IM.step = 'paste'; IM.rows = []; IM.sel = {}; IM.cf = ''; IM.msg = ''; IM.err = ''; IM.ferr = ''; IM.txt = '';
   const r = skE('skR');
-  IM.rem = r ? r.value.trim().toUpperCase() : '';
+  const cur = r ? r.value.trim().toUpperCase() : '';
+  if (cur || IM.step !== 'list') IM.rem = cur;
+  IM.cf = ''; IM.msg = ''; IM.err = ''; IM.ferr = '';
+  imRefresh();
   document.getElementById('imBack').classList.add('open');
   document.body.style.overflow = 'hidden';
   imRender();
-  logAct('i_bin', 'Import list opened', '');
+  logAct('i_bin', 'Import list opened', IM.step === 'list' ? IM.rows.length + ' items restored' : '');
 }
 
-function imClose(force) {
+// band karne par list delete nahi hoti, sirf modal band hota hai
+function imClose() {
   if (IM.busy) { showToast('Sending to sheet, please wait', 'amber'); return; }
-  const pending = IM.step === 'list' && IM.rows.some(r => !r.done);
-  if (!force && pending) { IM.cf = 'discard'; imFoot(); return; }
-  if (pending) logAct('i_bin', 'Import list discarded', IM.rows.length + ' items');
+  IM.cf = '';
+  imSave();
   document.getElementById('imBack').classList.remove('open');
   document.body.style.overflow = '';
-  IM.rows = []; IM.sel = {}; IM.step = 'paste'; IM.cf = '';
 }
 
 function imDetect(h) {
@@ -8646,70 +8845,120 @@ function imFile(file) {
   rd.readAsArrayBuffer(file);
 }
 
-function imHead(sub) {
-  return `<div class="im-hd"><div class="im-ic">📋</div><div class="im-tt"><b>Import received list</b><span>${sub}</span></div><button type="button" class="im-x" data-a="x" aria-label="Close">✕</button></div>`;
+function imHead(sub, n) {
+  const s = (i, t) => `<span class="${n > i ? 'ok' : n === i ? 'on' : ''}"><i>${n > i ? '✓' : i}</i>${t}</span>`;
+  return `<div class="im-stripe"></div>
+  <div class="im-hd"><div class="im-ic">📋</div><div class="im-tt"><b>Import received list</b><span>${sub}</span></div><button type="button" class="im-x" data-a="x" aria-label="Close">✕</button></div>
+  <div class="im-steps">${s(1, 'Paste')}<hr>${s(2, 'Review')}<hr>${s(3, 'Send')}</div>`;
 }
 
 function imSel() { return IM.rows.filter(r => IM.sel[r.id] && r.inM && !r.done); }
 function imQty(a) { return Math.round(a.reduce((s, r) => s + r.qty, 0) * 1000) / 1000; }
 
 function imRender() {
+  imSave();
+  const _old = imEl.querySelector('.im-ls');
+  const _sc = _old ? _old.scrollTop : 0;
   if (IM.step === 'paste') {
-    imEl.innerHTML = imHead('Paste from Excel or upload a file') +
-      `<div class="im-bd"><div class="im-drop"><textarea id="imTa" placeholder="Paste rows from Excel here (header is optional)">${lmEsc(IM.txt)}</textarea></div>
-      <button type="button" class="im-up" data-a="up">⬆️ Upload file (xlsx, xls, csv)</button>
-      <input type="file" id="imFi" accept=".csv,.txt,.xlsx,.xls" style="display:none">
-      <div class="im-err">${lmEsc(IM.err)}</div>
-      <button type="button" class="im-go" data-a="go">Show list</button>
-      <div class="im-hint">Header is optional. SAP code and qty columns are detected automatically. Rows with the same SAP code are merged. Max ${IM_MAX} items.</div></div>`;
+    imEl.innerHTML = imHead('Paste from Excel or upload a file', 1) +
+      `<div class="im-bd">
+        <div class="im-drop">
+          <div class="im-emp" id="imEmp" style="display:${IM.txt.trim() ? 'none' : 'flex'}">
+            <div class="im-big">📥</div><b>Paste rows from Excel</b><p>Copy the cells, then tap here and paste</p>
+            <div class="im-ex"><em>1000012345</em> &nbsp; 12<br><em>1000023456</em> &nbsp; 5</div>
+          </div>
+          <textarea id="imTa" spellcheck="false" aria-label="Paste rows">${lmEsc(IM.txt)}</textarea>
+        </div>
+        <div class="im-hn"><span>Header optional</span><span>SAP and qty auto detect</span><span>Same SAP merged</span><span>Max ${IM_MAX} items</span></div>
+        <input type="file" id="imFi" accept=".csv,.txt,.xlsx,.xls" style="display:none">
+      </div>
+      <div class="im-ft"><div class="im-err" id="imErr">${lmEsc(IM.err)}</div>
+        <div class="im-two"><button type="button" class="im-up" data-a="up">⬆️ Upload file</button><button type="button" class="im-go" data-a="go">Show list ➜</button></div>
+      </div>`;
     return;
   }
   const nm = IM.rows.filter(r => !r.inM).length;
   const nl = IM.rows.filter(r => r.inM && !r.loc && !r.done).length;
+  const ok = IM.rows.filter(r => r.inM && r.loc && !r.done).length;
   const dn = IM.rows.filter(r => r.done).length;
-  let h = imHead(IM.rows.length + ' items found') + '<div class="im-chips">';
-  h += `<span class="im-c">SAP: ${lmEsc(IM.cols.head[IM.cols.sap])}</span><span class="im-c">Qty: ${lmEsc(IM.cols.head[IM.cols.qty])}</span>`;
+  let h = imHead(IM.rows.length + ' items found', dn ? 3 : 2) + '<div class="im-chipsrow"><div class="im-chips">';
+  if (ok) h += `<span class="im-c g">📍 ${ok} located</span>`;
   if (IM.dup) h += `<span class="im-c b">${IM.dup} duplicate merged</span>`;
   if (IM.cut) h += `<span class="im-c a">First ${IM_MAX} only</span>`;
   if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
   if (nl) h += `<span class="im-c a">${nl} no location</span>`;
   if (dn) h += `<span class="im-c g">${dn} done</span>`;
-  h += '</div>';
+  h += '</div><span class="im-sel" id="imSelInfo"></span></div>';
   const act = IM.rows.filter(r => r.inM && !r.done);
   const all = act.length && act.every(r => IM.sel[r.id]);
   h += `<div class="im-bar"><label><input type="checkbox" id="imAll" ${all ? 'checked' : ''}> Select all</label><button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button></div><div class="im-ls">`;
   IM.rows.forEach(r => {
     const sl = !r.done && r.inM && stkFind(r.sap);
-    h += `<div class="im-it${r.done ? ' dn' : (!r.inM ? ' bad' : '')}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">🗑️</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
-    if (r.done) h += `<span class="im-c g">${r.done === 's' ? 'Added to sticker list' : 'Shifted'}</span>`;
+    const cls = r.done ? ' dn' : (!r.inM ? ' bad' : (r.loc ? '' : ' nl'));
+    h += `<div class="im-it${cls}${IM.sel[r.id] && !r.done ? ' sel' : ''}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">✕</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
+    if (r.done) h += `<span class="im-c g">Sticker + Shifted</span>`;
     else if (!r.inM) h += '<span class="im-c r">Not in master</span>';
     else {
-      h += r.loc ? `<span class="im-c b">📍 ${lmEsc(r.loc)}</span>` : '<span class="im-c a">No location</span>';
+      if (r.dS) h += '<span class="im-c g">🏷️ Sticker done</span>';
+      if (r.dH) h += '<span class="im-c g">✓ Shifted</span>';
+      h += r.loc ? `<span class="im-c g">📍 ${lmEsc(r.loc)}</span>` : '<span class="im-c a">No location</span>';
       h += `<span class="im-c">Stock ${r.stock}</span>`;
       if (sl) h += '<span class="im-c a">Already in sticker list</span>';
+      h += `<div class="im-q"><button type="button" data-a="m" data-id="${r.id}">−</button><input type="number" min="0" step="any" inputmode="decimal" data-q="${r.id}" value="${r.qty}" aria-label="Qty"><button type="button" data-a="p" data-id="${r.id}">+</button></div>`;
     }
     h += '</div>';
-    if (!r.done && r.inM) h += `<div class="im-t3"><span>Qty</span><div class="im-q"><button type="button" data-a="m" data-id="${r.id}">−</button><input type="number" min="0" step="any" inputmode="decimal" data-q="${r.id}" value="${r.qty}"><button type="button" data-a="p" data-id="${r.id}">+</button></div></div>`;
+    if (!r.done && r.inM && !r.loc) h += `<div class="im-lw"><div class="im-li"><input class="notif-inline-input" id="imL${r.id}" data-l="${r.id}" value="${lmEsc(r.locDraft || '')}" placeholder="Add location (optional)" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" style="width:100%;padding-right:34px;"><button type="button" class="loc-scan-btn-sm" onclick="openScanner('imL${r.id}')" aria-label="Scan location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></button></div><button type="button" class="notif-save-btn" data-a="loc" data-id="${r.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button></div>`;
     h += '</div>';
   });
   if (!IM.rows.length) h += '<div class="notif-empty">All rows removed</div>';
   h += '</div><div class="im-ft" id="imFt"></div>';
   imEl.innerHTML = h;
   imFoot();
+  const _nl = imEl.querySelector('.im-ls');
+  if (_nl) _nl.scrollTop = _sc;
 }
 
 function imFoot() {
+  imSave();
   const f = document.getElementById('imFt');
   if (!f) return;
+  const si = document.getElementById('imSelInfo');
+  if (si) { const s = imSel(); si.textContent = s.length + ' Selected · Qty ' + imQty(s); }
   if (IM.cf) {
     const t = IM.cf === 'discard' ? 'Discard this list? Nothing has been saved.' : 'Clear the whole list?';
     f.innerHTML = `<div class="im-cf"><span>${t}</span><span style="display:flex;gap:6px"><button type="button" data-a="no">No</button><button type="button" data-a="yes" style="color:var(--red)">Yes</button></span></div>`;
     return;
   }
   const a = imSel(), n = a.length, b = IM.busy ? ' disabled' : '';
-  f.innerHTML = `<div class="im-info">${n} selected, total qty ${imQty(a)}${IM.rem ? ' · Remark: ' + lmEsc(IM.rem) : ''}</div>
-    <div class="im-two"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker (${n})</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift (${n})</button></div>
+  f.innerHTML = `${IM.rem ? `<div class="im-info">Remark: ${lmEsc(IM.rem)}</div>` : ''}
+    <div class="im-two"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift</button></div>
+    <button type="button" class="im-bo" data-a="bo"${b}>🏷️ Sticker &amp; ✓ Shift</button>
     ${IM.ferr ? `<div class="im-err">${lmEsc(IM.ferr)}</div>` : ''}${IM.msg ? `<div class="im-msg">${lmEsc(IM.msg)}</div>` : ''}`;
+}
+
+function imSaveLoc(r) {
+  if (!guard('loc')) return;
+  const inp = document.getElementById('imL' + r.id);
+  const loc = inp ? inp.value.trim().toUpperCase() : '';
+  if (!loc) { if (inp) inp.focus(); return; }
+  const it = itemMaster.find(i => String(i.sap).trim() === r.sap);
+  if (!it) return;
+  localStorage.setItem('lastLocationText', loc);
+  locRemember(loc);
+  it.location = loc;
+  pendingUpdates[it.sn] = { location: loc, ts: Date.now() };
+  addBinPending(loc, 'Item added here');
+  logAct('i_loc', 'Location updated · ' + it.name, '→' + loc + ' · SAP ' + it.sap);
+  fetch(`${API}?action=update&sn=${it.sn}&location=${encodeURIComponent(loc)}&update_by=${encodeURIComponent(userName)}`)
+    .catch(() => showToast('Server sync failed', 'red'));
+  r.loc = loc; r.locDraft = ''; IM.ferr = '';
+  renderStats();
+  if (currentItem && String(currentItem.sap).trim() === r.sap && !skE('updateLocation')) renderItem();
+  const ls = imEl.querySelector('.im-ls'), sc = ls ? ls.scrollTop : 0;
+  imRender();
+  const nl = imEl.querySelector('.im-ls');
+  if (nl) nl.scrollTop = sc;
+  showToast('Location saved: ' + loc, 'green');
 }
 
 function imRun(k) {
@@ -8719,23 +8968,26 @@ function imRun(k) {
   if (!a.length) { IM.ferr = 'Select at least one item'; imFoot(); return; }
   if (a.some(r => r.qty <= 0)) { IM.ferr = 'An item has qty 0. Fix it or remove it'; imFoot(); return; }
   let ok, skip, why;
-  if (k === 'h') {
-    ok = a.filter(r => r.loc); skip = a.length - ok.length; why = 'no location';
-    if (!ok.length) { IM.ferr = 'Selected items have no location, cannot shift'; imFoot(); return; }
-  } else {
-    ok = a.filter(r => !stkFind(r.sap)); skip = a.length - ok.length; why = 'already in sticker list';
+  if (k === 's') {
+    ok = a.filter(r => !stkFind(r.sap) && !r.dS); skip = a.length - ok.length; why = 'already in sticker list';
     if (!ok.length) { IM.ferr = 'Selected items are already in the sticker list'; imFoot(); return; }
+  } else {
+    ok = a.filter(r => r.loc && !(k === 'h' && r.dH)); skip = a.length - ok.length; why = 'no location / already shifted';
+    if (!ok.length) { IM.ferr = 'Selected items have no location, cannot shift'; imFoot(); return; }
   }
   const base = Date.now(), rem = IM.rem;
-  if (k === 's') {
+  if (k === 's' || k === 'b') {
     ok.forEach(r => {
+      if (stkFind(r.sap)) return;
       const q = { sap: r.sap, qty: Math.min(999, Math.max(1, Math.round(r.qty))), rem, printed: false };
       stkQ.push(q);
       stkPut(q);
     });
     stkUI();
-  } else {
+  }
+  if (k === 'h' || k === 'b') {
     ok.forEach((r, i) => {
+      if (r.dH) return;
       const o = { id: base + i, sap: r.sap, name: r.name, qty: r.qty, loc: r.loc, rem, by: userName, ts: base + i };
       shfQ.unshift(o);
       shfSend({ action: 'setShift', id: o.id, sap: o.sap, name: o.name, qty: o.qty, loc: o.loc, rem: o.rem, by: o.by, ts: o.ts });
@@ -8743,17 +8995,18 @@ function imRun(k) {
     shfUI();
   }
   const tot = imQty(ok);
-  ok.forEach(r => { r.done = k; IM.sel[r.id] = false; });
-  logAct('i_bin', k === 's' ? 'Import sticker queued' : 'Import shifted', ok.length + ' items, qty ' + tot + (skip ? ', skipped ' + skip : ''));
-  const base_msg = (k === 's' ? ok.length + ' items added to sticker list' : ok.length + ' items shifted (qty ' + tot + ')') + (skip ? '. ' + skip + ' skipped (' + why + ')' : '');
-  IM.msg = base_msg + '. Sending to sheet…';
-  IM.busy = true;
-  imRender();
-  binQueue.then(() => {
-    IM.busy = false;
-    IM.msg = base_msg + '. Sent to sheet ✓';
-    if (document.getElementById('imBack').classList.contains('open')) imRender();
+  ok.forEach(r => {
+    const s = (r.dS || k === 's' || k === 'b'), h = (r.dH || k === 'h' || k === 'b');
+    r.dS = s; r.dH = h;
+    r.done = (s && h) ? (k === 'b' ? 'b' : 'b') : '';
+    IM.sel[r.id] = false;
   });
+  logAct('i_bin', k === 's' ? 'Import sticker queued' : k === 'b' ? 'Import sticker + shifted' : 'Import shifted', ok.length + ' items, qty ' + tot + (skip ? ', skipped ' + skip : ''));
+  const what = k === 's' ? ok.length + ' items added to sticker list'
+    : k === 'b' ? ok.length + ' items added to sticker list and shifted (qty ' + tot + ')'
+    : ok.length + ' items shifted (qty ' + tot + ')';
+  IM.msg = what + (skip ? '. ' + skip + ' skipped (' + why + ')' : '') + ' ✓';
+  imRender();
 }
 imEl.addEventListener('click', e => {
   const t = e.target.closest('[data-a]');
@@ -8783,10 +9036,20 @@ imEl.addEventListener('click', e => {
     logAct('i_bin', 'Import row removed', 'SAP ' + row.sap);
     imRender();
   }
-  else if (a === 'm' && row) { row.qty = Math.max(0, Math.round((row.qty - 1) * 1000) / 1000); IM.ferr = ''; imRender(); }
-  else if (a === 'p' && row) { row.qty = Math.round((row.qty + 1) * 1000) / 1000; IM.ferr = ''; imRender(); }
+  else if ((a === 'm' || a === 'p') && row) {
+    row.qty = a === 'm'
+      ? Math.max(0, Math.round((row.qty - 1) * 1000) / 1000)
+      : Math.round((row.qty + 1) * 1000) / 1000;
+    IM.ferr = '';
+    const qi = imEl.querySelector('input[data-q="' + id + '"]');
+    if (qi) qi.value = row.qty;
+    imFoot();
+    imSave();
+  }
   else if (a === 'st') imRun('s');
+  else if (a === 'loc' && row) imSaveLoc(row);
   else if (a === 'sh') imRun('h');
+  else if (a === 'bo') imRun('b');
 });
 
 imEl.addEventListener('change', e => {
@@ -8798,11 +9061,29 @@ imEl.addEventListener('change', e => {
 
 imEl.addEventListener('input', e => {
   const t = e.target;
-  if (t.id === 'imTa') { IM.txt = t.value; return; }
+  if (t.id === 'imTa') {
+  IM.txt = t.value; IM.err = ''; imSave();
+  const m = document.getElementById('imEmp'), er = document.getElementById('imErr');
+  if (m) m.style.display = t.value.trim() ? 'none' : 'flex';
+  if (er) er.textContent = '';
+    return;
+}
+  if (t.dataset.l !== undefined) {
+    const r = IM.rows.find(x => x.id === +t.dataset.l);
+    if (r) r.locDraft = t.value;
+    return;
+  }
   if (t.dataset.q !== undefined) {
     const r = IM.rows.find(x => x.id === +t.dataset.q);
     if (r) { r.qty = Math.max(0, parseFloat(t.value) || 0); IM.ferr = ''; imFoot(); }
   }
+});
+
+imEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target.dataset.l === undefined) return;
+  e.preventDefault();
+  const r = IM.rows.find(x => x.id === +e.target.dataset.l);
+  if (r) imSaveLoc(r);
 });
 
 renderStats();
