@@ -2603,7 +2603,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .im-tools{background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 12px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
 .im-tr1{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .im-tr2{display:flex;gap:8px}
-.im-tools .im-sel{margin:0;height:38px;padding:0 14px;font-size:12px;white-space:nowrap}
+.im-chipsrow .im-sel{margin:0 0 10px;height:26px;padding:0 11px;font-size:11px;white-space:nowrap;flex-shrink:0}
 .im-sa{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 10px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);font:700 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
 .im-sa input{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin:0;border:2px solid var(--text);border-radius:3px;background:var(--surface);display:grid;place-items:center}
 .im-sa input:checked{background:var(--accent);border-color:var(--accent)}
@@ -8996,16 +8996,13 @@ function imRender() {
   if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
   if (nl) h += `<span class="im-c a">${nl} no location</span>`;
   if (dn) h += `<span class="im-c g">${dn} done</span>`;
-  h += '</div></div>';
+  h += '</div><span class="im-sel" id="imSelInfo"></span></div>';
   const act = IM.rows.filter(r => r.inM && !r.done && imHit(r));
   const all = act.length && act.every(r => IM.sel[r.id]);
   h += `<div class="im-tools">
-    <div class="im-tr1">
-      <span class="im-sel" id="imSelInfo"></span>
-      <div class="im-tr2">
-        <label class="im-sa"><input type="checkbox" id="imAll" ${all ? 'checked' : ''}><span>Select all</span></label>
-        <button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button>
-      </div>
+     <div class="im-tr1">
+      <label class="im-sa"><input type="checkbox" id="imAll" ${all ? 'checked' : ''}><span>Select all</span></label>
+      <button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button>
     </div>
     <div class="im-srch"><span>🔍</span><input id="imQ" type="text" placeholder="Search name, SAP, location" value="${lmEsc(IM.q || '')}" autocomplete="off" autocorrect="off" spellcheck="false"></div>
   </div><div class="im-ls">`;
