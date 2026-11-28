@@ -2439,7 +2439,7 @@ body.loading .upload-zone { opacity: 0.45; }
 .im-tmp{margin:0 14px 8px;font-size:11.5px;padding:6px 10px;border-radius:8px;background:rgba(180,83,9,.1);color:var(--amber);font-weight:600;flex-shrink:0}
 
 /* paste step (full height) */
-.im-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:2px 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.im-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:2px 14px 10px;overflow-y:auto}
 .im-drop{flex:1;min-height:180px;display:flex;border:2px dashed rgba(37,99,235,.35);border-radius:16px;padding:10px;background:rgba(37,99,235,.03);transition:border-color .2s,background .2s}
 .im-drop:focus-within{border-color:var(--accent);background:rgba(37,99,235,.06)}
 .im-drop textarea{flex:1;width:100%;border:0;background:transparent;outline:0;resize:none;font:12px/1.6 'JetBrains Mono',monospace;color:var(--text)}
@@ -2459,6 +2459,8 @@ body.loading .upload-zone { opacity: 0.45; }
 .im-go{width:100%;height:50px;margin-top:8px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font:700 15px 'Inter',sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(37,99,235,.3)}
 .im-go:active{transform:scale(.98)}
 .im-err{font-size:12.5px;color:var(--red);font-weight:600;min-height:18px;margin-top:8px}
+#imErr{margin:0 0 8px}
+#imErr:empty{display:none}
 .im-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
 
 /* review step */
@@ -2594,6 +2596,49 @@ body.loading .upload-zone { opacity: 0.45; }
   border-color:var(--border);
   color:var(--text);
 }
+/* ─── Import list: new layout ─── */
+.im-chipsrow{padding-bottom:2px}
+.im-ls{overflow-x:hidden}
+
+.im-tools{background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 12px;flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.im-tr1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.im-tr2{display:flex;gap:8px}
+.im-tools .im-sel{margin:0;height:38px;padding:0 14px;font-size:12px;white-space:nowrap}
+.im-sa{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 10px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);font:700 13px 'Inter',sans-serif;cursor:pointer;white-space:nowrap}
+.im-sa input{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin:0;border:2px solid var(--text);border-radius:3px;background:var(--surface);display:grid;place-items:center}
+.im-sa input:checked{background:var(--accent);border-color:var(--accent)}
+.im-sa input:checked::after{content:'✓';color:#fff;font-size:11px;font-weight:800;line-height:1}
+.im-tools .im-lk{height:38px;border-radius:12px;font-size:13px;white-space:nowrap}
+
+.im-srch{display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;background:var(--surface);border:2px solid var(--border);border-radius:14px}
+.im-srch:focus-within{border-color:var(--accent)}
+.im-srch input{flex:1;min-width:0;border:0;outline:0;background:none;font:500 15px 'Inter',sans-serif;color:var(--text)}
+
+/* location row: input + scan + save */
+.im-lw{margin-left:0;gap:8px}
+.im-lw .notif-inline-input{flex:1 1 0;height:42px;font-size:14px}
+.im-scn{flex-shrink:0;width:46px;height:42px;padding:0;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.im-scn:active{transform:scale(.94)}
+.im-scn svg{width:20px;height:20px}
+.im-lw .notif-save-btn{flex:0 0 auto;width:auto;height:42px;padding:0 20px;border-radius:10px;font-size:14px}
+
+/* footer: 3 buttons in 1 row */
+.im-three{display:grid;grid-template-columns:1fr 1fr 1.7fr;gap:8px}
+.im-three button{height:48px;border-radius:14px;font:700 13.5px 'Inter',sans-serif;cursor:pointer;transition:transform .1s;padding:0 4px;white-space:nowrap}
+.im-three button:active{transform:scale(.97)}
+.im-three button:disabled{opacity:.5;cursor:not-allowed}
+.im-three .im-bo{margin-top:0;width:auto}
+/* ─── Import list: left margin hatao, scan inside input, Qty label ─── */
+.im-t2{margin:8px 0 0 0}
+.im-lw{margin:10px 0 0 0}
+.im-li{position:relative;flex:1 1 0;min-width:0}
+.im-li .notif-inline-input{width:100%;height:42px;font-size:14px;padding-right:40px}
+.im-li .loc-scan-btn-sm{right:6px;width:30px;height:30px}
+.im-li .loc-scan-btn-sm svg{width:18px;height:18px}
+
+.im-qw{margin-left:auto;display:flex;align-items:center;gap:6px}
+.im-ql{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.im-t2 .im-qw .im-q{margin-left:0}
 </style>
 </head>
 
@@ -8154,7 +8199,7 @@ function renderStkList() {
   const n = stkQ.length, tot = stkQ.reduce((a, q) => a + q.qty, 0), done = stkQ.filter(q => q.printed).length;
   skE('notifCountBadge').textContent = n;
   skE('notifSub').textContent = n ? 'Print and clear' : 'Sab up to date';
-skE('binBar').innerHTML = n ? `<div class="bn-line bn-box"><div class="bn-tx"><b>${n}</b> Sticker · <b>${Math.ceil(tot / 16)}</b> Page</div><div class="bn-act">
+skE('binBar').innerHTML = n ? `<div class="bn-line bn-box"><div class="bn-tx"><b>${n}</b><span class="btn-full-text">Sticker</span><span class="btn-short-text">Stk</span> · <b>${Math.ceil(tot / 16)}</b><span class="btn-full-text">Page</span><span class="btn-short-text">Pg</span></div><div class="bn-act">
     <button type="button" class="bn-ib" onclick="stkShiftAll()" title="Shift all" aria-label="Shift all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M3 11V9a2 2 0 0 1 2-2h16"/><path d="M7 21l-4-4 4-4"/><path d="M21 13v2a2 2 0 0 1-2 2H3"/></svg>Shift</button>
     <button type="button" class="bn-ib${stkQR ? ' on' : ''}" onclick="stkQrT(${!stkQR})" title="QR on stickers: ${stkQR ? 'on' : 'off'}" aria-label="QR on stickers">${BN_I.qr}QR</button>
     ${done ? `<button type="button" class="bn-ib ok" onclick="stkClearDone()" title="Clear printed" aria-label="Clear printed">${BN_I.ok}Clear<span class="bn-bd">${done}</span></button>` : ''}
@@ -8852,6 +8897,26 @@ function imHead(sub, n) {
   <div class="im-steps">${s(1, 'Paste')}<hr>${s(2, 'Review')}<hr>${s(3, 'Send')}</div>`;
 }
 
+function imHit(r) {
+  const q = (IM.q || '').trim().toLowerCase();
+  return !q || (r.name + ' ' + r.sap + ' ' + (r.loc || '')).toLowerCase().includes(q);
+}
+// typing par re-render nahi, sirf rows hide/show (focus nahi toot-ta)
+function imApplyQ() {
+  const q = (IM.q || '').trim().toLowerCase();
+  let n = 0;
+  imEl.querySelectorAll('.im-it').forEach(el => {
+    const hit = !q || (el.dataset.s || '').includes(q);
+    el.style.display = hit ? '' : 'none';
+    if (hit) n++;
+  });
+  const nr = document.getElementById('imNr');
+  if (nr) nr.style.display = n ? 'none' : 'block';
+  const act = IM.rows.filter(r => r.inM && !r.done && imHit(r));
+  const a = document.getElementById('imAll');
+  if (a) a.checked = !!act.length && act.every(r => IM.sel[r.id]);
+}
+
 function imSel() { return IM.rows.filter(r => IM.sel[r.id] && r.inM && !r.done); }
 function imQty(a) { return Math.round(a.reduce((s, r) => s + r.qty, 0) * 1000) / 1000; }
 
@@ -8865,11 +8930,10 @@ function imRender() {
         <div class="im-drop">
           <div class="im-emp" id="imEmp" style="display:${IM.txt.trim() ? 'none' : 'flex'}">
             <div class="im-big">📥</div><b>Paste rows from Excel</b><p>Copy the cells, then tap here and paste</p>
-            <div class="im-ex"><em>1000012345</em> &nbsp; 12<br><em>1000023456</em> &nbsp; 5</div>
+            <div class="im-ex"><em>1000012345</em> &nbsp; 12<br><em>1000023456</em> &nbsp; 05</div>
           </div>
           <textarea id="imTa" spellcheck="false" aria-label="Paste rows">${lmEsc(IM.txt)}</textarea>
         </div>
-        <div class="im-hn"><span>Header optional</span><span>SAP and qty auto detect</span><span>Same SAP merged</span><span>Max ${IM_MAX} items</span></div>
         <input type="file" id="imFi" accept=".csv,.txt,.xlsx,.xls" style="display:none">
       </div>
       <div class="im-ft"><div class="im-err" id="imErr">${lmEsc(IM.err)}</div>
@@ -8888,14 +8952,23 @@ function imRender() {
   if (nm) h += `<span class="im-c r">${nm} not in master</span>`;
   if (nl) h += `<span class="im-c a">${nl} no location</span>`;
   if (dn) h += `<span class="im-c g">${dn} done</span>`;
-  h += '</div><span class="im-sel" id="imSelInfo"></span></div>';
-  const act = IM.rows.filter(r => r.inM && !r.done);
+  h += '</div></div>';
+  const act = IM.rows.filter(r => r.inM && !r.done && imHit(r));
   const all = act.length && act.every(r => IM.sel[r.id]);
-  h += `<div class="im-bar"><label><input type="checkbox" id="imAll" ${all ? 'checked' : ''}> Select all</label><button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button></div><div class="im-ls">`;
+  h += `<div class="im-tools">
+    <div class="im-tr1">
+      <span class="im-sel" id="imSelInfo"></span>
+      <div class="im-tr2">
+        <label class="im-sa"><input type="checkbox" id="imAll" ${all ? 'checked' : ''}><span>Select all</span></label>
+        <button type="button" class="im-lk" data-a="clr">🗑️ Clear list</button>
+      </div>
+    </div>
+    <div class="im-srch"><span>🔍</span><input id="imQ" type="text" placeholder="Search name, SAP, location" value="${lmEsc(IM.q || '')}" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+  </div><div class="im-ls">`;
   IM.rows.forEach(r => {
     const sl = !r.done && r.inM && stkFind(r.sap);
     const cls = r.done ? ' dn' : (!r.inM ? ' bad' : (r.loc ? '' : ' nl'));
-    h += `<div class="im-it${cls}${IM.sel[r.id] && !r.done ? ' sel' : ''}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">✕</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
+    h += `<div class="im-it${cls}${IM.sel[r.id] && !r.done ? ' sel' : ''}" data-s="${lmEsc((r.name + ' ' + r.sap + ' ' + (r.loc || '')).toLowerCase())}"><div class="im-t1"><input type="checkbox" data-c="${r.id}" ${IM.sel[r.id] ? 'checked' : ''}${(!r.inM || r.done) ? ' disabled' : ''}><div class="im-nm">${lmEsc(r.name)}</div><button type="button" class="im-del" data-a="del" data-id="${r.id}" aria-label="Remove row">✕</button></div><div class="im-t2"><span class="im-sp">${lmEsc(r.sap)}</span>`;
     if (r.done) h += `<span class="im-c g">Sticker + Shifted</span>`;
     else if (!r.inM) h += '<span class="im-c r">Not in master</span>';
     else {
@@ -8904,16 +8977,18 @@ function imRender() {
       h += r.loc ? `<span class="im-c g">📍 ${lmEsc(r.loc)}</span>` : '<span class="im-c a">No location</span>';
       h += `<span class="im-c">Stock ${r.stock}</span>`;
       if (sl) h += '<span class="im-c a">Already in sticker list</span>';
-      h += `<div class="im-q"><button type="button" data-a="m" data-id="${r.id}">−</button><input type="number" min="0" step="any" inputmode="decimal" data-q="${r.id}" value="${r.qty}" aria-label="Qty"><button type="button" data-a="p" data-id="${r.id}">+</button></div>`;
+      h += `<div class="im-qw"><span class="im-ql">Qty</span><div class="im-q"><button type="button" data-a="m" data-id="${r.id}">−</button><input type="number" min="0" step="any" inputmode="decimal" data-q="${r.id}" value="${r.qty}" aria-label="Qty"><button type="button" data-a="p" data-id="${r.id}">+</button></div></div>`;
     }
     h += '</div>';
-    if (!r.done && r.inM && !r.loc) h += `<div class="im-lw"><div class="im-li"><input class="notif-inline-input" id="imL${r.id}" data-l="${r.id}" value="${lmEsc(r.locDraft || '')}" placeholder="Add location (optional)" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" style="width:100%;padding-right:34px;"><button type="button" class="loc-scan-btn-sm" onclick="openScanner('imL${r.id}')" aria-label="Scan location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></button></div><button type="button" class="notif-save-btn" data-a="loc" data-id="${r.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button></div>`;
+            if (!r.done && r.inM && !r.loc) h += `<div class="im-lw"><div class="im-li"><input class="notif-inline-input" id="imL${r.id}" data-l="${r.id}" value="${lmEsc(r.locDraft || '')}" placeholder="Add location (optional)" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"><button type="button" class="loc-scan-btn-sm" onclick="openScanner('imL${r.id}')" aria-label="Scan location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg></button></div><button type="button" class="notif-save-btn" data-a="loc" data-id="${r.id}">💾 Save</button></div>`;
     h += '</div>';
   });
   if (!IM.rows.length) h += '<div class="notif-empty">All rows removed</div>';
+  h += '<div class="notif-empty" id="imNr" style="display:none">No match found</div>';
   h += '</div><div class="im-ft" id="imFt"></div>';
   imEl.innerHTML = h;
   imFoot();
+  imApplyQ();
   const _nl = imEl.querySelector('.im-ls');
   if (_nl) _nl.scrollTop = _sc;
 }
@@ -8931,8 +9006,7 @@ function imFoot() {
   }
   const a = imSel(), n = a.length, b = IM.busy ? ' disabled' : '';
   f.innerHTML = `${IM.rem ? `<div class="im-info">Remark: ${lmEsc(IM.rem)}</div>` : ''}
-    <div class="im-two"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift</button></div>
-    <button type="button" class="im-bo" data-a="bo"${b}>🏷️ Sticker &amp; ✓ Shift</button>
+    <div class="im-three"><button type="button" class="im-s" data-a="st"${b}>🏷️ Sticker</button><button type="button" class="im-h" data-a="sh"${b}>✓ Shift</button><button type="button" class="im-bo" data-a="bo"${b}>🏷️ Sticker &amp; ✓ Shift</button></div>
     ${IM.ferr ? `<div class="im-err">${lmEsc(IM.ferr)}</div>` : ''}${IM.msg ? `<div class="im-msg">${lmEsc(IM.msg)}</div>` : ''}`;
 }
 
@@ -9055,12 +9129,13 @@ imEl.addEventListener('click', e => {
 imEl.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'imFi') { if (t.files[0]) imFile(t.files[0]); t.value = ''; return; }
-  if (t.id === 'imAll') { IM.rows.forEach(r => { if (r.inM && !r.done) IM.sel[r.id] = t.checked; }); IM.ferr = ''; imRender(); return; }
+if (t.id === 'imAll') { IM.rows.forEach(r => { if (r.inM && !r.done && imHit(r)) IM.sel[r.id] = t.checked; }); IM.ferr = ''; imRender(); return; }
   if (t.dataset.c !== undefined) { IM.sel[t.dataset.c] = t.checked; IM.ferr = ''; imRender(); }
 });
 
 imEl.addEventListener('input', e => {
   const t = e.target;
+  if (t.id === 'imQ') { IM.q = t.value; imApplyQ(); return; }
   if (t.id === 'imTa') {
   IM.txt = t.value; IM.err = ''; imSave();
   const m = document.getElementById('imEmp'), er = document.getElementById('imErr');
