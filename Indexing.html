@@ -9039,7 +9039,7 @@ function imFoot() {
   const f = document.getElementById('imFt');
   if (!f) return;
   const si = document.getElementById('imSelInfo');
-  if (si) { const s = imSel(); si.textContent = s.length + ' Selected · Qty ' + imQty(s); }
+  if (si) { const s = imSel(); si.textContent = s.length + ' Sel · Qty ' + imQty(s); }
   if (IM.cf) {
     const t = IM.cf === 'discard' ? 'Discard this list? Nothing has been saved.' : 'Clear the whole list?';
     f.innerHTML = `<div class="im-cf"><span>${t}</span><span style="display:flex;gap:6px"><button type="button" data-a="no">No</button><button type="button" data-a="yes" style="color:var(--red)">Yes</button></span></div>`;
